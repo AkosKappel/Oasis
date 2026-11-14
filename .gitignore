@@ -1,0 +1,9 @@
+node_modules/
+.output/
+.wxt/
+coverage/
+.env
+.env.*
+!.env.example
+*.local
+.DS_Store
