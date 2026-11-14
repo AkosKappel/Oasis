@@ -154,7 +154,7 @@ export function BookmarkLibrary({
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search your library"
-              className="w-full rounded-md border border-border bg-white/60 py-2 pl-9 pr-3 text-sm"
+              className="w-full rounded-md border border-border bg-surface/60 py-2 pl-9 pr-3 text-sm"
             />
           </label>
         </div>
@@ -172,7 +172,7 @@ export function BookmarkLibrary({
         {(loadError || error) && (
           <p
             role="alert"
-            className="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+            className="mt-6 rounded-lg border border-danger/30 bg-danger/10 p-4 text-sm text-danger"
           >
             {loadError || error}
           </p>

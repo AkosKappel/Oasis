@@ -1,3 +1,4 @@
+import { useAppearance } from '@/features/appearance/use-appearance';
 import { useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { BookmarkEditor } from '@/features/bookmarks/bookmark-editor';
@@ -6,6 +7,7 @@ import { captureTab } from './capture-tab';
 import type { BookmarkInput } from '@/database/bookmarks';
 
 export function CaptureApp() {
+  useAppearance();
   const { library, error: libraryError } = useLibrary();
   const [initialValues, setInitialValues] = useState<BookmarkInput>();
   const [error, setError] = useState<string>();
@@ -39,7 +41,7 @@ export function CaptureApp() {
           </p>
         </div>
       ) : error || libraryError ? (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-danger">
           {error || libraryError}
         </p>
       ) : initialValues && library ? (

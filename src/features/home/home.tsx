@@ -1,8 +1,17 @@
 import { useEffect, useState } from 'react';
-import { ArrowUpRight, Library, Search } from 'lucide-react';
+import { ArrowUpRight, Library, Search, SlidersHorizontal } from 'lucide-react';
+import type { Appearance } from '@/database/appearance';
 import { useLibrary } from '@/features/bookmarks/use-library';
 
-export function Home({ onSearch }: { onSearch: (query: string) => void }) {
+export function Home({
+  onSearch,
+  appearance,
+  onAppearance,
+}: {
+  onSearch: (query: string) => void;
+  appearance: Appearance;
+  onAppearance: () => void;
+}) {
   const [now, setNow] = useState(() => new Date());
   const { library, error } = useLibrary();
   useEffect(() => {
@@ -41,15 +50,20 @@ export function Home({ onSearch }: { onSearch: (query: string) => void }) {
           {now.toLocaleTimeString(undefined, {
             hour: '2-digit',
             minute: '2-digit',
+            ...(appearance.clock === 'system'
+              ? {}
+              : { hour12: appearance.clock === '12' }),
           })}
         </time>
-        <p className="mt-5 text-sm text-muted-foreground sm:text-base">
-          {now.toLocaleDateString(undefined, {
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </p>
+        {appearance.showDate && (
+          <p className="mt-5 text-sm text-muted-foreground sm:text-base">
+            {now.toLocaleDateString(undefined, {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </p>
+        )}
         <form
           action="#library"
           onSubmit={(event) => {
@@ -61,7 +75,7 @@ export function Home({ onSearch }: { onSearch: (query: string) => void }) {
           }}
           className="mt-10 w-full max-w-sm"
         >
-          <label className="flex items-center gap-3 rounded-full border border-border/60 bg-white/40 px-5 py-3 focus-within:border-primary">
+          <label className="flex items-center gap-3 rounded-full border border-border/60 bg-surface/40 px-5 py-3 focus-within:border-primary">
             <Search
               className="size-4 shrink-0 text-muted-foreground"
               aria-hidden="true"
@@ -75,7 +89,7 @@ export function Home({ onSearch }: { onSearch: (query: string) => void }) {
             />
           </label>
         </form>
-        {!!favorites?.length && (
+        {appearance.showFavorites && !!favorites?.length && (
           <nav
             aria-label="Favorite bookmarks"
             className="mt-8 flex max-w-full flex-wrap justify-center gap-x-6 gap-y-3"
@@ -93,11 +107,21 @@ export function Home({ onSearch }: { onSearch: (query: string) => void }) {
           </nav>
         )}
         {error && (
-          <p role="alert" className="mt-6 text-sm text-red-700">
+          <p role="alert" className="mt-6 text-sm text-danger">
             {error}
           </p>
         )}
       </section>
+      <footer className="flex justify-end">
+        <button
+          type="button"
+          onClick={onAppearance}
+          aria-label="Appearance"
+          className="rounded-md p-2 text-muted-foreground hover:text-foreground"
+        >
+          <SlidersHorizontal className="size-4" aria-hidden="true" />
+        </button>
+      </footer>
     </main>
   );
 }

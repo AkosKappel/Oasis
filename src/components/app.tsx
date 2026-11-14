@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
 import { BookmarkLibrary } from '@/features/bookmarks/bookmark-library';
 import { CommandPalette } from '@/features/search/command-palette';
+import { useAppearance } from '@/features/appearance/use-appearance';
+import { AppearanceSettings } from '@/features/appearance/appearance-settings';
 import { Home } from '@/features/home/home';
 
 export function App() {
+  const { appearance, error: appearanceError } = useAppearance();
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [route, setRoute] = useState(() => window.location.hash);
   const [search, setSearch] = useState<{ query: string }>();
   useEffect(() => {
@@ -29,7 +33,25 @@ export function App() {
           initialQuery={new URLSearchParams(route.split('?')[1]).get('q') ?? ''}
         />
       ) : (
-        <Home onSearch={(query) => setSearch({ query })} />
+        <Home
+          appearance={appearance}
+          onAppearance={() => setSettingsOpen(true)}
+          onSearch={(query) => setSearch({ query })}
+        />
+      )}
+      {settingsOpen && (
+        <AppearanceSettings
+          appearance={appearance}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
+      {appearanceError && (
+        <p
+          role="alert"
+          className="fixed bottom-4 left-4 rounded bg-background p-3 text-sm text-danger"
+        >
+          {appearanceError}
+        </p>
       )}
       {search && (
         <CommandPalette

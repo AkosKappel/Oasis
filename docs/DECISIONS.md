@@ -50,3 +50,10 @@
 - Add only `activeTab`, which grants temporary access to the current page URL and title when the user invokes the toolbar popup. No persistent site access, tabs permission, content scripts or background worker is needed.
 - Reuse the existing bookmark form and transaction-backed repository for folder/tag assignment and validation. Saving is explicit; internal pages and credential-bearing URLs are rejected.
 - Show a saved confirmation and a Library link rather than automatically opening a new tab after saving.
+
+## 2026-11-14: minimalist appearance preferences
+
+- Store Personal-space appearance preferences in Dexie v2, with system/light/dark theme, three accent colors, clock format and date/favorites visibility. Live queries synchronize open extension pages.
+- Use a small Home appearance dialog and shared light/dark surface tokens, including Library and popup. Saving is explicit; Cancel preserves current settings.
+- Keep image backgrounds, personal albums, quote collections and optional productivity widgets in the local backlog for later work.
+- Existing JSON v1 backups still contain only library records; appearance preferences are device-local and excluded.

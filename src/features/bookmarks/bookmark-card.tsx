@@ -20,7 +20,7 @@ export function BookmarkCard({
   onDelete,
 }: BookmarkCardProps) {
   return (
-    <li className="group flex min-w-0 flex-col rounded-xl border border-border bg-white/65 p-5">
+    <li className="group flex min-w-0 flex-col rounded-xl border border-border bg-surface/65 p-5">
       <div className="mb-5 flex items-center justify-between">
         <span
           className="flex size-10 items-center justify-center rounded-lg bg-primary/10 font-semibold text-primary"

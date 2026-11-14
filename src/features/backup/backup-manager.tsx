@@ -102,7 +102,7 @@ export function BackupManager({ onClose }: { onClose: () => void }) {
         </p>
       )}
       {error && (
-        <p role="alert" className="mt-4 text-sm text-red-700">
+        <p role="alert" className="mt-4 text-sm text-danger">
           {error}
         </p>
       )}

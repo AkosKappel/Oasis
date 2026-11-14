@@ -6,13 +6,18 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
+  --color-surface: var(--surface);
+  --color-danger: var(--danger);
   --color-ring: var(--primary);
 }
 :root {
+  --surface: oklch(1 0 0);
+  --danger: oklch(0.48 0.18 25);
+  --accent-hue: 155;
   color-scheme: light;
   --background: oklch(0.98 0.008 155);
   --foreground: oklch(0.25 0.025 155);
-  --primary: oklch(0.43 0.08 155);
+  --primary: oklch(0.43 0.08 var(--accent-hue));
   --primary-foreground: oklch(0.99 0 0);
   --muted-foreground: oklch(0.48 0.025 155);
   --border: oklch(0.89 0.015 155);
@@ -54,7 +59,7 @@
   .field input,
   .field textarea,
   .field select {
-    @apply w-full rounded-md border border-border bg-white px-3 py-2 font-normal;
+    @apply w-full rounded-md border border-border bg-surface px-3 py-2 font-normal;
   }
 }
 
@@ -63,7 +68,26 @@
   flex-direction: column;
   background: radial-gradient(
     ellipse at 50% 38%,
-    oklch(0.97 0.025 155),
+    var(--home-glow, oklch(0.97 0.025 var(--accent-hue))),
     transparent 70%
   );
+}
+
+:root[data-accent='ocean'] {
+  --accent-hue: 250;
+}
+:root[data-accent='plum'] {
+  --accent-hue: 310;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --background: oklch(0.19 0.012 155);
+  --surface: oklch(0.24 0.012 155);
+  --foreground: oklch(0.94 0.008 155);
+  --muted-foreground: oklch(0.73 0.015 155);
+  --border: oklch(0.39 0.015 155);
+  --primary: oklch(0.78 0.09 var(--accent-hue));
+  --primary-foreground: oklch(0.18 0.012 155);
+  --danger: oklch(0.78 0.12 25);
+  --home-glow: oklch(0.25 0.025 var(--accent-hue));
 }

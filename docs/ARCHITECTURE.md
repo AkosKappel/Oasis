@@ -39,3 +39,7 @@ Oasis is a Chromium Manifest V3 extension built with WXT and React. WXT generate
 ## Permissions
 
 The manifest declares `activeTab` so the toolbar popup can read the current page title and URL after a user opens it. There is no background worker, content script or network integration. Record any additional permission in [DECISIONS.md](DECISIONS.md).
+
+## Appearance
+
+Dexie v2 adds a `preferences` table without changing library records. The appearance repository checks space ownership transactionally. Extension pages subscribe to its live query and resolve the system theme with `prefers-color-scheme`; CSS tokens apply to Home, Library, dialogs and popup.
