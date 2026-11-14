@@ -201,3 +201,8 @@
 - The new inline focus buttons need their own readable fills over photos. Set dark primary text and a dark translucent outline-button fill within photo Home; portal dialogs and panels retain the chosen app theme.
 - Keep countdown deadline labels consistent with the chosen clock format.
 - Verify the combined photo-backed daily focus, clocks/countdown, pinned Links and mocked weather, then enter/exit focus mode and check mobile width. Check button contrast against the brightest photo allowed by dimming. Provider permission acceptance remains outside headless automation.
+
+## 2026-11-14: glass panels
+
+- Give floating dialogs and Links a restrained theme-tinted glass surface with bounded backdrop blur. Keep fields and option pickers opaque, and strengthen secondary text for contrast even over extreme backgrounds.
+- Fall back to opaque surfaces when blur is unsupported or reduced transparency is requested. Respect forced colors without blur or decorative shadows. Do not blur or animate the entire Home canvas.
