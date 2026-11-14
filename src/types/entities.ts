@@ -60,3 +60,19 @@ export interface BackgroundSettings extends RecordMetadata {
   rotateDaily: boolean;
   dimming: number;
 }
+
+export interface QuoteCollection extends RecordMetadata {
+  spaceId: string;
+  name: string;
+}
+export interface Quote extends RecordMetadata {
+  spaceId: string;
+  collectionId: string;
+  text: string;
+  author: string;
+}
+export interface QuoteSettings extends RecordMetadata {
+  spaceId: string;
+  collectionId?: string;
+  visible: boolean;
+}

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ArrowUpRight, Library, Search, SlidersHorizontal } from 'lucide-react';
 import { dailyItem } from '@/lib/daily-item';
 import type { Appearance } from '@/database/appearance';
+import { useQuotes } from '@/features/quotes/use-quotes';
 import { useAlbums } from '@/features/albums/use-albums';
 import { useLibrary } from '@/features/bookmarks/use-library';
 
@@ -10,12 +11,15 @@ export function Home({
   appearance,
   onAppearance,
   onAlbums,
+  onQuotes,
 }: {
   onSearch: (query: string) => void;
   appearance: Appearance;
   onAppearance: () => void;
   onAlbums: () => void;
+  onQuotes: () => void;
 }) {
+  const { data: quotes } = useQuotes();
   const { data: albums } = useAlbums();
   const [now, setNow] = useState(() => new Date());
   const albumImages =
@@ -25,6 +29,15 @@ export function Home({
   const backgroundImage = albums?.background?.rotateDaily
     ? dailyItem(albumImages, albums.background.albumId ?? '', now)
     : albumImages.find((image) => image.id === albums?.background?.imageId);
+  const dailyQuote = quotes?.settings?.visible
+    ? dailyItem(
+        quotes.quotes.filter(
+          (quote) => quote.collectionId === quotes.settings?.collectionId,
+        ),
+        quotes.settings.collectionId ?? '',
+        now,
+      )
+    : undefined;
   const { library, error } = useLibrary();
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
@@ -130,13 +143,35 @@ export function Home({
             ))}
           </nav>
         )}
+        {dailyQuote && (
+          <figure
+            aria-label="Daily quote"
+            className="mt-10 w-full min-w-0 max-w-lg text-center"
+          >
+            <blockquote className="whitespace-pre-line break-words text-base leading-relaxed">
+              {dailyQuote.text}
+            </blockquote>
+            {dailyQuote.author && (
+              <figcaption className="mt-3 text-sm text-muted-foreground">
+                {dailyQuote.author}
+              </figcaption>
+            )}
+          </figure>
+        )}
         {error && (
           <p role="alert" className="mt-6 text-sm text-danger">
             {error}
           </p>
         )}
       </section>
-      <footer className="flex justify-end gap-3">
+      <footer className="flex flex-wrap justify-end gap-3">
+        <button
+          type="button"
+          className="rounded-md px-2 text-sm text-muted-foreground hover:text-foreground"
+          onClick={onQuotes}
+        >
+          Quotes
+        </button>
         <button
           type="button"
           className="rounded-md px-2 text-sm text-muted-foreground hover:text-foreground"

@@ -52,7 +52,7 @@ it('upgrades a v1 library without changing its bookmarks', async () => {
   );
   legacy.close();
   await database.open();
-  expect(database.verno).toBe(3);
+  expect(database.verno).toBe(4);
   expect(await database.bookmarks.get('saved')).toEqual(bookmark);
   expect(await database.preferences.count()).toBe(0);
 });
@@ -95,4 +95,54 @@ it('upgrades v2 preferences while adding empty media tables', async () => {
   expect(await database.preferences.get(preference.id)).toEqual(preference);
   expect(await database.albums.count()).toBe(0);
   expect(await database.albumImages.count()).toBe(0);
+});
+
+it('upgrades v3 media without changing stored images', async () => {
+  const { default: Dexie } = await import('dexie');
+  const legacy = new Dexie('oasis-test');
+  legacy.version(3).stores({
+    spaces: 'id, name, updatedAt',
+    bookmarks: 'id, spaceId, [spaceId+folderId], *tags, updatedAt',
+    folders: 'id, spaceId, [spaceId+parentId], updatedAt',
+    tags: 'id, spaceId, [spaceId+name], updatedAt',
+    preferences: 'id, spaceId',
+    albums: 'id, spaceId',
+    albumImages: 'id, spaceId, [spaceId+albumId]',
+    backgrounds: 'id, spaceId',
+  });
+  await legacy.open();
+  const image = {
+    id: 'image',
+    spaceId: 'default',
+    albumId: 'album',
+    name: 'Image',
+    dataUrl: 'data:image/jpeg;base64,/9j/',
+    width: 1,
+    height: 1,
+    createdAt: 1,
+    updatedAt: 1,
+  };
+  await legacy.transaction(
+    'rw',
+    legacy.table('spaces'),
+    legacy.table('albums'),
+    legacy.table('albumImages'),
+    async () => {
+      await legacy
+        .table('spaces')
+        .add({ id: 'default', name: 'Personal', createdAt: 1, updatedAt: 1 });
+      await legacy.table('albums').add({
+        id: 'album',
+        spaceId: 'default',
+        name: 'Nature',
+        createdAt: 1,
+        updatedAt: 1,
+      });
+      await legacy.table('albumImages').add(image);
+    },
+  );
+  legacy.close();
+  await database.open();
+  expect(await database.albumImages.get('image')).toEqual(image);
+  expect(await database.quotes.count()).toBe(0);
 });

@@ -57,3 +57,7 @@ The browser-only parser in `src/features/transfer` converts an inert HTML templa
 ## Image albums
 
 Dexie v3 adds `albums`, `albumImages` and `backgrounds`. Images are re-encoded locally and stored as JPEG data URLs. The album repository owns transactions, quota bounds, relationships and deletion tombstones; browser image preparation and archive decoding happen before writes. Home and the album dialog subscribe to one media snapshot. Album archives are independent from bookmark JSON/HTML.
+
+## Quotes
+
+Dexie v4 adds `quoteCollections`, `quotes` and `quoteSettings`. The repository owns validation, ownership, display selection and additive archives. Home chooses a daily entry from the selected active collection, while the dialog manages plain text and optional authors. Quote archives are separate from bookmark and image backups.

@@ -3,11 +3,13 @@ import { BookmarkLibrary } from '@/features/bookmarks/bookmark-library';
 import { CommandPalette } from '@/features/search/command-palette';
 import { useAppearance } from '@/features/appearance/use-appearance';
 import { AppearanceSettings } from '@/features/appearance/appearance-settings';
+import { QuoteManager } from '@/features/quotes/quote-manager';
 import { AlbumManager } from '@/features/albums/album-manager';
 import { Home } from '@/features/home/home';
 
 export function App() {
   const { appearance, error: appearanceError } = useAppearance();
+  const [quotesOpen, setQuotesOpen] = useState(false);
   const [albumsOpen, setAlbumsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [route, setRoute] = useState(() => window.location.hash);
@@ -36,12 +38,14 @@ export function App() {
         />
       ) : (
         <Home
+          onQuotes={() => setQuotesOpen(true)}
           onAlbums={() => setAlbumsOpen(true)}
           appearance={appearance}
           onAppearance={() => setSettingsOpen(true)}
           onSearch={(query) => setSearch({ query })}
         />
       )}
+      {quotesOpen && <QuoteManager onClose={() => setQuotesOpen(false)} />}
       {albumsOpen && <AlbumManager onClose={() => setAlbumsOpen(false)} />}
       {settingsOpen && (
         <AppearanceSettings

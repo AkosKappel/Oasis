@@ -94,3 +94,10 @@
 - Rotate a selected local album by local calendar day, with a stable album-specific offset and creation-time/ID ordering. Open tabs agree on the image, midnight advances it, and no timer service or network API is needed.
 - Expose daily rotation and 60/70/85% dimming in the album dialog. Choosing a specific image returns to fixed-image mode. Empty or removed albums fall back to the plain Home.
 - Use the rotation fields already defined in v3, so no schema migration is needed. The shared daily-item helper can also select daily quotes.
+
+## 2026-11-14: personal quote collections
+
+- Dexie v4 adds quote collections, plain-text quote entries and display preferences. Quotes are optional, selected explicitly, and rotate with the same local-day helper as images.
+- Allow up to 50 collections and 2,000 entries, with 500 characters per quote and 120 per optional author. All writes check active space/collection ownership and retain deletion tombstones.
+- Provide a separate small quote archive with IDs and relationships. Validate the whole graph before additive atomic restore, preserve existing active records and reject deleted/cross-space ID collisions.
+- Custom entries need no API or network permission. Provider quotes remain a later integration with attribution and content-rights checks documented in API-SOURCES.md.

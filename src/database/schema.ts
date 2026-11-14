@@ -8,8 +8,14 @@ import type {
   ImageAlbum,
   AlbumImage,
   BackgroundSettings,
+  QuoteCollection,
+  Quote,
+  QuoteSettings,
 } from '@/types/entities';
 export class OasisDatabase extends Dexie {
+  quoteCollections!: EntityTable<QuoteCollection, 'id'>;
+  quotes!: EntityTable<Quote, 'id'>;
+  quoteSettings!: EntityTable<QuoteSettings, 'id'>;
   albums!: EntityTable<ImageAlbum, 'id'>;
   albumImages!: EntityTable<AlbumImage, 'id'>;
   backgrounds!: EntityTable<BackgroundSettings, 'id'>;
@@ -31,6 +37,11 @@ export class OasisDatabase extends Dexie {
       albums: 'id, spaceId',
       albumImages: 'id, spaceId, [spaceId+albumId]',
       backgrounds: 'id, spaceId',
+    });
+    this.version(4).stores({
+      quoteCollections: 'id, spaceId',
+      quotes: 'id, spaceId, [spaceId+collectionId]',
+      quoteSettings: 'id, spaceId',
     });
     this.on('populate', (transaction) => {
       const now = Date.now();
