@@ -1,11 +1,34 @@
 # Architecture
 
-Oasis is a Chromium Manifest V3 extension built with WXT and React. `src/entrypoints/newtab` owns the new-tab page; shared application code lives in `src`. WXT generates the manifest and TypeScript configuration.
+Oasis is a Chromium Manifest V3 extension built with WXT and React. WXT generates the manifest and the TypeScript configuration.
 
-Tailwind CSS uses its Vite plugin. `components.json` configures shadcn/ui, with editable component source under `src/components/ui` and shared design tokens in `src/styles.css`.
+## Layout
 
-Dexie wraps IndexedDB in `src/database/schema.ts`. Version 1 defines spaces, bookmarks, folders, and tags. IDs are strings, timestamps are epoch milliseconds, and records support deletion tombstones. Folder and tag ownership is explicit through `spaceId`. The bookmark repository enforces URL validation, space ownership, and soft deletion. Folder and tag assignments must point to active records in the same space. Organization writes and cleanup run in transactions: deleting a folder removes its bookmark assignments, and deleting a tag removes that ID from bookmarks. Bookmark records are retained. Deleting folders that contain active subfolders is rejected until hierarchy management is available. Case-insensitive names are unique among active folders and among active tags within a space.
+| Path                     | Contents                                       |
+| ------------------------ | ---------------------------------------------- |
+| `src/entrypoints/newtab` | The new-tab page                               |
+| `src/features/<feature>` | UI, hooks and pure helpers of one feature      |
+| `src/database`           | Dexie schema and the space-scoped repositories |
+| `src/components/ui`      | shadcn/ui components (editable source)         |
+| `src/styles.css`         | Tailwind CSS and shared design tokens          |
+| `e2e`                    | Playwright tests against the built extension   |
 
-Opening a fresh database creates one Personal space transactionally. Import the database only from extension contexts; ordinary web origins have separate storage. Future schema changes require a new Dexie version and migration tests. Sync conflict resolution is not designed yet.
+## Data
 
-The library opens the database through a space-scoped bookmark repository. Writes validate titles and HTTP(S) URLs, reject embedded credentials, and check space ownership inside transactions. Deletion retains a tombstone. A single Dexie live query reads bookmarks, folders, and tags in a read transaction, updating the UI when local records change, including writes from other Oasis tabs. The editor uses a native modal dialog for focus containment and Escape handling. No background worker, content scripts, network integrations, or additional permissions are declared until a feature requires them.
+- Dexie wraps IndexedDB in `src/database/schema.ts`. Version 1 defines spaces, bookmarks, folders and tags. IDs are strings and timestamps are epoch milliseconds.
+- Opening a fresh database creates one Personal space in a transaction.
+- Every record belongs to a space through `spaceId`, and repositories check that ownership inside their transactions.
+- Deletion is soft: records keep a `deletedAt` tombstone, so a future sync can see deletions. The conflict resolution for sync is not designed yet.
+- Bookmark writes validate titles and HTTP(S) URLs and reject embedded credentials.
+- Folder and tag names are unique per space, ignoring case. Deleting a folder clears it from its bookmarks; deleting a tag removes it from theirs. Folders with active subfolders cannot be deleted until hierarchy management exists.
+- Schema changes need a new Dexie version and a migration test.
+- Open the database only from extension pages: ordinary web origins have separate storage.
+
+## UI
+
+- One Dexie live query reads bookmarks, folders and tags in a read transaction, so the UI updates when records change, including writes from other Oasis tabs.
+- Dialogs use the native `<dialog>` element for focus containment and Escape handling.
+
+## Permissions
+
+The manifest declares no permissions, background worker, content scripts or network integrations. Add them only when a feature needs them, and record the reason in [DECISIONS.md](DECISIONS.md).

@@ -18,4 +18,9 @@
 - Reject assignments to deleted, missing, or other-space records.
 - Folder and tag names are trimmed, limited to 80 characters, and unique ignoring case within their type and space.
 - Counts show active bookmarks across the whole library; filters combine by intersection.
-- Keep `BACKLOG.md` local and ignored by Git, matching the workspace convention. The tracked roadmap records implementation milestones.
+- Keep `BACKLOG.md` local and ignored by Git, matching the workspace convention.
+
+## 2026-11-14: documentation
+
+- Track planned work only in the local `BACKLOG.md` and history only in Git. The blueprint's `docs/ROADMAP.md` and `docs/CHANGELOG.md` are dropped because they repeated both; add a changelog with the first public release.
+- `AGENTS.md` holds the rules for coding agents (Codex, Claude); `CLAUDE.md` imports it.

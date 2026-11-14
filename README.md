@@ -21,18 +21,14 @@ pnpm exec playwright install chromium
 pnpm test:e2e    # Build and test the actual extension in Chromium
 ```
 
-## Current scope
+## Scope
 
-The foundation includes WXT, React, strict TypeScript, Tailwind CSS, shadcn/ui configuration and a Button primitive, Lucide icons, and a versioned Dexie schema. The new-tab page provides a bookmark library with add, edit, delete, favorites, and basic text filtering. Bookmarks open in a new tab. Folders and colored tags support creation, renaming, deletion, bookmark assignment, and combined filters. Folder/tag counts show totals across the library. Text filtering also matches folder and tag names. Import/export, nested folders, and dashboard widgets are not implemented yet.
-
-The database creates a Personal space on first open. All data stays in IndexedDB; no backend, analytics, or account is configured. Cloud synchronization remains an open decision.
+A new-tab page with a bookmark library: bookmarks, favorites, folders, colored tags and filtering. All data stays in IndexedDB on the device; there is no backend, account or analytics. Planned work is tracked in the local `BACKLOG.md`, the full product vision in the blueprint below.
 
 ## Documentation
 
 - [Product blueprint](docs/PROJECT.md), original supplied specification, retained as planning context.
 - [Architecture](docs/ARCHITECTURE.md)
-- [Roadmap](docs/ROADMAP.md)
 - [Decisions](docs/DECISIONS.md)
-- [Changelog](docs/CHANGELOG.md)
 
 License and open-source distribution are undecided. This repository is private by default and has no publication configuration.
