@@ -7,6 +7,11 @@ import {
   type PreparedImage,
 } from '@/database/albums';
 import { useAlbums } from './use-albums';
+import {
+  BUILTIN_ALBUMS,
+  builtinAlbumId,
+  isBuiltinAlbum,
+} from '@/database/builtin-albums';
 import { prepareImage, verifyArchivedImages } from './prepare-image';
 
 export function AlbumManager({ onClose }: { onClose: () => void }) {
@@ -20,7 +25,10 @@ export function AlbumManager({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState<string>();
   const [message, setMessage] = useState('');
   const album =
-    data?.albums.find((item) => item.id === selected) ?? data?.albums[0];
+    data?.albums.find((item) => item.id === selected) ??
+    data?.albums.find((item) => item.id === data.background?.albumId) ??
+    data?.albums[0];
+  const builtin = album ? isBuiltinAlbum(album.id) : false;
   useEffect(() => {
     const focused = previous.current;
     dialog.current?.showModal();
@@ -65,10 +73,46 @@ export function AlbumManager({ onClose }: { onClose: () => void }) {
         </Button>
       </div>
       <p className="mt-3 text-sm text-muted-foreground">
-        Your images stay on this device. Choose one as your Home background.
+        Choose a built-in collection or upload your own images. Everything works
+        offline.
       </p>
+      <section className="mt-5" aria-labelledby="builtin-albums-title">
+        <h3 id="builtin-albums-title" className="font-semibold">
+          Built-in albums
+        </h3>
+        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {BUILTIN_ALBUMS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              disabled={busy || !data}
+              aria-pressed={album?.id === builtinAlbumId(item.id)}
+              onClick={() => {
+                setSelected(builtinAlbumId(item.id));
+                setEditing(undefined);
+                setName('');
+              }}
+              className="overflow-hidden rounded-lg border border-border text-left aria-pressed:border-primary-content aria-pressed:ring-2 aria-pressed:ring-primary-content"
+            >
+              <img
+                src={`/albums/${item.images[0].id}.webp`}
+                alt=""
+                className="aspect-[8/5] w-full object-cover"
+              />
+              <span className="block px-3 py-2 text-sm font-medium">
+                {item.name}
+              </span>
+            </button>
+          ))}
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Original AI-generated artwork, included with Oasis. Your current
+          background stays until you choose an image or save daily rotation.
+        </p>
+      </section>
+      <h3 className="mt-6 font-semibold">Your albums</h3>
       <form
-        className="mt-5 flex flex-wrap items-end gap-3"
+        className="mt-3 flex flex-wrap items-end gap-3"
         onSubmit={(event) => {
           event.preventDefault();
           void run(async () => {
@@ -114,68 +158,97 @@ export function AlbumManager({ onClose }: { onClose: () => void }) {
             value={album?.id ?? ''}
             onChange={(event) => setSelected(event.target.value)}
           >
-            {data.albums.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
+            <optgroup label="Built-in">
+              {data.albums
+                .filter((item) => isBuiltinAlbum(item.id))
+                .map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+            </optgroup>
+            <optgroup label="Your albums">
+              {data.albums
+                .filter((item) => !isBuiltinAlbum(item.id))
+                .map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+            </optgroup>
           </select>
         </label>
       )}
       {album && (
         <>
-          <div className="my-4 flex flex-wrap gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={busy}
-              onClick={() => {
-                setEditing(album.id);
-                setName(album.name);
-              }}
-            >
-              Rename album
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={busy}
-              onClick={() => {
-                if (
-                  window.confirm(`Delete album “${album.name}” and its images?`)
-                )
-                  void run(async () => {
-                    await personalAlbums.remove(album.id, 'album');
-                    setSelected('');
-                  });
-              }}
-            >
-              Delete album
-            </Button>
-          </div>
-          <label className="field">
-            Upload images
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              multiple
-              disabled={busy}
-              onChange={(event) => {
-                const files = Array.from(event.target.files ?? []);
-                event.target.value = '';
-                if (files.length)
-                  void run(async () => {
-                    if (files.length > 100)
-                      throw new Error('Choose up to 100 images.');
-                    const prepared: PreparedImage[] = [];
-                    for (const file of files)
-                      prepared.push(await prepareImage(file));
-                    await personalAlbums.addImages(album.id, prepared);
-                    setMessage('Images added.');
-                  });
-              }}
-            />
-          </label>
+          {builtin && (
+            <p className="mt-4 text-sm text-muted-foreground">
+              {
+                BUILTIN_ALBUMS.find(
+                  (item) => builtinAlbumId(item.id) === album.id,
+                )?.description
+              }{' '}
+              Built-in albums stay available and cannot be edited.
+            </p>
+          )}
+          {!builtin && (
+            <>
+              <div className="my-4 flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={busy}
+                  onClick={() => {
+                    setEditing(album.id);
+                    setName(album.name);
+                  }}
+                >
+                  Rename album
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={busy}
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        `Delete album “${album.name}” and its images?`,
+                      )
+                    )
+                      void run(async () => {
+                        await personalAlbums.remove(album.id, 'album');
+                        setSelected('');
+                      });
+                  }}
+                >
+                  Delete album
+                </Button>
+              </div>
+              <label className="field">
+                Upload images
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  disabled={busy}
+                  onChange={(event) => {
+                    const files = Array.from(event.target.files ?? []);
+                    event.target.value = '';
+                    if (files.length)
+                      void run(async () => {
+                        if (files.length > 100)
+                          throw new Error('Choose up to 100 images.');
+                        const prepared: PreparedImage[] = [];
+                        for (const file of files)
+                          prepared.push(await prepareImage(file));
+                        await personalAlbums.addImages(album.id, prepared);
+                        setMessage('Images added.');
+                      });
+                  }}
+                />
+              </label>
+            </>
+          )}
           <form
             key={`${album.id}:${data?.background?.updatedAt ?? 0}`}
             className="my-5 flex flex-col gap-3 rounded-lg border border-border p-4"
@@ -202,8 +275,9 @@ export function AlbumManager({ onClose }: { onClose: () => void }) {
                 name="daily"
                 type="checkbox"
                 defaultChecked={
-                  data?.background?.albumId === album.id &&
-                  data.background.rotateDaily
+                  data?.background?.albumId === album.id
+                    ? data.background.rotateDaily
+                    : builtin
                 }
                 disabled={busy}
               />{' '}
@@ -264,20 +338,22 @@ export function AlbumManager({ onClose }: { onClose: () => void }) {
                     >
                       Use image
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={busy}
-                      aria-label={`Delete image ${image.name}`}
-                      onClick={() => {
-                        if (window.confirm(`Delete image “${image.name}”?`))
-                          void run(() =>
-                            personalAlbums.remove(image.id, 'image'),
-                          );
-                      }}
-                    >
-                      Delete
-                    </Button>
+                    {!builtin && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={busy}
+                        aria-label={`Delete image ${image.name}`}
+                        onClick={() => {
+                          if (window.confirm(`Delete image “${image.name}”?`))
+                            void run(() =>
+                              personalAlbums.remove(image.id, 'image'),
+                            );
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    )}
                   </div>
                 </li>
               ))}
@@ -344,8 +420,9 @@ export function AlbumManager({ onClose }: { onClose: () => void }) {
         />
       </label>
       <p className="mt-3 text-xs text-muted-foreground">
-        Up to 100 images and 30 MB after resizing. Removing images releases
-        their image data. Album backups are separate from bookmark backups.
+        Your albums can hold up to 100 images and 30 MB after resizing. Built-in
+        images do not use this allowance and are not copied into backups. Album
+        backups are separate from bookmark backups.
       </p>
       {(error || loadError) && (
         <p role="alert" className="mt-4 text-sm text-danger">

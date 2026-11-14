@@ -1,4 +1,5 @@
 import { db, type OasisDatabase } from './schema';
+import { builtinAlbums, isBuiltinAlbum } from './builtin-albums';
 import { requireOwnedRecord, requireSpace, requireUniqueName } from './records';
 import type { AlbumImage, ImageAlbum } from '@/types/entities';
 
@@ -54,6 +55,7 @@ function archiveMetadata(value: ImageAlbum) {
   if (
     typeof value.id !== 'string' ||
     !value.id ||
+    value.id.startsWith('oasis:builtin:') ||
     value.id.length > 200 ||
     value.spaceId !== 'default' ||
     value.deletedAt !== undefined ||
@@ -150,7 +152,13 @@ export function createAlbumRepository(
         database.backgrounds,
         async () => {
           await requireSpace(database, spaceId);
-          return { ...(await active()), background: await background() };
+          const custom = await active();
+          const builtin = builtinAlbums(spaceId);
+          return {
+            albums: [...builtin.albums, ...custom.albums],
+            images: [...builtin.images, ...custom.images],
+            background: await background(),
+          };
         },
       );
     },
@@ -246,7 +254,7 @@ export function createAlbumRepository(
         database.backgrounds,
         async () => {
           await requireSpace(database, spaceId);
-          if (albumId)
+          if (albumId && !isBuiltinAlbum(albumId))
             await requireOwnedRecord(
               database.albums,
               albumId,
@@ -254,12 +262,17 @@ export function createAlbumRepository(
               'album',
             );
           if (imageId) {
-            const image = await requireOwnedRecord(
-              database.albumImages,
-              imageId,
-              spaceId,
-              'image',
+            const builtin = builtinAlbums(spaceId).images.find(
+              (item) => item.id === imageId,
             );
+            const image =
+              builtin ??
+              (await requireOwnedRecord(
+                database.albumImages,
+                imageId,
+                spaceId,
+                'image',
+              ));
             if (image.albumId !== albumId)
               throw new Error('Choose an image from this album.');
           }
@@ -331,8 +344,8 @@ export function createAlbumRepository(
       return validateAlbumArchive({
         format: 'oasis-albums',
         version: 1,
-        albums: data.albums,
-        images: data.images,
+        albums: data.albums.filter((album) => !isBuiltinAlbum(album.id)),
+        images: data.images.filter((image) => !isBuiltinAlbum(image.albumId)),
       });
     },
     async restore(input: AlbumArchive) {

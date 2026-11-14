@@ -27,7 +27,7 @@ A minimal new-tab home with a clock, date, on-demand Links and appearance contro
 
 Save pages through the toolbar popup, the page/link context menu or Alt+Shift+O (customizable in browser extension shortcuts). Context-menu and keyboard capture open an editable confirmation page. Oasis JSON backup preserves bookmarks, folders, tags, favorites and notes. Browser bookmark HTML import/export preserves folder hierarchy, titles, URLs and descriptions; import previews valid records, skips unsafe links and merges exact URLs within each folder. Appearance preferences are device-local and excluded from backups.
 
-Home supports personal image albums, fixed or daily backgrounds with dimming, and optional daily quotes from custom collections. Uploads are resized locally; album and quote managers provide separate portable backups. The Library offers grid/list views, saved name/date sorting and selection actions to move bookmarks, add/remove tags or soft-delete them together.
+Home includes offline starter albums in illustrated landscape, nature, abstract and night styles. Choose a fixed image or daily rotation with dimming, upload personal image albums, and optionally show daily quotes from custom collections. Uploads are resized locally; album and quote managers provide separate portable backups. Built-in artwork stays separate from personal uploads and is excluded from album backups. The Library offers grid/list views, saved name/date sorting and selection actions to move bookmarks, add/remove tags or soft-delete them together.
 
 Optional online content providers are researched in [API sources](docs/API-SOURCES.md). No weather, image or quote API is connected yet.
 
@@ -40,5 +40,6 @@ Data stays on the device in IndexedDB; there is no backend, account or analytics
 - [Product blueprint](docs/PROJECT.md), original supplied specification, retained as planning context.
 - [Architecture](docs/ARCHITECTURE.md)
 - [Decisions](docs/DECISIONS.md)
+- [Album artwork and prompts](docs/ALBUM-ARTWORK.md)
 
 License and open-source distribution are undecided. This repository is private by default and has no publication configuration.

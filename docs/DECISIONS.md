@@ -158,3 +158,10 @@
 - Retain the last successful query snapshots and resubscribe failed live queries after an explicit retry. Reopen and verify the existing Personal space; never create a replacement database as recovery.
 - Keep unsaved bookmark form values after write failure. Recognized write errors show guidance for backups/image management; a successful retry signals recovery.
 - Test quota and read failures at the real IndexedDB API boundary, plus database reopen and retry behavior. Recovery links open Library separately to preserve an active capture form.
+
+## 2026-11-14: bundled starter albums
+
+- Offer Quiet geometry, Open air, Soft forms and After dark, each with warm/cool or contrasting scenes. Use original generated artwork with recorded prompts instead of third-party stock or a remote feed.
+- Package optimized WebP assets with the extension and expose a read-only catalog alongside personal albums. Do not seed image copies into IndexedDB or consume the personal upload allowance. Stable reserved IDs use the existing background settings model, so no schema change is needed.
+- Preserve existing plain/photo choices. Selecting a collection only browses it; choosing an image or saving daily settings applies it. Built-ins support the same dimming and daily rotation as personal albums.
+- Exclude built-ins from portable personal-album archives and reject reserved catalog IDs in imported records. The catalog remains available after personal-album deletion or restore.

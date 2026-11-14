@@ -77,3 +77,7 @@ Context-menu and keyboard actions open `capture.html`; its request fragment is p
 ## Storage recovery
 
 `storage-health.ts` exposes an in-memory external store for recognized storage failures and a retry generation. Library, appearance, media, quote and view-preference live queries retain cached snapshots and resubscribe after retry. Database blocked/version-change events provide specific guidance. The recovery UI offers connection retry, separate Library/backups and image management; it never deletes or replaces saved data.
+
+## Built-in albums
+
+`src/database/builtin-albums.ts` describes immutable collections and image URLs under `public/albums/`. The album repository combines this catalog with owned local records for display. Background writes validate both catalog and local assignments in the existing space-scoped transaction. Built-in records are never persisted, edited or exported; custom archives reject reserved catalog IDs. Existing background settings store fixed or daily catalog choices without a schema migration. Artwork provenance and prompts are recorded in `docs/ALBUM-ARTWORK.md`.
