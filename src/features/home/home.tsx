@@ -1,3 +1,5 @@
+import { DailyFocus } from '@/features/focus/daily-focus';
+import { localDay } from '@/database/daily-focus';
 import { useEffect, useState } from 'react';
 import { ArrowUpRight, Library, Search, SlidersHorizontal } from 'lucide-react';
 import { LinksMenu } from '@/features/links/links-menu';
@@ -138,6 +140,9 @@ export function Home({
             />
           </label>
         </form>
+        {appearance.showDailyFocus && (
+          <DailyFocus key={localDay(now)} day={localDay(now)} />
+        )}
         {appearance.showFavorites && !!favorites?.length && (
           <nav
             aria-label="Favorite bookmarks"

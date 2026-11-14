@@ -207,6 +207,16 @@ export function AppearanceSettings({
               <option value="24">24-hour</option>
             </select>
           </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={draft.showDailyFocus ?? false}
+              onChange={(event) =>
+                update({ showDailyFocus: event.target.checked })
+              }
+            />
+            Show daily focus
+          </label>
           <label className="field">
             Links side
             <select

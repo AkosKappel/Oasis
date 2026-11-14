@@ -81,3 +81,7 @@ Context-menu and keyboard actions open `capture.html`; its request fragment is p
 ## Built-in albums
 
 `src/database/builtin-albums.ts` describes immutable collections and image URLs under `public/albums/`. The album repository combines this catalog with owned local records for display. Background writes validate both catalog and local assignments in the existing space-scoped transaction. Built-in records are never persisted, edited or exported; custom archives reject reserved catalog IDs. Existing background settings store fixed or daily catalog choices without a schema migration. Artwork provenance and prompts are recorded in `docs/ALBUM-ARTWORK.md`.
+
+## Daily focus
+
+Dexie v9 adds `dailyFocus`, indexed by space and local day. Its repository validates dates and bounded titles in space-scoped transactions. The optional appearance flag controls Home visibility. A date-keyed live component follows completion and edits across tabs, retains drafts on failure and refreshes on storage retry. Daily goals are not included in bookmark backups.

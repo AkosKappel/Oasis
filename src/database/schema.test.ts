@@ -52,7 +52,7 @@ it('upgrades a v1 library without changing its bookmarks', async () => {
   );
   legacy.close();
   await database.open();
-  expect(database.verno).toBe(8);
+  expect(database.verno).toBe(9);
   expect(await database.bookmarks.get('saved')).toEqual(bookmark);
   expect(await database.preferences.count()).toBe(0);
 });
@@ -350,4 +350,37 @@ it('adds Links placement defaults to v7 appearance records', async () => {
     linksSide: 'left',
     linksPinned: false,
   });
+});
+
+it('upgrades v8 without replacing appearance or existing records', async () => {
+  const { default: Dexie } = await import('dexie');
+  const legacy = new Dexie('oasis-test');
+  legacy
+    .version(8)
+    .stores({ spaces: 'id, name, updatedAt', preferences: 'id, spaceId' });
+  await legacy.open();
+  const space = { id: 'default', name: 'Personal', createdAt: 1, updatedAt: 1 };
+  const preference = {
+    id: 'default:appearance',
+    spaceId: 'default',
+    theme: 'dark',
+    linksSide: 'right',
+    linksPinned: true,
+    createdAt: 1,
+    updatedAt: 1,
+  };
+  await legacy.transaction(
+    'rw',
+    legacy.table('spaces'),
+    legacy.table('preferences'),
+    async () => {
+      await legacy.table('spaces').add(space);
+      await legacy.table('preferences').add(preference);
+    },
+  );
+  legacy.close();
+  await database.open();
+  expect(await database.preferences.get(preference.id)).toEqual(preference);
+  expect(await database.spaces.get('default')).toEqual(space);
+  expect(await database.dailyFocus.count()).toBe(0);
 });

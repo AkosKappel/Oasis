@@ -8,6 +8,7 @@ export interface Appearance {
   accent: 'forest' | 'ocean' | 'plum';
   clock: 'system' | '12' | '24';
   showDate: boolean;
+  showDailyFocus?: boolean;
   showFavorites: boolean;
   linksSide: 'left' | 'right';
   linksPinned: boolean;
@@ -32,6 +33,8 @@ export function validateAppearance(value: Appearance): Appearance {
     !['forest', 'ocean', 'plum'].includes(value.accent) ||
     !['system', '12', '24'].includes(value.clock) ||
     typeof value.showDate !== 'boolean' ||
+    (value.showDailyFocus !== undefined &&
+      typeof value.showDailyFocus !== 'boolean') ||
     typeof value.showFavorites !== 'boolean' ||
     !['left', 'right'].includes(value.linksSide ?? 'left') ||
     (value.linksPinned !== undefined && typeof value.linksPinned !== 'boolean')
@@ -56,6 +59,9 @@ export function validateAppearance(value: Appearance): Appearance {
     accent: value.accent,
     clock: value.clock,
     showDate: value.showDate,
+    ...(value.showDailyFocus !== undefined
+      ? { showDailyFocus: value.showDailyFocus }
+      : {}),
     showFavorites: value.showFavorites,
     linksSide: value.linksSide ?? 'left',
     linksPinned: value.linksPinned ?? false,

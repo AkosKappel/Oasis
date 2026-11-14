@@ -165,3 +165,8 @@
 - Package optimized WebP assets with the extension and expose a read-only catalog alongside personal albums. Do not seed image copies into IndexedDB or consume the personal upload allowance. Stable reserved IDs use the existing background settings model, so no schema change is needed.
 - Preserve existing plain/photo choices. Selecting a collection only browses it; choosing an image or saving daily settings applies it. Built-ins support the same dimming and daily rotation as personal albums.
 - Exclude built-ins from portable personal-album archives and reject reserved catalog IDs in imported records. The catalog remains available after personal-album deletion or restore.
+
+## 2026-11-14: daily focus
+
+- Keep daily focus optional in Appearance, hidden by default. Store one short goal and completion status per space and local calendar day; the next day never inherits a previous goal.
+- Dexie v9 adds daily focus entries. The optional appearance flag needs no backfill; older appearance records remain unchanged. Goals remain device-local and separate from bookmark backups.
