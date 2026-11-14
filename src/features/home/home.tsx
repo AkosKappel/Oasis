@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowUpRight, Library, Search, SlidersHorizontal } from 'lucide-react';
+import { dailyItem } from '@/lib/daily-item';
 import type { Appearance } from '@/database/appearance';
 import { useAlbums } from '@/features/albums/use-albums';
 import { useLibrary } from '@/features/bookmarks/use-library';
@@ -16,12 +17,14 @@ export function Home({
   onAlbums: () => void;
 }) {
   const { data: albums } = useAlbums();
-  const backgroundImage = albums?.images.find(
-    (image) =>
-      image.id === albums.background?.imageId &&
-      image.albumId === albums.background?.albumId,
-  );
   const [now, setNow] = useState(() => new Date());
+  const albumImages =
+    albums?.images.filter(
+      (image) => image.albumId === albums.background?.albumId,
+    ) ?? [];
+  const backgroundImage = albums?.background?.rotateDaily
+    ? dailyItem(albumImages, albums.background.albumId ?? '', now)
+    : albumImages.find((image) => image.id === albums?.background?.imageId);
   const { library, error } = useLibrary();
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
@@ -34,6 +37,7 @@ export function Home({
   return (
     <main
       className={`home min-h-dvh px-6 py-6 sm:px-10 sm:py-8 ${backgroundImage ? 'home-photo' : ''}`}
+      data-background-image={backgroundImage?.id}
       style={
         backgroundImage
           ? {

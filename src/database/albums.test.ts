@@ -98,3 +98,24 @@ it('restores a portable archive into a fresh profile', async () => {
     await fresh.delete();
   }
 });
+
+it('persists daily rotation and rejects unreadable dimming levels', async () => {
+  const id = await repository.saveAlbum('Nature');
+  await repository.addImages(id, [image]);
+  await repository.setBackground(id, undefined, {
+    rotateDaily: true,
+    dimming: 0.7,
+  });
+  expect((await repository.list()).background).toMatchObject({
+    albumId: id,
+    rotateDaily: true,
+    dimming: 0.7,
+  });
+  await expect(
+    repository.setBackground(id, undefined, {
+      rotateDaily: true,
+      dimming: 0.1,
+    }),
+  ).rejects.toThrow('dimming');
+  expect((await repository.list()).background?.dimming).toBe(0.7);
+});

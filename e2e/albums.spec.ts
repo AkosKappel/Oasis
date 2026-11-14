@@ -67,9 +67,23 @@ test('manages local images, selects a background and backs up albums', async ({
     buffer: Buffer.from(JSON.stringify(invalid)),
   });
   await expect(page.getByRole('alert')).toContainText('invalid dimensions');
+  await page.getByRole('checkbox', { name: 'Rotate this album daily' }).check();
+  await page
+    .getByRole('combobox', { name: 'Background dimming', exact: true })
+    .selectOption('70');
+  await page
+    .getByRole('button', { name: 'Save background settings', exact: true })
+    .click();
+  await expect(page.getByRole('status')).toHaveText(
+    'Background settings saved.',
+  );
   await page.screenshot({ path: '/tmp/oasis-previews/albums.png' });
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   await expect(page.locator('main')).toHaveClass(/home-photo/);
+  await expect(page.locator('main')).toHaveAttribute(
+    'data-background-image',
+    /.+/,
+  );
   await page.reload();
   await expect(page.locator('main')).toHaveClass(/home-photo/);
   await page.screenshot({ path: '/tmp/oasis-previews/home-album.png' });

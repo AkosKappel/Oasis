@@ -174,6 +174,65 @@ export function AlbumManager({ onClose }: { onClose: () => void }) {
               }}
             />
           </label>
+          <form
+            key={`${album.id}:${data?.background?.updatedAt ?? 0}`}
+            className="my-5 flex flex-col gap-3 rounded-lg border border-border p-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              const values = new FormData(event.currentTarget);
+              void run(async () => {
+                await personalAlbums.setBackground(
+                  album.id,
+                  data?.background?.albumId === album.id
+                    ? data.background.imageId
+                    : undefined,
+                  {
+                    rotateDaily: values.has('daily'),
+                    dimming: Number(values.get('dimming')) / 100,
+                  },
+                );
+                setMessage('Background settings saved.');
+              });
+            }}
+          >
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                name="daily"
+                type="checkbox"
+                defaultChecked={
+                  data?.background?.albumId === album.id &&
+                  data.background.rotateDaily
+                }
+                disabled={busy}
+              />{' '}
+              Rotate this album daily
+            </label>
+            <label className="field">
+              Background dimming
+              <select
+                name="dimming"
+                defaultValue={String((data?.background?.dimming ?? 0.6) * 100)}
+                disabled={busy}
+              >
+                <option value="60">60%</option>
+                <option value="70">70%</option>
+                <option value="85">85%</option>
+              </select>
+            </label>
+            <p className="text-xs text-muted-foreground">
+              The same image stays all day, including across tabs. White text
+              stays readable with dimming.
+            </p>
+            <Button
+              size="sm"
+              disabled={
+                busy ||
+                !data?.images.some((image) => image.albumId === album.id)
+              }
+            >
+              Save background settings
+            </Button>
+          </form>
           <ul className="mt-5 grid gap-4 sm:grid-cols-3">
             {data?.images
               .filter((image) => image.albumId === album.id)
@@ -194,7 +253,10 @@ export function AlbumManager({ onClose }: { onClose: () => void }) {
                       disabled={busy}
                       onClick={() =>
                         void run(() =>
-                          personalAlbums.setBackground(album.id, image.id),
+                          personalAlbums.setBackground(album.id, image.id, {
+                            rotateDaily: false,
+                            dimming: data?.background?.dimming ?? 0.6,
+                          }),
                         )
                       }
                     >

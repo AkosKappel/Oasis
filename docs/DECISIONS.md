@@ -88,3 +88,9 @@
 - Removing an image or album keeps tombstones but clears deleted image payloads to release storage. Deleting a selected background falls back safely.
 - Provide a separate versioned album JSON archive including image data. Restore validates image decoding and dimensions before repository graph/ownership checks and atomic additions; existing active IDs stay unchanged. Bookmark JSON remains backward-compatible and separate.
 - Background dimming starts at 60% for legible white text. No external images, network permissions or provider keys are introduced.
+
+## 2026-11-14: daily image rotation
+
+- Rotate a selected local album by local calendar day, with a stable album-specific offset and creation-time/ID ordering. Open tabs agree on the image, midnight advances it, and no timer service or network API is needed.
+- Expose daily rotation and 60/70/85% dimming in the album dialog. Choosing a specific image returns to fixed-image mode. Empty or removed albums fall back to the plain Home.
+- Use the rotation fields already defined in v3, so no schema migration is needed. The shared daily-item helper can also select daily quotes.
