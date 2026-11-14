@@ -1,7 +1,18 @@
 import type { AppearanceRecord } from './appearance';
 import Dexie, { type EntityTable } from 'dexie';
-import type { Bookmark, Folder, Space, Tag } from '@/types/entities';
+import type {
+  Bookmark,
+  Folder,
+  Space,
+  Tag,
+  ImageAlbum,
+  AlbumImage,
+  BackgroundSettings,
+} from '@/types/entities';
 export class OasisDatabase extends Dexie {
+  albums!: EntityTable<ImageAlbum, 'id'>;
+  albumImages!: EntityTable<AlbumImage, 'id'>;
+  backgrounds!: EntityTable<BackgroundSettings, 'id'>;
   preferences!: EntityTable<AppearanceRecord, 'id'>;
   spaces!: EntityTable<Space, 'id'>;
   bookmarks!: EntityTable<Bookmark, 'id'>;
@@ -16,6 +27,11 @@ export class OasisDatabase extends Dexie {
       tags: 'id, spaceId, [spaceId+name], updatedAt',
     });
     this.version(2).stores({ preferences: 'id, spaceId' });
+    this.version(3).stores({
+      albums: 'id, spaceId',
+      albumImages: 'id, spaceId, [spaceId+albumId]',
+      backgrounds: 'id, spaceId',
+    });
     this.on('populate', (transaction) => {
       const now = Date.now();
       return transaction.table('spaces').add({

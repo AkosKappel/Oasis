@@ -40,3 +40,23 @@ export interface Tag extends RecordMetadata {
   name: string;
   color: string;
 }
+
+export interface ImageAlbum extends RecordMetadata {
+  spaceId: string;
+  name: string;
+}
+export interface AlbumImage extends RecordMetadata {
+  spaceId: string;
+  albumId: string;
+  name: string;
+  dataUrl: string;
+  width: number;
+  height: number;
+}
+export interface BackgroundSettings extends RecordMetadata {
+  spaceId: string;
+  albumId?: string;
+  imageId?: string;
+  rotateDaily: boolean;
+  dimming: number;
+}

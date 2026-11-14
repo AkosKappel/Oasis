@@ -80,3 +80,11 @@
 - Validate the plan before writing, then create missing folders and bookmarks in one space-scoped Dexie transaction. Imports never move or delete existing records and do not revive tombstones.
 - Support names, URLs, descriptions, folder hierarchy and creation dates. HTML is not a full Oasis backup: tags, favorite status and notes use JSON. Escape all exported text and attributes.
 - Limit HTML imports to 10 MB, 10,000 items and 32 folder levels, with a markup-complexity guard before parsing. HTML export rejects deeper structures; JSON remains the path for deeper libraries while streaming transfer is deferred.
+
+## 2026-11-14: local image albums
+
+- Dexie v3 adds space-owned image albums, images and background settings. Upload JPEG/PNG/WebP, resize to at most 2560 pixels per side and re-encode to JPEG to avoid carrying active content or source metadata.
+- Limit source files to 20 MB and 40 megapixels, normalized images to 3 MB, and active Personal images to 100 / 30 MB. Process files sequentially before an atomic batch write; report storage errors and preserve existing data.
+- Removing an image or album keeps tombstones but clears deleted image payloads to release storage. Deleting a selected background falls back safely.
+- Provide a separate versioned album JSON archive including image data. Restore validates image decoding and dimensions before repository graph/ownership checks and atomic additions; existing active IDs stay unchanged. Bookmark JSON remains backward-compatible and separate.
+- Background dimming starts at 60% for legible white text. No external images, network permissions or provider keys are introduced.

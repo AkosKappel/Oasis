@@ -3,10 +3,12 @@ import { BookmarkLibrary } from '@/features/bookmarks/bookmark-library';
 import { CommandPalette } from '@/features/search/command-palette';
 import { useAppearance } from '@/features/appearance/use-appearance';
 import { AppearanceSettings } from '@/features/appearance/appearance-settings';
+import { AlbumManager } from '@/features/albums/album-manager';
 import { Home } from '@/features/home/home';
 
 export function App() {
   const { appearance, error: appearanceError } = useAppearance();
+  const [albumsOpen, setAlbumsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [route, setRoute] = useState(() => window.location.hash);
   const [search, setSearch] = useState<{ query: string }>();
@@ -34,11 +36,13 @@ export function App() {
         />
       ) : (
         <Home
+          onAlbums={() => setAlbumsOpen(true)}
           appearance={appearance}
           onAppearance={() => setSettingsOpen(true)}
           onSearch={(query) => setSearch({ query })}
         />
       )}
+      {albumsOpen && <AlbumManager onClose={() => setAlbumsOpen(false)} />}
       {settingsOpen && (
         <AppearanceSettings
           appearance={appearance}

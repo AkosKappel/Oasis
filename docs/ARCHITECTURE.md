@@ -53,3 +53,7 @@ Folder path and descendant helpers are shared by management, assignment, cards, 
 ## Browser bookmark transfer
 
 The browser-only parser in `src/features/transfer` converts an inert HTML template into a typed import plan. `src/database/bookmark-html.ts` validates folder references and limits, maps source folders to active Personal-space records, deduplicates exact URLs within folders and commits additions atomically. Export validates the library graph before serializing escaped Netscape HTML. JSON and HTML controls share the Backup and restore dialog.
+
+## Image albums
+
+Dexie v3 adds `albums`, `albumImages` and `backgrounds`. Images are re-encoded locally and stored as JPEG data URLs. The album repository owns transactions, quota bounds, relationships and deletion tombstones; browser image preparation and archive decoding happen before writes. Home and the album dialog subscribe to one media snapshot. Album archives are independent from bookmark JSON/HTML.

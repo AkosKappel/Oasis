@@ -91,3 +91,17 @@
   --danger: oklch(0.78 0.12 25);
   --home-glow: oklch(0.25 0.025 var(--accent-hue));
 }
+
+.home-photo {
+  --foreground: white;
+  --muted-foreground: white;
+  --border: rgb(255 255 255 / 45%);
+  --primary: white;
+  --surface: rgb(10 20 18);
+  color: white;
+  color-scheme: dark;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 45%);
+}
+.home-photo input::placeholder {
+  color: rgb(255 255 255 / 85%);
+}

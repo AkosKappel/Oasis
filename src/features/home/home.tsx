@@ -1,17 +1,26 @@
 import { useEffect, useState } from 'react';
 import { ArrowUpRight, Library, Search, SlidersHorizontal } from 'lucide-react';
 import type { Appearance } from '@/database/appearance';
+import { useAlbums } from '@/features/albums/use-albums';
 import { useLibrary } from '@/features/bookmarks/use-library';
 
 export function Home({
   onSearch,
   appearance,
   onAppearance,
+  onAlbums,
 }: {
   onSearch: (query: string) => void;
   appearance: Appearance;
   onAppearance: () => void;
+  onAlbums: () => void;
 }) {
+  const { data: albums } = useAlbums();
+  const backgroundImage = albums?.images.find(
+    (image) =>
+      image.id === albums.background?.imageId &&
+      image.albumId === albums.background?.albumId,
+  );
   const [now, setNow] = useState(() => new Date());
   const { library, error } = useLibrary();
   useEffect(() => {
@@ -23,7 +32,18 @@ export function Home({
     .slice(0, 6);
 
   return (
-    <main className="home min-h-dvh px-6 py-6 sm:px-10 sm:py-8">
+    <main
+      className={`home min-h-dvh px-6 py-6 sm:px-10 sm:py-8 ${backgroundImage ? 'home-photo' : ''}`}
+      style={
+        backgroundImage
+          ? {
+              backgroundImage: `linear-gradient(rgb(0 0 0 / ${albums?.background?.dimming ?? 0.6}), rgb(0 0 0 / ${albums?.background?.dimming ?? 0.6})), url("${backgroundImage.dataUrl}")`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }
+          : undefined
+      }
+    >
       <nav
         aria-label="Main navigation"
         className="flex items-center justify-between text-sm"
@@ -112,7 +132,14 @@ export function Home({
           </p>
         )}
       </section>
-      <footer className="flex justify-end">
+      <footer className="flex justify-end gap-3">
+        <button
+          type="button"
+          className="rounded-md px-2 text-sm text-muted-foreground hover:text-foreground"
+          onClick={onAlbums}
+        >
+          Image albums
+        </button>
         <button
           type="button"
           onClick={onAppearance}
