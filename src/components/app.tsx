@@ -90,6 +90,7 @@ export function App() {
       {search && (
         <CommandPalette
           initialQuery={search.query}
+          preferredEngine={appearance.searchEngine}
           onClose={() => setSearch(undefined)}
         />
       )}

@@ -1,3 +1,4 @@
+import { SEARCH_ENGINES, type SearchEngine } from '@/lib/search-engines';
 import { reportStorageError } from '@/database/storage-health';
 import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { Button } from '@/components/ui/button';
@@ -217,6 +218,27 @@ export function AppearanceSettings({
             />
             Show daily focus
           </label>
+          <label className="field">
+            Home search
+            <select
+              value={draft.searchEngine ?? 'bookmarks'}
+              onChange={(event) =>
+                update({ searchEngine: event.target.value as SearchEngine })
+              }
+              aria-describedby="home-search-help"
+            >
+              {SEARCH_ENGINES.map((engine) => (
+                <option key={engine.id} value={engine.id}>
+                  {engine.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <p id="home-search-help" className="text-xs text-muted-foreground">
+            Web searches open the selected provider only when submitted. No
+            suggestions are requested. Ctrl/Cmd+K keeps bookmark search
+            available.
+          </p>
           <label className="field">
             Links side
             <select

@@ -79,6 +79,7 @@ export class OasisDatabase extends Dexie {
     this.version(10).stores({ homeWidgets: 'id, spaceId' });
     this.version(11).stores({ focusSessions: 'id, spaceId' });
     this.version(12).stores({ weatherSettings: 'id, spaceId' });
+    this.version(13).stores({ preferences: 'id, spaceId' });
     this.on('blocked', () => reportStorageIssue('blocked'));
     this.on('versionchange', () => {
       this.close();

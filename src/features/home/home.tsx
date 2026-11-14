@@ -1,3 +1,4 @@
+import { searchEngine, webSearchUrl } from '@/lib/search-engines';
 import { WeatherWidget } from '@/features/weather/weather-widget';
 import { useFocusSession } from '@/features/focus/use-focus-session';
 import { FocusTimer } from '@/features/focus/focus-mode';
@@ -33,6 +34,7 @@ export function Home({
   onFocus: () => void;
   onPinLinks: (pinned: boolean) => Promise<void>;
 }) {
+  const source = searchEngine(appearance.searchEngine);
   const { session, error: focusError } = useFocusSession();
   const { data: quotes } = useQuotes();
   const { data: albums } = useAlbums();
@@ -145,7 +147,11 @@ export function Home({
                 const query = String(
                   new FormData(event.currentTarget).get('query') ?? '',
                 );
-                onSearch(query);
+                if (source.id === 'bookmarks') onSearch(query);
+                else {
+                  const url = webSearchUrl(source.id, query);
+                  if (url) window.location.assign(url);
+                }
               }}
               className="mt-10 w-full max-w-sm"
             >
@@ -154,11 +160,20 @@ export function Home({
                   className="size-4 shrink-0 text-muted-foreground"
                   aria-hidden="true"
                 />
-                <span className="sr-only">Search bookmarks</span>
+                <span className="sr-only">
+                  {source.id === 'bookmarks'
+                    ? 'Search bookmarks'
+                    : `Search ${source.name}`}
+                </span>
                 <input
                   type="search"
                   name="query"
-                  placeholder="Find a bookmark"
+                  maxLength={2000}
+                  placeholder={
+                    source.id === 'bookmarks'
+                      ? 'Find a bookmark'
+                      : `Search ${source.name}`
+                  }
                   className="min-w-0 flex-1 bg-transparent text-sm outline-none focus-visible:outline-none"
                 />
               </label>

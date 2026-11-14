@@ -52,7 +52,7 @@ it('upgrades a v1 library without changing its bookmarks', async () => {
   );
   legacy.close();
   await database.open();
-  expect(database.verno).toBe(12);
+  expect(database.verno).toBe(13);
   expect(await database.bookmarks.get('saved')).toEqual(bookmark);
   expect(await database.preferences.count()).toBe(0);
 });
@@ -484,4 +484,40 @@ it('keeps v11 sessions while adding optional weather storage', async () => {
   await database.open();
   expect(await database.focusSessions.get(session.id)).toEqual(session);
   expect(await database.weatherSettings.count()).toBe(0);
+});
+
+it('preserves v12 appearance with local bookmark search as the legacy default', async () => {
+  const { default: Dexie } = await import('dexie');
+  const legacy = new Dexie('oasis-test');
+  legacy
+    .version(12)
+    .stores({ spaces: 'id, name, updatedAt', preferences: 'id, spaceId' });
+  await legacy.open();
+  const preference = {
+    id: 'default:appearance',
+    spaceId: 'default',
+    theme: 'dark',
+    accent: 'forest',
+    clock: '24',
+    showDate: true,
+    showFavorites: false,
+    linksSide: 'left',
+    linksPinned: false,
+    createdAt: 1,
+    updatedAt: 1,
+  };
+  await legacy.transaction(
+    'rw',
+    legacy.table('spaces'),
+    legacy.table('preferences'),
+    async () => {
+      await legacy
+        .table('spaces')
+        .add({ id: 'default', name: 'Personal', createdAt: 1, updatedAt: 1 });
+      await legacy.table('preferences').add(preference);
+    },
+  );
+  legacy.close();
+  await database.open();
+  expect(await database.preferences.get(preference.id)).toEqual(preference);
 });

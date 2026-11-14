@@ -1,12 +1,19 @@
+import {
+  searchEngine,
+  webSearchUrl,
+  type SearchEngine,
+} from '@/lib/search-engines';
 import { useEffect, useRef, useState } from 'react';
 import { filterBookmarks } from '@/features/bookmarks/filter-bookmarks';
 import { useLibrary } from '@/features/bookmarks/use-library';
 
 export function CommandPalette({
   initialQuery,
+  preferredEngine,
   onClose,
 }: {
   initialQuery: string;
+  preferredEngine?: SearchEngine;
   onClose: () => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -36,7 +43,21 @@ export function CommandPalette({
   ].filter((action) =>
     action.title.toLowerCase().includes(query.trim().toLowerCase()),
   );
-  const results = [...bookmarks, ...actions];
+  const webUrl = webSearchUrl(preferredEngine, query);
+  const source = searchEngine(preferredEngine);
+  const results = [
+    ...bookmarks,
+    ...actions,
+    ...(webUrl
+      ? [
+          {
+            id: 'web-search',
+            title: `Search ${source.name} for “${query.trim()}”`,
+            url: webUrl,
+          },
+        ]
+      : []),
+  ];
   const active = Math.min(selected, Math.max(0, results.length - 1));
   useEffect(() => {
     document
@@ -81,6 +102,7 @@ export function CommandPalette({
             results.length ? `search-result-${active}` : undefined
           }
           value={query}
+          maxLength={2000}
           placeholder="Search bookmarks and actions"
           onChange={(event) => {
             setQuery(event.target.value);

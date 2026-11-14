@@ -1,3 +1,4 @@
+import { SEARCH_ENGINES, type SearchEngine } from '@/lib/search-engines';
 import { normalizeHex } from '@/lib/colors';
 import { db, type OasisDatabase } from './schema';
 import { requireSpace } from './records';
@@ -9,6 +10,7 @@ export interface Appearance {
   clock: 'system' | '12' | '24';
   showDate: boolean;
   showDailyFocus?: boolean;
+  searchEngine?: SearchEngine;
   showFavorites: boolean;
   linksSide: 'left' | 'right';
   linksPinned: boolean;
@@ -33,6 +35,8 @@ export function validateAppearance(value: Appearance): Appearance {
     !['forest', 'ocean', 'plum'].includes(value.accent) ||
     !['system', '12', '24'].includes(value.clock) ||
     typeof value.showDate !== 'boolean' ||
+    (value.searchEngine !== undefined &&
+      !SEARCH_ENGINES.some((engine) => engine.id === value.searchEngine)) ||
     (value.showDailyFocus !== undefined &&
       typeof value.showDailyFocus !== 'boolean') ||
     typeof value.showFavorites !== 'boolean' ||
@@ -59,6 +63,9 @@ export function validateAppearance(value: Appearance): Appearance {
     accent: value.accent,
     clock: value.clock,
     showDate: value.showDate,
+    ...(value.searchEngine !== undefined
+      ? { searchEngine: value.searchEngine }
+      : {}),
     ...(value.showDailyFocus !== undefined
       ? { showDailyFocus: value.showDailyFocus }
       : {}),

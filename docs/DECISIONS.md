@@ -211,3 +211,9 @@
 
 - Append scenes to existing albums without changing any saved image IDs. Add Woodland for botanical scenery and Quiet spaces for calm architecture/interiors, keeping broad variety without a large category menu.
 - Package generated WebP assets locally with recorded prompts. Keep fixed selections unchanged; daily collections gain the additional scenes. Personal uploads and archives remain independent.
+
+## 2026-11-14: preferred web search engines
+
+- Keep local Bookmarks as Home's default. Offer Google, DuckDuckGo, Bing and Brave in Appearance, with explicit destination labels on Home. Ctrl/Cmd+K continues local search and adds an explicit preferred-provider action for a non-empty query.
+- Build only allowlisted HTTPS navigation URLs with encoded queries. Do not request suggestions, add tracking parameters or send queries while typing. No provider API or new permission is needed.
+- Dexie v13 records the optional appearance field without rewriting older preferences. Missing values resolve to local search; appearance preview/cancel/save and cross-tab behavior remain shared with existing settings.

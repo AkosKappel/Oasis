@@ -86,3 +86,15 @@ it('persists Links side/pinning and rejects unsupported placement', async () => 
     repository.save({ ...defaultAppearance, linksSide: 'top' as 'left' }),
   ).rejects.toThrow('valid');
 });
+
+it('persists an optional search engine and rejects unknown providers', async () => {
+  await repository.save({ ...defaultAppearance, searchEngine: 'duckduckgo' });
+  expect((await repository.get()).searchEngine).toBe('duckduckgo');
+  await expect(
+    repository.save({
+      ...defaultAppearance,
+      searchEngine: 'unknown' as 'google',
+    }),
+  ).rejects.toThrow('appearance');
+  expect((await repository.get()).searchEngine).toBe('duckduckgo');
+});
