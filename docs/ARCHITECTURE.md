@@ -43,3 +43,7 @@ The manifest declares `activeTab` so the toolbar popup can read the current page
 ## Appearance
 
 Dexie v2 adds a `preferences` table without changing library records. The appearance repository checks space ownership transactionally. Extension pages subscribe to its live query and resolve the system theme with `prefers-color-scheme`; CSS tokens apply to Home, Library, dialogs and popup.
+
+## Search
+
+`createBookmarkSearch` parses text and operators once per query and caches normalized fields and bounded word comparisons for that query. `filterBookmarks` intersects organization filters with search and returns stable relevance ordering. Library and the palette use the same helper; all matching runs locally.

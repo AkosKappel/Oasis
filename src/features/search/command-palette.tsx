@@ -147,6 +147,9 @@ export function CommandPalette({
         </p>
       )}
       <p className="mt-4 text-xs text-muted-foreground">
+        Try tag:reading, folder:work, domain:example.com or is:favorite.
+      </p>
+      <p className="mt-2 text-xs text-muted-foreground">
         ↑ ↓ to select · Enter to open · Esc to close
       </p>
     </dialog>

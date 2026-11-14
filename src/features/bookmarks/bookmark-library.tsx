@@ -153,11 +153,19 @@ export function BookmarkLibrary({
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search your library"
+              placeholder="Search or use tag:, folder:, domain:"
+              aria-describedby="library-search-help"
               className="w-full rounded-md border border-border bg-surface/60 py-2 pl-9 pr-3 text-sm"
             />
           </label>
         </div>
+        <p
+          id="library-search-help"
+          className="mt-3 text-xs text-muted-foreground"
+        >
+          Search titles, URLs, notes, folders and tags. Use quotes for phrases
+          or names with spaces, such as tag:"Read later".
+        </p>
         {bookmarks && (
           <OrganizationFilters
             bookmarks={bookmarks}

@@ -1,3 +1,4 @@
+import { createBookmarkSearch } from '@/features/search/search-bookmarks';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
 
 interface BookmarkFilters {
@@ -13,32 +14,26 @@ export function filterBookmarks(
   tags: Tag[],
   filters: BookmarkFilters,
 ) {
-  const query = filters.query.trim().toLowerCase();
-  const folderNames = new Map(
-    folders.map((folder) => [folder.id, folder.name]),
-  );
-  const tagNames = new Map(tags.map((tag) => [tag.id, tag.name]));
-  return bookmarks.filter((bookmark) => {
-    if (filters.favoritesOnly && !bookmark.isFavorite) return false;
+  const search = createBookmarkSearch(filters.query, folders, tags);
+  const matches: { bookmark: Bookmark; score: number }[] = [];
+  for (const bookmark of bookmarks) {
+    if (filters.favoritesOnly && !bookmark.isFavorite) continue;
     if (
       filters.folderId === 'unorganized'
         ? !!bookmark.folderId
         : filters.folderId && bookmark.folderId !== filters.folderId
     )
-      return false;
+      continue;
     if (
       filters.tagId === 'untagged'
         ? bookmark.tags.length > 0
         : filters.tagId && !bookmark.tags.includes(filters.tagId)
     )
-      return false;
-    const text = [
-      bookmark.title,
-      bookmark.url,
-      bookmark.description ?? '',
-      folderNames.get(bookmark.folderId ?? '') ?? '',
-      ...bookmark.tags.map((id) => tagNames.get(id) ?? ''),
-    ].join(' ');
-    return text.toLowerCase().includes(query);
-  });
+      continue;
+    const score = search(bookmark);
+    if (score !== undefined) matches.push({ bookmark, score });
+  }
+  return matches
+    .sort((a, b) => a.score - b.score)
+    .map(({ bookmark }) => bookmark);
 }

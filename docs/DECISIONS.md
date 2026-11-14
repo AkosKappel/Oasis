@@ -57,3 +57,10 @@
 - Use a small Home appearance dialog and shared light/dark surface tokens, including Library and popup. Saving is explicit; Cancel preserves current settings.
 - Keep image backgrounds, personal albums, quote collections and optional productivity widgets in the local backlog for later work.
 - Existing JSON v1 backups still contain only library records; appearance preferences are device-local and excluded.
+
+## 2026-11-14: local ranked search
+
+- Share one search implementation between Library and the command palette. Match all text terms, rank full titles and literal matches ahead of fuzzy matches, and search descriptions, notes, folder names and tags too.
+- Support exact case/accent-insensitive tag/folder names, domain host or subdomain matching, and `is:favorite`. Quote phrases and names containing spaces. Repeated operators combine by intersection; unknown operators are literal text and unsupported `is:` values match nothing.
+- Allow one word edit for 4-7 characters and two for 8-64, including adjacent transpositions. Shorter or longer terms and quoted phrases use substring matching.
+- Keep the implementation dependency-free after a 10,000-bookmark typo/operator benchmark measured approximately 180-275 ms on this shared server with word comparisons cached. Q-01 remains for broader workloads and indexing decisions as libraries grow; these timings are observations, not CI thresholds.
