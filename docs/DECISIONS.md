@@ -127,3 +127,8 @@
 - Verify Links/search/Appearance keyboard transitions and dismissal, readable custom highlights over bright photo backgrounds, and 320-pixel Home layouts with long quote/author text.
 - Reduce the minimum clock size on narrow screens and wrap long authors in Home and quote management. Keep color controls synchronized with system-theme changes while the dialog is open.
 - Expose color preview as a named accessible group. This focused browser/contrast pass does not replace the broader release accessibility and screen-reader review tracked locally.
+
+## 2026-11-14: dropdown styling
+
+- Keep native select controls and form/keyboard behavior. Use customizable native pickers in Chromium 135+ to style arrows, option spacing, selected/hover states and popup colors consistently with the theme.
+- Older browsers retain native option lists and a CSS chevron fallback. No replacement dropdown library or browser minimum is introduced.
