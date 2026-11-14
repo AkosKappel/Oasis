@@ -29,7 +29,7 @@
 
 - Open new tabs on a separate home with a clock, date, bookmark search and up to six favorites. Keep folders, tags and editing in Library.
 - Use a local CSS background rather than a photo service. The home works offline without new permissions or requests.
-- Use hash navigation so Library can be bookmarked and browser back/forward works. Home searches pass their query to Library.
+- Use hash navigation so Library can be bookmarked and browser back/forward works. Home searches open the command palette; Library also accepts a query in its hash URL.
 - Defer daily focus and appearance controls until the basic home and search flow are established.
 
 ## 2026-11-14: keyboard search
@@ -44,3 +44,9 @@
 - Restore adds missing records and keeps existing active records with the same ID unchanged. IDs owned by another space or by a deleted record stop the restore; restoring deleted IDs requires a fresh browser profile.
 - Validate the complete file and the resulting merged library, including unique names, ownership, references, safe bookmark URLs and folder cycles. Commit all additions in one Dexie transaction or roll them all back.
 - Limit import files to 10 MB. Preview counts before the explicit Restore action. Browser bookmark HTML is a separate B-06 feature.
+
+## 2026-11-14: toolbar quick capture
+
+- Add only `activeTab`, which grants temporary access to the current page URL and title when the user invokes the toolbar popup. No persistent site access, tabs permission, content scripts or background worker is needed.
+- Reuse the existing bookmark form and transaction-backed repository for folder/tag assignment and validation. Saving is explicit; internal pages and credential-bearing URLs are rejected.
+- Show a saved confirmation and a Library link rather than automatically opening a new tab after saving.

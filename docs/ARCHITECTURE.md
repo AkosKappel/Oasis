@@ -6,6 +6,7 @@ Oasis is a Chromium Manifest V3 extension built with WXT and React. WXT generate
 
 | Path                     | Contents                                       |
 | ------------------------ | ---------------------------------------------- |
+| `src/entrypoints/popup`  | Toolbar quick capture                          |
 | `src/entrypoints/newtab` | The new-tab page                               |
 | `src/features/<feature>` | UI, hooks and pure helpers of one feature      |
 | `src/database`           | Dexie schema and the space-scoped repositories |
@@ -24,15 +25,17 @@ Oasis is a Chromium Manifest V3 extension built with WXT and React. WXT generate
 - Schema changes need a new Dexie version and a migration test.
 - Open the database only from extension pages: ordinary web origins have separate storage.
 
+- `src/database/backup.ts` validates and exports active Personal-space records. Restore checks the merged graph inside a write transaction, preserves existing active IDs and adds only missing records. It never removes records or revives tombstones.
+
 ## UI
 
 - One Dexie live query reads bookmarks, folders and tags in a read transaction, so the UI updates when records change, including writes from other Oasis tabs.
 - Dialogs use the native `<dialog>` element for focus containment and Escape handling.
 
+- New tabs open Home; `#library` opens bookmark management. Home reads the same live query for favorites and opens the command palette on search submission.
+- The command palette shares the library live query and filter helper. Its native modal keeps focus inside search and restores the previous focused element when closed.
+- The popup reads the active tab and reuses the bookmark form and repositories. It offers folder/tag assignment and reports unsupported pages before saving.
+
 ## Permissions
 
-The manifest declares no permissions, background worker, content scripts or network integrations. Add them only when a feature needs them, and record the reason in [DECISIONS.md](DECISIONS.md).
-
-- New tabs open Home; `#library` opens bookmark management. Home reads the same live library query for favorites and passes searches through the hash query string.
-- The command palette shares the library live query and filter helper. Its native modal keeps keyboard focus inside search and restores the previous focused element when closed.
-- `src/database/backup.ts` validates and exports active Personal-space records. Restore checks the merged graph inside a write transaction, preserves existing active IDs and adds only missing records. It never removes records or revives tombstones.
+The manifest declares `activeTab` so the toolbar popup can read the current page title and URL after a user opens it. There is no background worker, content script or network integration. Record any additional permission in [DECISIONS.md](DECISIONS.md).

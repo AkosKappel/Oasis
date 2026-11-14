@@ -23,7 +23,7 @@ pnpm test:e2e    # Build and test the actual extension in Chromium
 
 ## Scope
 
-A new-tab page with a bookmark library: bookmarks, favorites, folders, colored tags and filtering. All data stays in IndexedDB on the device; there is no backend, account or analytics. Planned work is tracked in the local `BACKLOG.md`, the full product vision in the blueprint below.
+A minimal new-tab home with a clock, date and favorite links, plus a separate bookmark library with folders, colored tags and filtering. Use Ctrl/Cmd+K to search bookmarks and navigate. The toolbar popup saves the current page to your library. Versioned JSON backup and restore keeps bookmarks, folders and tags portable. All data stays in IndexedDB on the device; there is no backend, account or analytics. Planned work is tracked in the local `BACKLOG.md`, the full product vision in the blueprint below.
 
 ## Documentation
 
