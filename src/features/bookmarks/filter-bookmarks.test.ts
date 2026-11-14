@@ -71,3 +71,35 @@ it('finds unorganized and untagged bookmarks', () => {
     }).map((item) => item.id),
   ).toEqual(['two']);
 });
+
+it('includes descendants in folder filters and full-path folder operators', () => {
+  const nested = [
+    ...folders,
+    {
+      ...metadata,
+      id: 'child',
+      name: 'Articles',
+      parentId: 'folder',
+      sortOrder: 0,
+    },
+  ];
+  const saved = [{ ...bookmarks[0]!, folderId: 'child' }, bookmarks[1]!];
+  expect(
+    filterBookmarks(saved, nested, tags, {
+      ...filters,
+      folderId: 'folder',
+    }).map((record) => record.id),
+  ).toEqual(['one']);
+  expect(
+    filterBookmarks(saved, nested, tags, {
+      ...filters,
+      query: 'folder:Resources',
+    }).map((record) => record.id),
+  ).toEqual(['one']);
+  expect(
+    filterBookmarks(saved, nested, tags, {
+      ...filters,
+      query: 'folder:"Resources / Articles"',
+    }).map((record) => record.id),
+  ).toEqual(['one']);
+});

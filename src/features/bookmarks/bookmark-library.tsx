@@ -1,3 +1,4 @@
+import { folderPaths } from '@/features/organization/folder-tree';
 import { BackupManager } from '@/features/backup/backup-manager';
 import { BookmarkCard } from './bookmark-card';
 import { useState } from 'react';
@@ -51,7 +52,13 @@ export function BookmarkLibrary({
       })
     : undefined;
   const organizationFiltered = !!folderId || !!tagId;
-  const folderMap = new Map(folders.map((folder) => [folder.id, folder]));
+  const paths = folderPaths(folders);
+  const folderMap = new Map(
+    folders.map((folder) => [
+      folder.id,
+      { ...folder, name: paths.get(folder.id)! },
+    ]),
+  );
   const tagMap = new Map(tags.map((tag) => [tag.id, tag]));
 
   async function remove(bookmark: Bookmark) {
@@ -163,8 +170,9 @@ export function BookmarkLibrary({
           id="library-search-help"
           className="mt-3 text-xs text-muted-foreground"
         >
-          Search titles, URLs, notes, folders and tags. Use quotes for phrases
-          or names with spaces, such as tag:"Read later".
+          Folder filters include subfolders. Search titles, URLs, notes, folders
+          and tags. Use quotes for phrases or names with spaces, such as
+          tag:"Read later".
         </p>
         {bookmarks && (
           <OrganizationFilters

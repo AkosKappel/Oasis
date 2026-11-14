@@ -21,7 +21,7 @@ Oasis is a Chromium Manifest V3 extension built with WXT and React. WXT generate
 - Every record belongs to a space through `spaceId`, and repositories check that ownership inside their transactions.
 - Deletion is soft: records keep a `deletedAt` tombstone, so a future sync can see deletions. The conflict resolution for sync is not designed yet.
 - Bookmark writes validate titles and HTTP(S) URLs and reject embedded credentials.
-- Folder and tag names are unique per space, ignoring case. Deleting a folder clears it from its bookmarks; deleting a tag removes it from theirs. Folders with active subfolders cannot be deleted until hierarchy management exists.
+- Folder names are unique among siblings and tag names per space, ignoring case. Deleting a folder clears it from its bookmarks; deleting a tag removes it from theirs. Folders with active subfolders cannot be deleted. Parent changes validate ownership and prevent cycles transactionally.
 - Schema changes need a new Dexie version and a migration test.
 - Open the database only from extension pages: ordinary web origins have separate storage.
 
@@ -47,3 +47,5 @@ Dexie v2 adds a `preferences` table without changing library records. The appear
 ## Search
 
 `createBookmarkSearch` parses text and operators once per query and caches normalized fields and bounded word comparisons for that query. `filterBookmarks` intersects organization filters with search and returns stable relevance ordering. Library and the palette use the same helper; all matching runs locally.
+
+Folder path and descendant helpers are shared by management, assignment, cards, filters and search. Folder filter counts include descendants; hierarchy uses the existing v1 `parentId` field.

@@ -1,3 +1,4 @@
+import { descendantFolderIds } from '@/features/organization/folder-tree';
 import { createBookmarkSearch } from '@/features/search/search-bookmarks';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
 
@@ -14,6 +15,9 @@ export function filterBookmarks(
   tags: Tag[],
   filters: BookmarkFilters,
 ) {
+  const selectedFolders = filters.folderId
+    ? descendantFolderIds(folders, filters.folderId)
+    : undefined;
   const search = createBookmarkSearch(filters.query, folders, tags);
   const matches: { bookmark: Bookmark; score: number }[] = [];
   for (const bookmark of bookmarks) {
@@ -21,7 +25,7 @@ export function filterBookmarks(
     if (
       filters.folderId === 'unorganized'
         ? !!bookmark.folderId
-        : filters.folderId && bookmark.folderId !== filters.folderId
+        : filters.folderId && !selectedFolders?.has(bookmark.folderId ?? '')
     )
       continue;
     if (

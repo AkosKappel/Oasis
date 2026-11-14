@@ -45,8 +45,8 @@ export function OrganizationManager({
         <OrganizationSection
           kind="folder"
           items={folders}
-          onSave={(name, _color, id) =>
-            personalOrganization.saveFolder(name, id)
+          onSave={(name, _color, id, parentId) =>
+            personalOrganization.saveFolder(name, id, parentId)
           }
           onRemove={personalOrganization.removeFolder}
           disabled={busy}

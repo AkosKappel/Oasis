@@ -142,7 +142,16 @@ export function validateBackup(value: unknown): Backup {
   const folderMap = unique(folders);
   const tagMap = unique(tags);
   unique(bookmarks);
-  uniqueNames(folders);
+  const siblingNames = new Set<string>();
+  for (const folder of folders) {
+    const key = JSON.stringify([
+      folder.parentId ?? null,
+      folder.name.toLowerCase(),
+    ]);
+    if (siblingNames.has(key))
+      throw new Error('Folder names must be unique within each parent folder.');
+    siblingNames.add(key);
+  }
   uniqueNames(tags);
   const checked = new Set<string>();
   for (const folder of folders) {

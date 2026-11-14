@@ -35,7 +35,7 @@ export function createOrganizationRepository(
       ]);
       return { folders, tags };
     },
-    async saveFolder(name: string, id?: string) {
+    async saveFolder(name: string, id?: string, parentId?: string) {
       const value = validateName(name);
       return database.transaction(
         'rw',
@@ -43,18 +43,52 @@ export function createOrganizationRepository(
         database.folders,
         async () => {
           await requireSpace(database, spaceId);
-          if (id)
-            await requireOwnedRecord(database.folders, id, spaceId, 'folder');
-          await requireUniqueName(
-            database.folders,
-            spaceId,
-            value,
-            id,
-            'folder',
-          );
+          const existing = id
+            ? await requireOwnedRecord(database.folders, id, spaceId, 'folder')
+            : undefined;
+          const parent =
+            parentId === undefined
+              ? existing?.parentId
+              : parentId.trim() || undefined;
+          const visited = new Set<string>();
+          let ancestor = parent;
+          while (ancestor) {
+            if (ancestor === id || visited.has(ancestor))
+              throw new Error(
+                'A folder cannot be moved inside itself or its subfolders.',
+              );
+            visited.add(ancestor);
+            ancestor = (
+              await requireOwnedRecord(
+                database.folders,
+                ancestor,
+                spaceId,
+                'parent folder',
+              )
+            ).parentId;
+          }
+          const duplicate = await database.folders
+            .where('spaceId')
+            .equals(spaceId)
+            .filter(
+              (folder) =>
+                folder.deletedAt === undefined &&
+                folder.id !== id &&
+                folder.parentId === parent &&
+                folder.name.toLowerCase() === value.toLowerCase(),
+            )
+            .first();
+          if (duplicate)
+            throw new Error(
+              'A folder with this name already exists in this parent folder.',
+            );
           const now = Date.now();
           if (id) {
-            await database.folders.update(id, { name: value, updatedAt: now });
+            await database.folders.update(id, {
+              name: value,
+              parentId: parent,
+              updatedAt: now,
+            });
             return id;
           }
           const folderId = crypto.randomUUID();
@@ -62,6 +96,7 @@ export function createOrganizationRepository(
             id: folderId,
             spaceId,
             name: value,
+            parentId: parent,
             sortOrder: now,
             createdAt: now,
             updatedAt: now,

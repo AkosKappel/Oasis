@@ -1,3 +1,7 @@
+import {
+  descendantFolderIds,
+  folderPaths,
+} from '@/features/organization/folder-tree';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
 
 type SearchField = 'tag' | 'folder' | 'domain' | 'is';
@@ -62,9 +66,23 @@ export function createBookmarkSearch(
     .filter((term) => !term.field && term.value)
     .map((term) => ({ ...term, distances: new Map<string, number>() }));
   const operators = parsed.filter((term) => term.field);
+  const paths = folderPaths(folders);
   const folderNames = new Map(
-    folders.map((folder) => [folder.id, normalize(folder.name)]),
+    folders.map((folder) => [folder.id, normalize(paths.get(folder.id)!)]),
   );
+  const folderMatches = new Map<string, Set<string>>();
+  for (const term of operators.filter((term) => term.field === 'folder')) {
+    const ids = new Set<string>();
+    for (const folder of folders) {
+      if (
+        normalize(folder.name) === term.value ||
+        folderNames.get(folder.id) === term.value
+      ) {
+        for (const id of descendantFolderIds(folders, folder.id)) ids.add(id);
+      }
+    }
+    folderMatches.set(term.value, ids);
+  }
   const tagNames = new Map(tags.map((tag) => [tag.id, normalize(tag.name)]));
   const normalized = new Map<string, string>();
   const wordLists = new Map<string, string[]>();
@@ -86,7 +104,7 @@ export function createBookmarkSearch(
         return;
       if (
         term.field === 'folder' &&
-        folderNames.get(bookmark.folderId ?? '') !== term.value
+        !folderMatches.get(term.value)?.has(bookmark.folderId ?? '')
       )
         return;
       if (

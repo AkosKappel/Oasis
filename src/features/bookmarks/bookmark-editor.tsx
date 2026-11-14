@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { personalBookmarks, type BookmarkInput } from '@/database/bookmarks';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
+import { folderOptions } from '@/features/organization/folder-tree';
 import { Button } from '@/components/ui/button';
 
 interface BookmarkEditorProps {
@@ -119,9 +120,9 @@ export function BookmarkEditor({
             defaultValue={bookmark?.folderId ?? defaultFolderId ?? ''}
           >
             <option value="">Unorganized</option>
-            {folders.map((folder) => (
+            {folderOptions(folders).map((folder) => (
               <option key={folder.id} value={folder.id}>
-                {folder.name}
+                {folder.path}
               </option>
             ))}
           </select>

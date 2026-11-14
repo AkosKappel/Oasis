@@ -202,3 +202,53 @@ it('rejects operations on deleted records or unavailable spaces', async () => {
   await expect(organization.saveFolder('Other')).rejects.toThrow('space');
   await expect(organization.list()).rejects.toThrow('space');
 });
+
+it('creates nested folders with sibling uniqueness and preserves assignments on moves', async () => {
+  const reading = await organization.saveFolder('Reading');
+  const work = await organization.saveFolder('Work');
+  const child = await organization.saveFolder('Articles', undefined, reading);
+  await organization.saveFolder('Articles', undefined, work);
+  await expect(
+    organization.saveFolder('articles', undefined, reading),
+  ).rejects.toThrow('already exists');
+  const bookmarkId = await bookmarks.save({ ...input, folderId: child });
+  await expect(
+    organization.saveFolder('Articles', child, work),
+  ).rejects.toThrow('already exists');
+  await organization.saveFolder('Sources', child, work);
+  expect((await database.bookmarks.get(bookmarkId))?.folderId).toBe(child);
+  expect((await database.folders.get(child))?.parentId).toBe(work);
+  await organization.saveFolder('Sources renamed', child);
+  expect((await database.folders.get(child))?.parentId).toBe(work);
+  await organization.saveFolder('Sources renamed', child, '');
+  expect((await database.folders.get(child))?.parentId).toBeUndefined();
+});
+it('rejects cycles and deleted or other-space parents without partial changes', async () => {
+  const root = await organization.saveFolder('Root');
+  const child = await organization.saveFolder('Child', undefined, root);
+  await expect(
+    organization.saveFolder('Root changed', root, child),
+  ).rejects.toThrow('itself');
+  await expect(
+    organization.saveFolder('Root changed', root, root),
+  ).rejects.toThrow('itself');
+  expect((await database.folders.get(root))?.name).toBe('Root');
+  await expect(organization.removeFolder(root)).rejects.toThrow('subfolders');
+  const work = createOrganizationRepository('work', database);
+  await database.transaction('rw', database.spaces, () =>
+    database.spaces.add({
+      id: 'work',
+      name: 'Work',
+      createdAt: 1,
+      updatedAt: 1,
+    }),
+  );
+  const foreign = await work.saveFolder('Foreign');
+  await expect(
+    organization.saveFolder('Child', child, foreign),
+  ).rejects.toThrow('parent folder');
+  await organization.removeFolder(child);
+  await expect(
+    organization.saveFolder('New', undefined, child),
+  ).rejects.toThrow('parent folder');
+});

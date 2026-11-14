@@ -64,3 +64,10 @@
 - Support exact case/accent-insensitive tag/folder names, domain host or subdomain matching, and `is:favorite`. Quote phrases and names containing spaces. Repeated operators combine by intersection; unknown operators are literal text and unsupported `is:` values match nothing.
 - Allow one word edit for 4-7 characters and two for 8-64, including adjacent transpositions. Shorter or longer terms and quoted phrases use substring matching.
 - Keep the implementation dependency-free after a 10,000-bookmark typo/operator benchmark measured approximately 180-275 ms on this shared server with word comparisons cached. Q-01 remains for broader workloads and indexing decisions as libraries grow; these timings are observations, not CI thresholds.
+
+## 2026-11-14: folder hierarchy
+
+- Use the existing `parentId` model, without a schema change. Folder names are unique among siblings; tags remain unique per space. JSON v1 validation accepts the same hierarchy and sibling-name rules.
+- Show full paths in management, bookmark assignment, cards and filters. A selected folder includes its descendants and its count aggregates their bookmarks. `folder:` accepts a name or full path and includes descendants too.
+- Move folders with the parent selector in the edit form. Repository transactions validate ancestor ownership, active records, sibling collisions and cycles, while preserving folder IDs and bookmark assignments.
+- Reject deletion of folders with active children. Deleting a leaf keeps its bookmarks and makes them Unorganized, preserving the existing behavior.

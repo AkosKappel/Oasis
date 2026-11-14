@@ -151,3 +151,18 @@ describe('transactional restore', () => {
     }
   });
 });
+
+it('round trips nested folders with the same names under different parents', async () => {
+  const backup = fixture();
+  backup.folders.push(
+    { ...backup.folders[0]!, id: 'parent', name: 'Work' },
+    { ...backup.folders[0]!, id: 'nested', parentId: 'parent' },
+  );
+  backup.bookmarks[0]!.folderId = 'nested';
+  await repository.restore(backup);
+  const exported = await repository.export();
+  expect(
+    exported.folders.find((folder) => folder.id === 'nested')?.parentId,
+  ).toBe('parent');
+  expect(exported.bookmarks[0]?.folderId).toBe('nested');
+});

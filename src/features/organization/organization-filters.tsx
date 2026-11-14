@@ -1,3 +1,4 @@
+import { folderOptions } from './folder-tree';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
 
 interface OrganizationFiltersProps {
@@ -20,16 +21,20 @@ export function OrganizationFilters({
   onTagChange,
 }: OrganizationFiltersProps) {
   const folderCounts = new Map<string, number>();
+  const byId = new Map(folders.map((folder) => [folder.id, folder]));
   const tagCounts = new Map<string, number>();
   let unorganized = 0;
   let untagged = 0;
   for (const bookmark of bookmarks) {
-    if (bookmark.folderId)
-      folderCounts.set(
-        bookmark.folderId,
-        (folderCounts.get(bookmark.folderId) ?? 0) + 1,
-      );
-    else unorganized++;
+    if (bookmark.folderId) {
+      const visited = new Set<string>();
+      let id: string | undefined = bookmark.folderId;
+      while (id && !visited.has(id)) {
+        visited.add(id);
+        folderCounts.set(id, (folderCounts.get(id) ?? 0) + 1);
+        id = byId.get(id)?.parentId;
+      }
+    } else unorganized++;
     if (bookmark.tags.length === 0) untagged++;
     for (const tag of bookmark.tags)
       tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
@@ -44,9 +49,9 @@ export function OrganizationFilters({
         >
           <option value="">All folders</option>
           <option value="unorganized">Unorganized ({unorganized})</option>
-          {folders.map((folder) => (
+          {folderOptions(folders).map((folder) => (
             <option key={folder.id} value={folder.id}>
-              {folder.name} ({folderCounts.get(folder.id) ?? 0})
+              {folder.path} ({folderCounts.get(folder.id) ?? 0})
             </option>
           ))}
         </select>

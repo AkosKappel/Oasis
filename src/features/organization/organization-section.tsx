@@ -1,16 +1,23 @@
 import { useState, type SubmitEvent } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
+import { descendantFolderIds, folderOptions } from './folder-tree';
 import { Button } from '@/components/ui/button';
 
 interface OrganizationItem {
   id: string;
   name: string;
   color?: string;
+  parentId?: string;
 }
 interface OrganizationSectionProps {
   kind: 'folder' | 'tag';
   items: OrganizationItem[];
-  onSave: (name: string, color: string, id?: string) => Promise<unknown>;
+  onSave: (
+    name: string,
+    color: string,
+    id?: string,
+    parentId?: string,
+  ) => Promise<unknown>;
   onRemove: (id: string) => Promise<void>;
   onBusyChange: (busy: boolean) => void;
   disabled: boolean;
@@ -26,13 +33,20 @@ export function OrganizationSection({
 }: OrganizationSectionProps) {
   const [editingId, setEditingId] = useState<string>();
   const [name, setName] = useState('');
+  const [parentId, setParentId] = useState('');
   const [color, setColor] = useState('#286443');
   const [error, setError] = useState<string>();
+  const options = folderOptions(items);
+  const paths = new Map(options.map((folder) => [folder.id, folder.path]));
+  const blockedParents = editingId
+    ? descendantFolderIds(items, editingId)
+    : new Set<string>();
   const title = kind === 'folder' ? 'Folders' : 'Tags';
 
   function reset() {
     setEditingId(undefined);
     setName('');
+    setParentId('');
     setColor('#286443');
     setError(undefined);
   }
@@ -43,7 +57,7 @@ export function OrganizationSection({
     onBusyChange(true);
     setError(undefined);
     try {
-      await onSave(name, color, editingId);
+      await onSave(name, color, editingId, parentId);
       reset();
     } catch (cause) {
       setError(
@@ -90,7 +104,7 @@ export function OrganizationSection({
       </h3>
       <p className="mt-1 text-sm text-muted-foreground">
         {kind === 'folder'
-          ? 'One home for each bookmark.'
+          ? 'Move folders by editing their parent.'
           : 'Connect bookmarks across folders.'}
       </p>
       <form onSubmit={save} className="mt-5 flex flex-col gap-3">
@@ -117,6 +131,25 @@ export function OrganizationSection({
             </label>
           )}
         </fieldset>
+        {kind === 'folder' && (
+          <label className="field">
+            Parent folder
+            <select
+              disabled={disabled}
+              value={parentId}
+              onChange={(event) => setParentId(event.target.value)}
+            >
+              <option value="">Top level</option>
+              {options
+                .filter((folder) => !blockedParents.has(folder.id))
+                .map((folder) => (
+                  <option key={folder.id} value={folder.id}>
+                    {folder.path}
+                  </option>
+                ))}
+            </select>
+          </label>
+        )}
         <div className="flex gap-2">
           <Button type="submit" size="sm" disabled={disabled}>
             {editingId ? `Save ${kind}` : `Create ${kind}`}
@@ -145,7 +178,7 @@ export function OrganizationSection({
         </p>
       ) : (
         <ul className="mt-5 flex flex-col gap-2">
-          {items.map((item) => (
+          {(kind === 'folder' ? options : items).map((item) => (
             <li
               key={item.id}
               className="flex min-w-0 items-center gap-2 rounded-lg border border-border px-3 py-2"
@@ -158,17 +191,18 @@ export function OrganizationSection({
                 />
               )}
               <span className="min-w-0 flex-1 break-words text-sm">
-                {item.name}
+                {kind === 'folder' ? paths.get(item.id) : item.name}
               </span>
               <Button
                 type="button"
                 variant="outline"
                 size="icon"
                 disabled={disabled}
-                aria-label={`Edit ${kind} ${item.name}`}
+                aria-label={`Edit ${kind} ${kind === 'folder' ? paths.get(item.id) : item.name}`}
                 onClick={() => {
                   setEditingId(item.id);
                   setName(item.name);
+                  setParentId(item.parentId ?? '');
                   setColor(item.color ?? '#286443');
                   setError(undefined);
                 }}
@@ -180,7 +214,7 @@ export function OrganizationSection({
                 variant="outline"
                 size="icon"
                 disabled={disabled}
-                aria-label={`Delete ${kind} ${item.name}`}
+                aria-label={`Delete ${kind} ${kind === 'folder' ? paths.get(item.id) : item.name}`}
                 onClick={() => void remove(item)}
               >
                 <Trash2 className="size-4" aria-hidden="true" />
