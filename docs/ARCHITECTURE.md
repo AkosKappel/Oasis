@@ -89,3 +89,7 @@ Dexie v9 adds `dailyFocus`, indexed by space and local day. Its repository valid
 ## Home widgets
 
 Dexie v10 adds `homeWidgets` for clock and countdown records, validated by the repository with per-kind bounds. Visibility and soft deletion synchronize through live queries. Home uses its existing clock tick, IANA formatting and stored countdown instants; there is no network dependency or second timer loop.
+
+## Focus sessions
+
+Dexie v11 adds `focusSessions`. Repository transactions start, pause, resume and end the current space-owned session. Home derives remaining time from its existing wall-clock tick, with no background process or per-second writes. Running sessions hide Home navigation and widgets; elapsed sessions show completion when a page is open or next opened. Session settings are device-local and outside bookmark backups.

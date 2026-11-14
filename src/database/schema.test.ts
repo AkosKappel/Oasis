@@ -52,7 +52,7 @@ it('upgrades a v1 library without changing its bookmarks', async () => {
   );
   legacy.close();
   await database.open();
-  expect(database.verno).toBe(10);
+  expect(database.verno).toBe(11);
   expect(await database.bookmarks.get('saved')).toEqual(bookmark);
   expect(await database.preferences.count()).toBe(0);
 });
@@ -417,4 +417,38 @@ it('upgrades v9 daily focus without losing goals', async () => {
   await database.open();
   expect(await database.dailyFocus.get('goal')).toEqual(goal);
   expect(await database.homeWidgets.count()).toBe(0);
+});
+
+it('preserves v10 widgets when adding focus sessions', async () => {
+  const { default: Dexie } = await import('dexie');
+  const legacy = new Dexie('oasis-test');
+  legacy
+    .version(10)
+    .stores({ spaces: 'id, name, updatedAt', homeWidgets: 'id, spaceId' });
+  await legacy.open();
+  const widget = {
+    id: 'clock',
+    spaceId: 'default',
+    kind: 'clock',
+    label: 'Tokyo',
+    timeZone: 'Asia/Tokyo',
+    visible: true,
+    createdAt: 1,
+    updatedAt: 1,
+  };
+  await legacy.transaction(
+    'rw',
+    legacy.table('spaces'),
+    legacy.table('homeWidgets'),
+    async () => {
+      await legacy
+        .table('spaces')
+        .add({ id: 'default', name: 'Personal', createdAt: 1, updatedAt: 1 });
+      await legacy.table('homeWidgets').add(widget);
+    },
+  );
+  legacy.close();
+  await database.open();
+  expect(await database.homeWidgets.get('clock')).toEqual(widget);
+  expect(await database.focusSessions.count()).toBe(0);
 });

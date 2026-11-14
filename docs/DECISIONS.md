@@ -176,3 +176,8 @@
 - Dexie v10 adds space-owned Home widgets with visibility flags and deletion tombstones. Start empty, limit to three clocks and three countdowns, and manage them through Widgets.
 - Use browser IANA time zones for clocks and daylight-saving behavior, with a date alongside the time. Countdown entry uses local time and saves an absolute instant; reject nonexistent local times instead of silently shifting them.
 - Keep labels short and widgets compact. No location API, permission or dependency is needed. Widgets remain device-local and outside bookmark backups.
+
+## 2026-11-14: focus sessions
+
+- Dexie v11 stores one current session per space. Absolute deadlines avoid interval drift after sleep, tab suspension or reload; paused sessions store remaining time. Transactional actions always read current state across tabs.
+- Running sessions replace Home controls with the timer and pause/end actions. Pausing or completing restores Home. No website blocking, sound, background alarm, notifications permission or automatic repeated sessions are included.

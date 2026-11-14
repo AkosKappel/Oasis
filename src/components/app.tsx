@@ -1,3 +1,4 @@
+import { FocusModeDialog } from '@/features/focus/focus-mode';
 import { WidgetManager } from '@/features/widgets/widget-manager';
 import { StorageRecovery } from '@/features/storage/storage-recovery';
 import type { Appearance } from '@/database/appearance';
@@ -17,6 +18,7 @@ export function App() {
     error: appearanceError,
     saveAppearance,
   } = useAppearance(preview);
+  const [focusOpen, setFocusOpen] = useState(false);
   const [widgetsOpen, setWidgetsOpen] = useState(false);
   const [quotesOpen, setQuotesOpen] = useState(false);
   const [albumsOpen, setAlbumsOpen] = useState(false);
@@ -53,6 +55,7 @@ export function App() {
           onPinLinks={(pinned) =>
             saveAppearance({ ...appearance, linksPinned: pinned })
           }
+          onFocus={() => setFocusOpen(true)}
           onWidgets={() => setWidgetsOpen(true)}
           onQuotes={() => setQuotesOpen(true)}
           onAlbums={() => setAlbumsOpen(true)}
@@ -61,6 +64,7 @@ export function App() {
           onSearch={(query) => setSearch({ query })}
         />
       )}
+      {focusOpen && <FocusModeDialog onClose={() => setFocusOpen(false)} />}
       {widgetsOpen && <WidgetManager onClose={() => setWidgetsOpen(false)} />}
       {quotesOpen && <QuoteManager onClose={() => setQuotesOpen(false)} />}
       {albumsOpen && <AlbumManager onClose={() => setAlbumsOpen(false)} />}
