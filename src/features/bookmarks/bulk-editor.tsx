@@ -1,3 +1,4 @@
+import { reportStorageError } from '@/database/storage-health';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type { Folder, Tag } from '@/types/entities';
@@ -57,6 +58,7 @@ export function BulkEditor({
                   mode: data.get('mode') === 'remove' ? 'remove' : 'add',
                 },
           ).catch((cause) => {
+            reportStorageError(cause);
             setError(
               cause instanceof Error
                 ? cause.message

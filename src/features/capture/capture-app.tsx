@@ -1,3 +1,4 @@
+import { StorageRecovery } from '@/features/storage/storage-recovery';
 import { useAppearance } from '@/features/appearance/use-appearance';
 import { useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
@@ -71,6 +72,7 @@ export function CaptureApp({
   }
   return (
     <main className={fullPage ? 'mx-auto w-full max-w-lg p-6' : 'p-5'}>
+      <StorageRecovery />
       {saved ? (
         <div role="status" className="py-8">
           <h1 className="text-xl font-semibold">Bookmark saved</h1>

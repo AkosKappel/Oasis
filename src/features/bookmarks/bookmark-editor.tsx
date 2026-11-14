@@ -1,3 +1,7 @@
+import {
+  reportStorageError,
+  storageWriteSucceeded,
+} from '@/database/storage-health';
 import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { personalBookmarks, type BookmarkInput } from '@/database/bookmarks';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
@@ -50,9 +54,11 @@ export function BookmarkEditor({
         },
         bookmark?.id,
       );
+      storageWriteSucceeded();
       if (onSaved) onSaved();
       else onClose();
     } catch (cause) {
+      reportStorageError(cause);
       setError(
         cause instanceof Error
           ? cause.message

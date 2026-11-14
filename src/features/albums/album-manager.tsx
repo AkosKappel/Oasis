@@ -1,3 +1,4 @@
+import { reportStorageError } from '@/database/storage-health';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -35,6 +36,7 @@ export function AlbumManager({ onClose }: { onClose: () => void }) {
     try {
       await action();
     } catch (cause) {
+      reportStorageError(cause);
       setError(
         cause instanceof Error
           ? cause.message

@@ -1,3 +1,4 @@
+import { reportStorageError } from '@/database/storage-health';
 import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import type { Appearance } from '@/database/appearance';
@@ -71,7 +72,8 @@ export function AppearanceSettings({
     try {
       await onSave(draft);
       onClose();
-    } catch {
+    } catch (cause) {
+      reportStorageError(cause);
       setError('Your settings could not be saved. Try again.');
       setBusy(false);
     }

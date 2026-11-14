@@ -1,3 +1,4 @@
+import { reportStorageIssue } from './storage-health';
 import type { LibraryPreferenceRecord } from './library-preferences';
 import type { AppearanceRecord } from './appearance';
 import Dexie, { type EntityTable } from 'dexie';
@@ -66,6 +67,11 @@ export class OasisDatabase extends Dexie {
             record.linksPinned ??= false;
           }),
       );
+    this.on('blocked', () => reportStorageIssue('blocked'));
+    this.on('versionchange', () => {
+      this.close();
+      reportStorageIssue('updated');
+    });
     this.on('populate', (transaction) => {
       const now = Date.now();
       return transaction.table('spaces').add({

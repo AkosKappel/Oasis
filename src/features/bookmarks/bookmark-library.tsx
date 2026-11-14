@@ -1,3 +1,7 @@
+import {
+  reportStorageError,
+  storageWriteSucceeded,
+} from '@/database/storage-health';
 import { BulkEditor } from './bulk-editor';
 import type { BulkBookmarkAction } from '@/database/bookmarks';
 import { useLibraryPreferences } from './use-library-preferences';
@@ -71,7 +75,8 @@ export function BookmarkLibrary({
     setError(undefined);
     try {
       await personalLibraryPreferences.save(patch);
-    } catch {
+    } catch (cause) {
+      reportStorageError(cause);
       setError('Your library view settings could not be saved. Try again.');
     }
   }
@@ -94,6 +99,7 @@ export function BookmarkLibrary({
   }
   async function applyBulk(action: BulkBookmarkAction) {
     await personalBookmarks.bulkUpdate(activeSelected, action);
+    storageWriteSucceeded();
     clearSelection();
     setSelecting(false);
     setBulkEditor(undefined);
@@ -109,6 +115,7 @@ export function BookmarkLibrary({
     try {
       await applyBulk({ kind: 'delete' });
     } catch (cause) {
+      reportStorageError(cause);
       setError(
         cause instanceof Error
           ? cause.message
@@ -135,7 +142,8 @@ export function BookmarkLibrary({
     setError(undefined);
     try {
       await personalBookmarks.remove(bookmark.id);
-    } catch {
+    } catch (cause) {
+      reportStorageError(cause);
       setError('The bookmark could not be deleted. Try again.');
     } finally {
       setDeleting(undefined);

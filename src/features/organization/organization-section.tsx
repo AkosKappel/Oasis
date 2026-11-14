@@ -1,3 +1,4 @@
+import { reportStorageError } from '@/database/storage-health';
 import { useState, type SubmitEvent } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import { descendantFolderIds, folderOptions } from './folder-tree';
@@ -60,6 +61,7 @@ export function OrganizationSection({
       await onSave(name, color, editingId, parentId);
       reset();
     } catch (cause) {
+      reportStorageError(cause);
       setError(
         cause instanceof Error
           ? cause.message
@@ -87,6 +89,7 @@ export function OrganizationSection({
       await onRemove(item.id);
       if (editingId === item.id) reset();
     } catch (cause) {
+      reportStorageError(cause);
       setError(
         cause instanceof Error
           ? cause.message

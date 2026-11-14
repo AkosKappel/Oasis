@@ -151,3 +151,10 @@
 - Add explicit selection mode in grid/list views, bounded to 1,000 bookmarks per operation. Filter changes clear selection; actions only use active visible selections.
 - Move, add/remove tags and soft-delete in one space-scoped transaction after validating every bookmark and assignment. A failure rolls back the whole batch.
 - Keep selections on failure, confirm deletion, and return focus to the persistent selection control after successful modal actions.
+
+## 2026-11-14: non-destructive storage recovery
+
+- Centralize quota, unavailable storage, blocked upgrades and version-change guidance without storing raw errors or clearing the database.
+- Retain the last successful query snapshots and resubscribe failed live queries after an explicit retry. Reopen and verify the existing Personal space; never create a replacement database as recovery.
+- Keep unsaved bookmark form values after write failure. Recognized write errors show guidance for backups/image management; a successful retry signals recovery.
+- Test quota and read failures at the real IndexedDB API boundary, plus database reopen and retry behavior. Recovery links open Library separately to preserve an active capture form.

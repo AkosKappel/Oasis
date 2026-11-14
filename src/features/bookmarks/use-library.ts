@@ -1,8 +1,11 @@
+import { reportStorageError } from '@/database/storage-health';
+import { useStorageHealth } from '@/features/storage/use-storage-health';
 import { useEffect, useState } from 'react';
 import { liveQuery } from 'dexie';
 import { getPersonalLibrary } from '@/database/library';
 
 export function useLibrary() {
+  const { retryVersion } = useStorageHealth();
   const [library, setLibrary] =
     useState<Awaited<ReturnType<typeof getPersonalLibrary>>>();
   const [error, setError] = useState<string>();
@@ -12,12 +15,14 @@ export function useLibrary() {
         setLibrary(items);
         setError(undefined);
       },
-      error: () =>
+      error: (cause) => {
+        reportStorageError(cause, true);
         setError(
-          'Your library could not be loaded. Reload the page to try again.',
-        ),
+          'Your library could not be loaded. Use Retry storage to try again.',
+        );
+      },
     });
     return () => subscription.unsubscribe();
-  }, []);
+  }, [retryVersion]);
   return { library, error };
 }

@@ -1,3 +1,8 @@
+import {
+  reportStorageError,
+  storageWriteSucceeded,
+} from '@/database/storage-health';
+import { useStorageHealth } from '@/features/storage/use-storage-health';
 import { useCallback, useEffect, useState } from 'react';
 import { liveQuery } from 'dexie';
 import { applyAppearance } from './apply-appearance';
@@ -9,6 +14,7 @@ import {
 } from '@/database/appearance';
 
 export function useAppearance(preview?: Appearance) {
+  const { retryVersion } = useStorageHealth();
   const [appearance, setAppearance] = useState(defaultAppearance);
   const [error, setError] = useState<string>();
   useEffect(() => {
@@ -17,13 +23,15 @@ export function useAppearance(preview?: Appearance) {
         setAppearance(value);
         setError(undefined);
       },
-      error: () =>
+      error: (cause) => {
+        reportStorageError(cause, true);
         setError(
-          'Appearance settings could not be loaded. Reload to try again.',
-        ),
+          'Appearance settings could not be loaded. Use Retry storage to try again.',
+        );
+      },
     });
     return () => subscription.unsubscribe();
-  }, []);
+  }, [retryVersion]);
   const effective = preview ?? appearance;
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)');
@@ -36,6 +44,7 @@ export function useAppearance(preview?: Appearance) {
     const values = validateAppearance(input);
     await personalAppearance.save(values);
     setAppearance(values);
+    storageWriteSucceeded();
   }, []);
   return { appearance, error, saveAppearance };
 }

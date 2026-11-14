@@ -1,3 +1,4 @@
+import { StorageRecovery } from '@/features/storage/storage-recovery';
 import type { Appearance } from '@/database/appearance';
 import { useEffect, useState } from 'react';
 import { BookmarkLibrary } from '@/features/bookmarks/bookmark-library';
@@ -39,6 +40,7 @@ export function App() {
   }, []);
   return (
     <>
+      <StorageRecovery onManageImages={() => setAlbumsOpen(true)} />
       {route.split('?')[0] === '#library' ? (
         <BookmarkLibrary
           key={route}
