@@ -49,3 +49,7 @@ Dexie v2 adds a `preferences` table without changing library records. The appear
 `createBookmarkSearch` parses text and operators once per query and caches normalized fields and bounded word comparisons for that query. `filterBookmarks` intersects organization filters with search and returns stable relevance ordering. Library and the palette use the same helper; all matching runs locally.
 
 Folder path and descendant helpers are shared by management, assignment, cards, filters and search. Folder filter counts include descendants; hierarchy uses the existing v1 `parentId` field.
+
+## Browser bookmark transfer
+
+The browser-only parser in `src/features/transfer` converts an inert HTML template into a typed import plan. `src/database/bookmark-html.ts` validates folder references and limits, maps source folders to active Personal-space records, deduplicates exact URLs within folders and commits additions atomically. Export validates the library graph before serializing escaped Netscape HTML. JSON and HTML controls share the Backup and restore dialog.

@@ -71,3 +71,12 @@
 - Show full paths in management, bookmark assignment, cards and filters. A selected folder includes its descendants and its count aggregates their bookmarks. `folder:` accepts a name or full path and includes descendants too.
 - Move folders with the parent selector in the edit form. Repository transactions validate ancestor ownership, active records, sibling collisions and cycles, while preserving folder IDs and bookmark assignments.
 - Reject deletion of folders with active children. Deleting a leaf keeps its bookmarks and makes them Unorganized, preserving the existing behavior.
+
+## 2026-11-14: browser bookmark HTML transfer
+
+- Import/export Netscape bookmark HTML from a file without requesting the browser bookmarks permission. Parse imported markup in an inert template that is never attached to the page.
+- Preview folder and valid-link counts; skip malformed, non-HTTP(S) and credential-bearing links. Invalid folder structure or names stop the file before any writes.
+- Merge folders by case-insensitive sibling name and parent path. Skip an exact normalized URL already in the same folder, including duplicates within the file; keep query strings and fragments distinct and preserve existing records unchanged.
+- Validate the plan before writing, then create missing folders and bookmarks in one space-scoped Dexie transaction. Imports never move or delete existing records and do not revive tombstones.
+- Support names, URLs, descriptions, folder hierarchy and creation dates. HTML is not a full Oasis backup: tags, favorite status and notes use JSON. Escape all exported text and attributes.
+- Limit HTML imports to 10 MB, 10,000 items and 32 folder levels, with a markup-complexity guard before parsing. HTML export rejects deeper structures; JSON remains the path for deeper libraries while streaming transfer is deferred.

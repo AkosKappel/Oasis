@@ -23,7 +23,11 @@ pnpm test:e2e    # Build and test the actual extension in Chromium
 
 ## Scope
 
-A minimal new-tab home with a clock, date and favorite links, plus a separate bookmark library with folders, colored tags and filtering. Use Ctrl/Cmd+K to search bookmarks and navigate. The toolbar popup saves the current page to your library. Versioned JSON backup and restore keeps bookmarks, folders and tags portable. All data stays in IndexedDB on the device; there is no backend, account or analytics. Planned work is tracked in the local `BACKLOG.md`, the full product vision in the blueprint below.
+A minimal new-tab home with a clock, date, favorite links and appearance controls. Choose system, light or dark theme, an accent color, clock format and which home elements to show. The separate bookmark library supports nested folders, colored tags and ranked search with typo tolerance. Use Ctrl/Cmd+K to search and navigate; filter with `tag:`, `folder:`, `domain:` or `is:favorite`, and quote names containing spaces.
+
+The toolbar popup saves the current page to your library. Oasis JSON backup preserves bookmarks, folders, tags, favorites and notes. Browser bookmark HTML import/export preserves folder hierarchy, titles, URLs and descriptions; import previews valid records, skips unsafe links and merges exact URLs within each folder. Appearance preferences are device-local and excluded from backups.
+
+Data stays on the device in IndexedDB; there is no backend, account or analytics. Planned work is tracked in the local `BACKLOG.md`, the full product vision in the blueprint below.
 
 ## Documentation
 
