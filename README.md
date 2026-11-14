@@ -4,7 +4,7 @@ Your personal space on the web. A local-first browser extension combining a new-
 
 ## Development
 
-Use Node.js 22.12+ (or a newer supported LTS) and pnpm 12.18.0.
+Use Node.js 24 and pnpm 12.
 
 ```sh
 pnpm install
