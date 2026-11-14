@@ -35,3 +35,4 @@ The manifest declares no permissions, background worker, content scripts or netw
 
 - New tabs open Home; `#library` opens bookmark management. Home reads the same live library query for favorites and passes searches through the hash query string.
 - The command palette shares the library live query and filter helper. Its native modal keeps keyboard focus inside search and restores the previous focused element when closed.
+- `src/database/backup.ts` validates and exports active Personal-space records. Restore checks the merged graph inside a write transaction, preserves existing active IDs and adds only missing records. It never removes records or revives tombstones.

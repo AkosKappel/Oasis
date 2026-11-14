@@ -1,3 +1,4 @@
+import { BackupManager } from '@/features/backup/backup-manager';
 import { BookmarkCard } from './bookmark-card';
 import { useState } from 'react';
 import {
@@ -23,6 +24,7 @@ export function BookmarkLibrary({
 }) {
   const { library, error: loadError } = useLibrary();
   const { bookmarks, folders = [], tags = [] } = library ?? {};
+  const [backupOpen, setBackupOpen] = useState(false);
   const [organizationOpen, setOrganizationOpen] = useState(false);
   const [folderFilter, setFolderFilter] = useState('');
   const [tagFilter, setTagFilter] = useState('');
@@ -68,6 +70,7 @@ export function BookmarkLibrary({
 
   return (
     <div className="min-h-screen">
+      {backupOpen && <BackupManager onClose={() => setBackupOpen(false)} />}
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 sm:px-10">
           <a
@@ -100,6 +103,9 @@ export function BookmarkLibrary({
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => setBackupOpen(true)}>
+              Backup and restore
+            </Button>
             <Button
               variant="outline"
               onClick={() => setOrganizationOpen(true)}

@@ -37,3 +37,10 @@
 - Ctrl/Cmd+K opens a native modal search dialog on Home and Library. Arrow keys select, Enter opens, and Escape restores focus.
 - Reuse the existing local substring matching across titles, URLs, descriptions, folders and tags. Fuzzy search and operators remain S-01; no search dependency is needed for this increment.
 - Limit displayed bookmarks to 20 and include Home and Library navigation actions. Opening a result uses the current tab, matching new-tab launch behavior.
+
+## 2026-11-14: portable Personal-space backups
+
+- Export versioned Oasis JSON containing active bookmarks, folders and tags, including stable IDs and metadata. Deleted records, settings and other spaces are excluded.
+- Restore adds missing records and keeps existing active records with the same ID unchanged. IDs owned by another space or by a deleted record stop the restore; restoring deleted IDs requires a fresh browser profile.
+- Validate the complete file and the resulting merged library, including unique names, ownership, references, safe bookmark URLs and folder cycles. Commit all additions in one Dexie transaction or roll them all back.
+- Limit import files to 10 MB. Preview counts before the explicit Restore action. Browser bookmark HTML is a separate B-06 feature.
