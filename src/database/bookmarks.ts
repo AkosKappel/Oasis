@@ -1,11 +1,14 @@
 import { db, type OasisDatabase } from './schema';
 import type { Bookmark } from '@/types/entities';
+import { requireOwnedRecord, requireSpace } from './records';
 
 export interface BookmarkInput {
   title: string;
   url: string;
   description: string;
   isFavorite: boolean;
+  folderId?: string;
+  tags?: string[];
 }
 
 export function validateBookmark(input: BookmarkInput): BookmarkInput {
@@ -28,6 +31,10 @@ export function validateBookmark(input: BookmarkInput): BookmarkInput {
     url: url.href,
     description: input.description.trim(),
     isFavorite: input.isFavorite,
+    ...(input.folderId !== undefined
+      ? { folderId: input.folderId.trim() || undefined }
+      : {}),
+    ...(input.tags !== undefined ? { tags: [...new Set(input.tags)] } : {}),
   };
 }
 
@@ -35,25 +42,9 @@ export function createBookmarkRepository(
   spaceId: string,
   database: OasisDatabase = db,
 ) {
-  async function requireSpace() {
-    const space = await database.spaces.get(spaceId);
-    if (!space || space.deletedAt !== undefined)
-      throw new Error('This space is unavailable.');
-  }
-  async function requireBookmark(id: string) {
-    const bookmark = await database.bookmarks.get(id);
-    if (
-      !bookmark ||
-      bookmark.spaceId !== spaceId ||
-      bookmark.deletedAt !== undefined
-    ) {
-      throw new Error('This bookmark is no longer available.');
-    }
-    return bookmark;
-  }
   return {
     async list() {
-      await requireSpace();
+      await requireSpace(database, spaceId);
       return database.bookmarks
         .where('spaceId')
         .equals(spaceId)
@@ -67,11 +58,29 @@ export function createBookmarkRepository(
         'rw',
         database.spaces,
         database.bookmarks,
+        database.folders,
+        database.tags,
         async () => {
-          await requireSpace();
+          await requireSpace(database, spaceId);
+          if (values.folderId)
+            await requireOwnedRecord(
+              database.folders,
+              values.folderId,
+              spaceId,
+              'folder',
+            );
+          if (values.tags) {
+            for (const tagId of values.tags)
+              await requireOwnedRecord(database.tags, tagId, spaceId, 'tag');
+          }
           const now = Date.now();
           if (id) {
-            await requireBookmark(id);
+            await requireOwnedRecord(
+              database.bookmarks,
+              id,
+              spaceId,
+              'bookmark',
+            );
             await database.bookmarks.update(id, { ...values, updatedAt: now });
             return id;
           }
@@ -79,7 +88,7 @@ export function createBookmarkRepository(
             ...values,
             id: crypto.randomUUID(),
             spaceId,
-            tags: [],
+            tags: values.tags ?? [],
             isPinned: false,
             sortOrder: now,
             createdAt: now,
@@ -97,8 +106,8 @@ export function createBookmarkRepository(
         database.spaces,
         database.bookmarks,
         async () => {
-          await requireSpace();
-          await requireBookmark(id);
+          await requireSpace(database, spaceId);
+          await requireOwnedRecord(database.bookmarks, id, spaceId, 'bookmark');
           const now = Date.now();
           await database.bookmarks.update(id, {
             deletedAt: now,

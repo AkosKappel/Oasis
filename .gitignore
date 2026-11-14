@@ -9,3 +9,6 @@ coverage/
 .DS_Store
 test-results/
 playwright-report/
+
+# Local project planning
+BACKLOG.md

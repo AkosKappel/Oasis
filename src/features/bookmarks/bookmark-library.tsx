@@ -11,22 +11,42 @@ import { Button } from '@/components/ui/button';
 import { personalBookmarks } from '@/database/bookmarks';
 import type { Bookmark } from '@/types/entities';
 import { BookmarkEditor } from './bookmark-editor';
-import { useBookmarks } from './use-bookmarks';
+import { useLibrary } from './use-library';
+import { filterBookmarks } from './filter-bookmarks';
+import { OrganizationManager } from '@/features/organization/organization-manager';
+import { OrganizationFilters } from '@/features/organization/organization-filters';
 
 export function BookmarkLibrary() {
-  const { bookmarks, error: loadError } = useBookmarks();
+  const { library, error: loadError } = useLibrary();
+  const { bookmarks, folders = [], tags = [] } = library ?? {};
+  const [organizationOpen, setOrganizationOpen] = useState(false);
+  const [folderFilter, setFolderFilter] = useState('');
+  const [tagFilter, setTagFilter] = useState('');
+  const folderId =
+    folderFilter === 'unorganized' ||
+    folders.some((folder) => folder.id === folderFilter)
+      ? folderFilter
+      : '';
+  const tagId =
+    tagFilter === 'untagged' || tags.some((tag) => tag.id === tagFilter)
+      ? tagFilter
+      : '';
   const [editor, setEditor] = useState<{ bookmark?: Bookmark }>();
   const [query, setQuery] = useState('');
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [error, setError] = useState<string>();
   const [deleting, setDeleting] = useState<string>();
-  const visible = bookmarks?.filter(
-    (bookmark) =>
-      (!favoritesOnly || bookmark.isFavorite) &&
-      `${bookmark.title} ${bookmark.url} ${bookmark.description ?? ''}`
-        .toLowerCase()
-        .includes(query.trim().toLowerCase()),
-  );
+  const visible = bookmarks
+    ? filterBookmarks(bookmarks, folders, tags, {
+        query,
+        favoritesOnly,
+        folderId,
+        tagId,
+      })
+    : undefined;
+  const organizationFiltered = !!folderId || !!tagId;
+  const folderMap = new Map(folders.map((folder) => [folder.id, folder]));
+  const tagMap = new Map(tags.map((tag) => [tag.id, tag]));
 
   async function remove(bookmark: Bookmark) {
     if (!window.confirm(`Delete “${bookmark.title}” from your library?`))
@@ -75,13 +95,22 @@ export function BookmarkLibrary() {
               Good places on the web, all in one place.
             </p>
           </div>
-          <Button
-            onClick={() => setEditor({})}
-            disabled={!bookmarks || !!loadError}
-          >
-            <Plus className="size-4" aria-hidden="true" />
-            Add bookmark
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setOrganizationOpen(true)}
+              disabled={!bookmarks || !!loadError}
+            >
+              Folders and tags
+            </Button>
+            <Button
+              onClick={() => setEditor({})}
+              disabled={!bookmarks || !!loadError}
+            >
+              <Plus className="size-4" aria-hidden="true" />
+              Add bookmark
+            </Button>
+          </div>
         </div>
         <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
           <div className="flex gap-2" aria-label="Library filters">
@@ -119,6 +148,17 @@ export function BookmarkLibrary() {
             />
           </label>
         </div>
+        {bookmarks && (
+          <OrganizationFilters
+            bookmarks={bookmarks}
+            folders={folders}
+            tags={tags}
+            folderId={folderId}
+            tagId={tagId}
+            onFolderChange={setFolderFilter}
+            onTagChange={setTagFilter}
+          />
+        )}
         {(loadError || error) && (
           <p
             role="alert"
@@ -142,18 +182,22 @@ export function BookmarkLibrary() {
             <h2 className="text-xl font-medium">
               {query
                 ? 'No matching bookmarks'
-                : favoritesOnly
-                  ? 'Your favorites belong here'
-                  : 'Make room for your next discovery'}
+                : organizationFiltered
+                  ? 'No bookmarks in this selection'
+                  : favoritesOnly
+                    ? 'Your favorites belong here'
+                    : 'Make room for your next discovery'}
             </h2>
             <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
               {query
-                ? 'Try another title, URL, or description.'
-                : favoritesOnly
-                  ? 'Choose “Add to favorites” when saving or editing a bookmark.'
-                  : 'Save a useful tool, a favorite read, or somewhere you want to return to.'}
+                ? 'Try another title, URL, description, folder, or tag.'
+                : organizationFiltered
+                  ? 'Choose another folder or tag, or clear your filters.'
+                  : favoritesOnly
+                    ? 'Choose “Add to favorites” when saving or editing a bookmark.'
+                    : 'Save a useful tool, a favorite read, or somewhere you want to return to.'}
             </p>
-            {!query && !favoritesOnly && (
+            {!query && !favoritesOnly && !organizationFiltered && (
               <Button className="mt-6" onClick={() => setEditor({})}>
                 Save your first bookmark
               </Button>
@@ -166,6 +210,11 @@ export function BookmarkLibrary() {
               <BookmarkCard
                 key={bookmark.id}
                 bookmark={bookmark}
+                folder={folderMap.get(bookmark.folderId ?? '')}
+                tags={bookmark.tags.flatMap((id) => {
+                  const tag = tagMap.get(id);
+                  return tag ? [tag] : [];
+                })}
                 deleting={!!deleting}
                 onEdit={(bookmark) => setEditor({ bookmark })}
                 onDelete={(bookmark) => void remove(bookmark)}
@@ -177,9 +226,19 @@ export function BookmarkLibrary() {
           Saved on this device. Always your space.
         </p>
       </main>
+      {organizationOpen && (
+        <OrganizationManager
+          folders={folders}
+          tags={tags}
+          onClose={() => setOrganizationOpen(false)}
+        />
+      )}
       {editor && (
         <BookmarkEditor
           bookmark={editor.bookmark}
+          folders={folders}
+          tags={tags}
+          defaultFolderId={folderId === 'unorganized' ? undefined : folderId}
           onClose={() => setEditor(undefined)}
         />
       )}

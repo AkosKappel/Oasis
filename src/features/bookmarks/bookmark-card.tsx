@@ -1,10 +1,12 @@
 import { Pencil, Star, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import type { Bookmark } from '@/types/entities';
+import type { Bookmark, Folder, Tag } from '@/types/entities';
 
 interface BookmarkCardProps {
   bookmark: Bookmark;
   deleting: boolean;
+  folder?: Folder;
+  tags: Tag[];
   onEdit: (bookmark: Bookmark) => void;
   onDelete: (bookmark: Bookmark) => void;
 }
@@ -12,6 +14,8 @@ interface BookmarkCardProps {
 export function BookmarkCard({
   bookmark,
   deleting,
+  folder,
+  tags,
   onEdit,
   onDelete,
 }: BookmarkCardProps) {
@@ -48,6 +52,28 @@ export function BookmarkCard({
         <p className="mt-3 line-clamp-3 break-words text-sm leading-relaxed text-muted-foreground">
           {bookmark.description}
         </p>
+      )}
+      {(folder || tags.length > 0) && (
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          {folder && (
+            <span className="max-w-full break-words rounded border border-border px-2 py-1">
+              {folder.name}
+            </span>
+          )}
+          {tags.map((tag) => (
+            <span
+              key={tag.id}
+              className="flex max-w-full items-center gap-1 rounded-full border border-border px-2 py-1"
+            >
+              <span
+                className="size-2 shrink-0 rounded-full border border-black/15"
+                style={{ backgroundColor: tag.color }}
+                aria-hidden="true"
+              />
+              <span className="min-w-0 break-words">{tag.name}</span>
+            </span>
+          ))}
+        </div>
       )}
       <div className="mt-auto flex justify-end gap-1 pt-5">
         <Button

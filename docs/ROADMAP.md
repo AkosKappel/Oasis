@@ -13,10 +13,11 @@
 - [x] Validated data access, bookmark creation, editing, and soft deletion.
 - [x] Bookmark cards, favorites, basic text filtering, and opening links in new tabs.
 - [x] Reactive local queries, loading and error states, database tests, and Chromium interaction test.
-- [ ] Folders and tags.
+- [x] Flat folders, colored tags, assignment, combined filters and counts.
+- [x] Atomic organization deletion that preserves bookmarks, with database and extension tests.
 - [ ] Import/export.
 
-Decide folder deletion behavior and the initial MVP scope before expanding the schema.
+Deleting a folder moves its bookmarks to Unorganized. Deleting a tag removes its assignments. Nested folders, drag-and-drop, and custom folder icons remain future work.
 
 ## Later
 

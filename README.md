@@ -23,7 +23,7 @@ pnpm test:e2e    # Build and test the actual extension in Chromium
 
 ## Current scope
 
-The foundation includes WXT, React, strict TypeScript, Tailwind CSS, shadcn/ui configuration and a Button primitive, Lucide icons, and a versioned Dexie schema. The new-tab page provides a bookmark library with add, edit, delete, favorites, and basic text filtering. Bookmarks open in a new tab. Folders, tags, import/export, and dashboard widgets are not implemented yet.
+The foundation includes WXT, React, strict TypeScript, Tailwind CSS, shadcn/ui configuration and a Button primitive, Lucide icons, and a versioned Dexie schema. The new-tab page provides a bookmark library with add, edit, delete, favorites, and basic text filtering. Bookmarks open in a new tab. Folders and colored tags support creation, renaming, deletion, bookmark assignment, and combined filters. Folder/tag counts show totals across the library. Text filtering also matches folder and tag names. Import/export, nested folders, and dashboard widgets are not implemented yet.
 
 The database creates a Personal space on first open. All data stays in IndexedDB; no backend, analytics, or account is configured. Cloud synchronization remains an open decision.
 

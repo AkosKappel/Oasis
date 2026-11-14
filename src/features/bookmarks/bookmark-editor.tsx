@@ -1,14 +1,23 @@
 import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { personalBookmarks } from '@/database/bookmarks';
-import type { Bookmark } from '@/types/entities';
+import type { Bookmark, Folder, Tag } from '@/types/entities';
 import { Button } from '@/components/ui/button';
 
 interface BookmarkEditorProps {
   bookmark?: Bookmark;
   onClose: () => void;
+  folders: Folder[];
+  tags: Tag[];
+  defaultFolderId?: string;
 }
 
-export function BookmarkEditor({ bookmark, onClose }: BookmarkEditorProps) {
+export function BookmarkEditor({
+  bookmark,
+  folders,
+  tags,
+  defaultFolderId,
+  onClose,
+}: BookmarkEditorProps) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState<string>();
   const [saving, setSaving] = useState(false);
@@ -29,6 +38,8 @@ export function BookmarkEditor({ bookmark, onClose }: BookmarkEditorProps) {
           url: String(data.get('url') ?? ''),
           description: String(data.get('description') ?? ''),
           isFavorite: data.get('isFavorite') === 'on',
+          folderId: String(data.get('folderId') ?? ''),
+          tags: data.getAll('tags').map(String),
         },
         bookmark?.id,
       );
@@ -101,6 +112,51 @@ export function BookmarkEditor({ bookmark, onClose }: BookmarkEditorProps) {
               placeholder="What makes this worth saving?"
             />
           </label>
+          <label className="field">
+            Folder
+            <select
+              name="folderId"
+              defaultValue={bookmark?.folderId ?? defaultFolderId ?? ''}
+            >
+              <option value="">Unorganized</option>
+              {folders.map((folder) => (
+                <option key={folder.id} value={folder.id}>
+                  {folder.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <fieldset className="rounded-lg border border-border p-3">
+            <legend className="px-1 text-sm font-medium">Tags</legend>
+            {tags.length ? (
+              <div className="flex flex-wrap gap-x-4 gap-y-3">
+                {tags.map((tag) => (
+                  <label
+                    key={tag.id}
+                    className="flex min-w-0 items-center gap-2 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      name="tags"
+                      value={tag.id}
+                      defaultChecked={bookmark?.tags.includes(tag.id)}
+                      className="size-4 shrink-0 accent-primary"
+                    />
+                    <span
+                      className="size-2 shrink-0 rounded-full border border-black/15"
+                      style={{ backgroundColor: tag.color }}
+                      aria-hidden="true"
+                    />
+                    <span className="break-words">{tag.name}</span>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Create tags in “Folders and tags” to organize your bookmarks.
+              </p>
+            )}
+          </fieldset>
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"

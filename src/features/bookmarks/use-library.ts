@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import { liveQuery } from 'dexie';
-import { personalBookmarks } from '@/database/bookmarks';
-import type { Bookmark } from '@/types/entities';
+import { getPersonalLibrary } from '@/database/library';
 
-export function useBookmarks() {
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>();
+export function useLibrary() {
+  const [library, setLibrary] =
+    useState<Awaited<ReturnType<typeof getPersonalLibrary>>>();
   const [error, setError] = useState<string>();
   useEffect(() => {
-    const subscription = liveQuery(() => personalBookmarks.list()).subscribe({
+    const subscription = liveQuery(getPersonalLibrary).subscribe({
       next: (items) => {
-        setBookmarks(items);
+        setLibrary(items);
         setError(undefined);
       },
       error: () =>
@@ -19,5 +19,5 @@ export function useBookmarks() {
     });
     return () => subscription.unsubscribe();
   }, []);
-  return { bookmarks, error };
+  return { library, error };
 }
