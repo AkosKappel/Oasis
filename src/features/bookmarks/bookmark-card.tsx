@@ -4,6 +4,8 @@ import type { Bookmark, Folder, Tag } from '@/types/entities';
 
 interface BookmarkCardProps {
   compact?: boolean;
+  selected?: boolean;
+  onSelect?: () => void;
   bookmark: Bookmark;
   deleting: boolean;
   folder?: Folder;
@@ -15,6 +17,8 @@ interface BookmarkCardProps {
 export function BookmarkCard({
   bookmark,
   compact = false,
+  selected = false,
+  onSelect,
   deleting,
   folder,
   tags,
@@ -34,12 +38,23 @@ export function BookmarkCard({
       <div
         className={
           compact
-            ? 'hidden shrink-0 flex-col items-center gap-2 sm:flex'
+            ? 'flex shrink-0 flex-col items-center gap-2'
             : 'mb-5 flex items-center justify-between'
         }
       >
+        {onSelect && (
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={selected}
+              onChange={onSelect}
+              className="size-4 accent-primary"
+            />
+            <span className="sr-only">Select {bookmark.title}</span>
+          </label>
+        )}
         <span
-          className="flex size-10 items-center justify-center rounded-lg bg-secondary font-semibold text-secondary-foreground"
+          className={`${compact ? 'hidden sm:flex' : 'flex'} size-10 items-center justify-center rounded-lg bg-secondary font-semibold text-secondary-foreground`}
           aria-hidden="true"
         >
           {bookmark.title.slice(0, 1).toUpperCase()}

@@ -145,3 +145,9 @@
 - Alt+Shift+O opens the same explicit-save editor for the active page. Link capture defaults its title to the destination hostname; users can edit it and assign folders/tags.
 - Pass validated capture data in the extension editor fragment and immediately scrub that fragment from its history entry. Save still goes through the existing transaction-backed bookmark form.
 - Browser-owned context-menu clicks cannot be driven reliably in headless Chromium. Unit tests dispatch registered listeners; browser tests verify the real capture page, persistence, worker manifest and request scrubbing.
+
+## 2026-11-14: bulk bookmark actions
+
+- Add explicit selection mode in grid/list views, bounded to 1,000 bookmarks per operation. Filter changes clear selection; actions only use active visible selections.
+- Move, add/remove tags and soft-delete in one space-scoped transaction after validating every bookmark and assignment. A failure rolls back the whole batch.
+- Keep selections on failure, confirm deletion, and return focus to the persistent selection control after successful modal actions.

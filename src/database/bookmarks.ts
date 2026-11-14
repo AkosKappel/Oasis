@@ -11,6 +11,11 @@ export interface BookmarkInput {
   tags?: string[];
 }
 
+export type BulkBookmarkAction =
+  | { kind: 'move'; folderId?: string }
+  | { kind: 'tags'; tags: string[]; mode: 'add' | 'remove' }
+  | { kind: 'delete' };
+
 export function validateBookmark(input: BookmarkInput): BookmarkInput {
   const title = input.title.trim();
   if (!title) throw new Error('Enter a title for your bookmark.');
@@ -97,6 +102,70 @@ export function createBookmarkRepository(
           };
           await database.bookmarks.add(bookmark);
           return bookmark.id;
+        },
+      );
+    },
+    async bulkUpdate(ids: string[], action: BulkBookmarkAction) {
+      if (
+        !Array.isArray(ids) ||
+        !ids.length ||
+        new Set(ids).size > 1000 ||
+        ids.some((id) => typeof id !== 'string' || !id)
+      )
+        throw new Error('Select between 1 and 1,000 bookmarks.');
+      if (!action || !['move', 'tags', 'delete'].includes(action.kind))
+        throw new Error('Choose a valid bulk action.');
+      if (
+        action.kind === 'tags' &&
+        (!Array.isArray(action.tags) ||
+          !action.tags.length ||
+          action.tags.length > 100 ||
+          !['add', 'remove'].includes(action.mode))
+      )
+        throw new Error('Choose up to 100 tags to add or remove.');
+      return database.transaction(
+        'rw',
+        database.spaces,
+        database.bookmarks,
+        database.folders,
+        database.tags,
+        async () => {
+          await requireSpace(database, spaceId);
+          const bookmarks = await Promise.all(
+            [...new Set(ids)].map((id) =>
+              requireOwnedRecord(database.bookmarks, id, spaceId, 'bookmark'),
+            ),
+          );
+          if (action.kind === 'move' && action.folderId)
+            await requireOwnedRecord(
+              database.folders,
+              action.folderId,
+              spaceId,
+              'folder',
+            );
+          if (action.kind === 'tags')
+            for (const id of action.tags)
+              await requireOwnedRecord(database.tags, id, spaceId, 'tag');
+          const now = Date.now();
+          await database.bookmarks.bulkPut(
+            bookmarks.map((bookmark) => ({
+              ...bookmark,
+              updatedAt: now,
+              ...(action.kind === 'delete'
+                ? { deletedAt: now }
+                : action.kind === 'move'
+                  ? { folderId: action.folderId || undefined }
+                  : {
+                      tags:
+                        action.mode === 'add'
+                          ? [...new Set([...bookmark.tags, ...action.tags])]
+                          : bookmark.tags.filter(
+                              (id) => !action.tags.includes(id),
+                            ),
+                    }),
+            })),
+          );
+          return bookmarks.length;
         },
       );
     },

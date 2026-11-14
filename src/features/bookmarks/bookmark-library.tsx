@@ -1,3 +1,5 @@
+import { BulkEditor } from './bulk-editor';
+import type { BulkBookmarkAction } from '@/database/bookmarks';
 import { useLibraryPreferences } from './use-library-preferences';
 import { sortBookmarks } from './sort-bookmarks';
 import {
@@ -32,6 +34,10 @@ export function BookmarkLibrary({
   const { preferences, error: preferencesError } = useLibraryPreferences();
   const { library, error: loadError } = useLibrary();
   const { bookmarks, folders = [], tags = [] } = library ?? {};
+  const [selecting, setSelecting] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(() => new Set());
+  const [bulkEditor, setBulkEditor] = useState<'move' | 'tags'>();
+  const [bulkBusy, setBulkBusy] = useState(false);
   const [backupOpen, setBackupOpen] = useState(false);
   const [organizationOpen, setOrganizationOpen] = useState(false);
   const [folderFilter, setFolderFilter] = useState('');
@@ -67,6 +73,49 @@ export function BookmarkLibrary({
       await personalLibraryPreferences.save(patch);
     } catch {
       setError('Your library view settings could not be saved. Try again.');
+    }
+  }
+  const activeSelected =
+    visible
+      ?.filter((bookmark) => selected.has(bookmark.id))
+      .map((bookmark) => bookmark.id) ?? [];
+  function clearSelection() {
+    setSelected(new Set());
+  }
+  function toggleSelection(id: string) {
+    const next = new Set(selected);
+    if (next.has(id)) next.delete(id);
+    else if (next.size < 1000) next.add(id);
+    else {
+      setError('Select up to 1,000 bookmarks at a time.');
+      return;
+    }
+    setSelected(next);
+  }
+  async function applyBulk(action: BulkBookmarkAction) {
+    await personalBookmarks.bulkUpdate(activeSelected, action);
+    clearSelection();
+    setSelecting(false);
+    setBulkEditor(undefined);
+    requestAnimationFrame(() =>
+      document.getElementById('bookmark-selection-toggle')?.focus(),
+    );
+  }
+  async function deleteSelected() {
+    if (!window.confirm(`Delete ${activeSelected.length} selected bookmarks?`))
+      return;
+    setBulkBusy(true);
+    setError(undefined);
+    try {
+      await applyBulk({ kind: 'delete' });
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'The selected bookmarks could not be deleted.',
+      );
+    } finally {
+      setBulkBusy(false);
     }
   }
   const organizationFiltered = !!folderId || !!tagId;
@@ -151,7 +200,10 @@ export function BookmarkLibrary({
           <div className="flex gap-2" aria-label="Library filters">
             <Button
               variant={favoritesOnly ? 'outline' : 'default'}
-              onClick={() => setFavoritesOnly(false)}
+              onClick={() => {
+                setFavoritesOnly(false);
+                clearSelection();
+              }}
               aria-pressed={!favoritesOnly}
             >
               All bookmarks{' '}
@@ -161,7 +213,10 @@ export function BookmarkLibrary({
             </Button>
             <Button
               variant={favoritesOnly ? 'default' : 'outline'}
-              onClick={() => setFavoritesOnly(true)}
+              onClick={() => {
+                setFavoritesOnly(true);
+                clearSelection();
+              }}
               aria-pressed={favoritesOnly}
             >
               <Star className="size-4" aria-hidden="true" />
@@ -177,7 +232,10 @@ export function BookmarkLibrary({
             <input
               type="search"
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                clearSelection();
+              }}
               placeholder="Search or use tag:, folder:, domain:"
               aria-describedby="library-search-help"
               className="w-full rounded-md border border-border bg-surface/60 py-2 pl-9 pr-3 text-sm"
@@ -200,8 +258,14 @@ export function BookmarkLibrary({
             tags={tags}
             folderId={folderId}
             tagId={tagId}
-            onFolderChange={setFolderFilter}
-            onTagChange={setTagFilter}
+            onFolderChange={(value) => {
+              setFolderFilter(value);
+              clearSelection();
+            }}
+            onTagChange={(value) => {
+              setTagFilter(value);
+              clearSelection();
+            }}
           />
         )}
         <div className="mt-5 flex flex-wrap items-end justify-between gap-3">
@@ -241,6 +305,89 @@ export function BookmarkLibrary({
             </select>
           </label>
         </div>
+        <div className="mt-4">
+          <Button
+            id="bookmark-selection-toggle"
+            variant="outline"
+            size="sm"
+            disabled={!bookmarks?.length || bulkBusy}
+            onClick={() => {
+              setSelecting(!selecting);
+              clearSelection();
+            }}
+          >
+            {selecting ? 'Cancel selection' : 'Select bookmarks'}
+          </Button>
+        </div>
+        {selecting && (
+          <section
+            aria-label="Bulk actions"
+            className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface p-3"
+          >
+            <p role="status" className="mr-2 text-sm">
+              Selected: {activeSelected.length}
+            </p>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={bulkBusy}
+              onClick={() =>
+                setSelected(
+                  new Set(
+                    visible?.slice(0, 1000).map((bookmark) => bookmark.id),
+                  ),
+                )
+              }
+            >
+              Select visible
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={bulkBusy}
+              onClick={clearSelection}
+            >
+              Clear selection
+            </Button>
+            <Button
+              size="sm"
+              disabled={!activeSelected.length || bulkBusy}
+              onClick={() => setBulkEditor('move')}
+            >
+              Move selected
+            </Button>
+            <Button
+              size="sm"
+              disabled={!activeSelected.length || bulkBusy}
+              onClick={() => setBulkEditor('tags')}
+            >
+              Tag selected
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={!activeSelected.length || bulkBusy}
+              onClick={() => void deleteSelected()}
+            >
+              Delete selected
+            </Button>
+            {(visible?.length ?? 0) > 1000 && (
+              <p className="w-full text-xs text-muted-foreground">
+                Select visible selects the first 1,000 results.
+              </p>
+            )}
+          </section>
+        )}
+        {bulkEditor && (
+          <BulkEditor
+            kind={bulkEditor}
+            count={activeSelected.length}
+            folders={folders}
+            tags={tags}
+            onApply={applyBulk}
+            onClose={() => setBulkEditor(undefined)}
+          />
+        )}
         {(loadError || error || preferencesError) && (
           <p
             role="alert"
@@ -298,6 +445,10 @@ export function BookmarkLibrary({
             {visible.map((bookmark) => (
               <BookmarkCard
                 key={bookmark.id}
+                selected={selected.has(bookmark.id)}
+                onSelect={
+                  selecting ? () => toggleSelection(bookmark.id) : undefined
+                }
                 compact={preferences.view === 'list'}
                 bookmark={bookmark}
                 folder={folderMap.get(bookmark.folderId ?? '')}
