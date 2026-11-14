@@ -195,3 +195,9 @@
 - Group safe HTTP(S) URLs using URL parsing only. Normalize host case/default ports through the browser parser; preserve protocol, path slashes, query order/values and fragments. Do not strip tracking parameters or merge content heuristically.
 - Review the whole Library with a chosen keeper and explicitly selected copies. Show folders, favorites, descriptions, tag counts and notes. Never merge metadata or delete automatically.
 - Recheck ownership, URL equality and reviewed timestamps in one transaction before soft-deleting copies. A concurrent edit or storage failure leaves the batch unchanged. Keep selections on failure and return focus to Done after success. No schema change is needed.
+
+## 2026-11-14: combined dashboard verification
+
+- The new inline focus buttons need their own readable fills over photos. Set dark primary text and a dark translucent outline-button fill within photo Home; portal dialogs and panels retain the chosen app theme.
+- Keep countdown deadline labels consistent with the chosen clock format.
+- Verify the combined photo-backed daily focus, clocks/countdown, pinned Links and mocked weather, then enter/exit focus mode and check mobile width. Check button contrast against the brightest photo allowed by dimming. Provider permission acceptance remains outside headless automation.

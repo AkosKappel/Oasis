@@ -100,16 +100,21 @@
 }
 
 .home-photo {
+  --background: rgb(10 20 18 / 70%);
   --foreground: white;
   --muted-foreground: white;
   --border: rgb(255 255 255 / 45%);
   --primary: white;
+  --primary-foreground: #0a1412;
   --primary-content: white;
   --ring: white;
   --surface: rgb(10 20 18);
   color: white;
   color-scheme: dark;
   text-shadow: 0 1px 3px rgb(0 0 0 / 45%);
+}
+.home-photo [data-slot='button'] {
+  text-shadow: none;
 }
 .home-photo input::placeholder {
   color: rgb(255 255 255 / 85%);

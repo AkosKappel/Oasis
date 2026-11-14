@@ -55,6 +55,7 @@ export function HomeWidgets({
                   day: 'numeric',
                   hour: '2-digit',
                   minute: '2-digit',
+                  ...(clock === 'system' ? {} : { hour12: clock === '12' }),
                 })}
               </p>
             </>
