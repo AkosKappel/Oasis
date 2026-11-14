@@ -17,7 +17,7 @@ export const defaultAppearance: Appearance = {
   accent: 'forest',
   clock: 'system',
   showDate: true,
-  showFavorites: true,
+  showFavorites: false,
 };
 export function validateAppearance(value: Appearance): Appearance {
   if (

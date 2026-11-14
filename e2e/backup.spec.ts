@@ -89,11 +89,13 @@ test('validates, restores and downloads a portable library backup', async ({
     page.getByRole('link', { name: /Imported example/ }),
   ).toBeVisible();
   await page.getByRole('link', { name: 'Oasis home' }).click();
+  await page.getByRole('button', { name: 'Links', exact: true }).click();
   await expect(
     page
-      .getByRole('navigation', { name: 'Favorite bookmarks' })
+      .getByRole('dialog', { name: 'Links', exact: true })
       .getByRole('link', { name: /Imported example/ }),
   ).toBeVisible();
+  await page.keyboard.press('Escape');
   await page.keyboard.press('Control+k');
   await page
     .getByRole('combobox', { name: 'Search bookmarks and actions' })

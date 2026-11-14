@@ -105,3 +105,17 @@
 .home-photo input::placeholder {
   color: rgb(255 255 255 / 85%);
 }
+
+.links-panel {
+  position: fixed;
+  inset: 4.5rem auto auto 1.5rem;
+  margin: 0;
+  width: min(24rem, calc(100vw - 3rem));
+  max-height: calc(100dvh - 6rem);
+  overflow-y: auto;
+}
+@media (min-width: 640px) {
+  .links-panel {
+    left: 2.5rem;
+  }
+}

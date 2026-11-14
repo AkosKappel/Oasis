@@ -20,7 +20,7 @@ test('persists appearance, synchronizes tabs and follows system theme', async ({
     .getByRole('combobox', { name: 'Clock format', exact: true })
     .selectOption('24');
   await page.getByLabel('Show date', { exact: true }).uncheck();
-  await page.getByLabel('Show favorites', { exact: true }).uncheck();
+  await page.getByLabel('Show shortcut row', { exact: true }).uncheck();
   await page.getByRole('button', { name: 'Save settings' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(second.locator('html')).toHaveAttribute('data-accent', 'ocean');
@@ -30,7 +30,7 @@ test('persists appearance, synchronizes tabs and follows system theme', async ({
   await page.getByRole('button', { name: 'Appearance', exact: true }).click();
   await expect(page.getByLabel('Show date', { exact: true })).not.toBeChecked();
   await expect(
-    page.getByLabel('Show favorites', { exact: true }),
+    page.getByLabel('Show shortcut row', { exact: true }),
   ).not.toBeChecked();
   await page
     .getByRole('combobox', { name: 'Theme', exact: true })

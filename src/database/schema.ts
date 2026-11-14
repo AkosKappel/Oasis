@@ -46,6 +46,14 @@ export class OasisDatabase extends Dexie {
       quoteSettings: 'id, spaceId',
     });
     this.version(5).stores({ libraryPreferences: 'id, spaceId' });
+    this.version(6)
+      .stores({ preferences: 'id, spaceId' })
+      .upgrade((transaction) =>
+        transaction
+          .table('preferences')
+          .toCollection()
+          .modify({ showFavorites: false }),
+      );
     this.on('populate', (transaction) => {
       const now = Date.now();
       return transaction.table('spaces').add({

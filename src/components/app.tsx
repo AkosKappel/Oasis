@@ -18,6 +18,7 @@ export function App() {
     function shortcut(event: KeyboardEvent) {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
+        document.getElementById('home-links')?.hidePopover();
         if (!document.querySelector('dialog[open]')) setSearch({ query: '' });
       }
     }

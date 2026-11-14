@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowUpRight, Library, Search, SlidersHorizontal } from 'lucide-react';
+import { LinksMenu } from '@/features/links/links-menu';
 import { dailyItem } from '@/lib/daily-item';
 import type { Appearance } from '@/database/appearance';
 import { useQuotes } from '@/features/quotes/use-quotes';
@@ -65,9 +66,12 @@ export function Home({
         aria-label="Main navigation"
         className="flex items-center justify-between text-sm"
       >
-        <span className="font-medium tracking-widest text-muted-foreground">
-          oasis
-        </span>
+        <LinksMenu
+          bookmarks={library?.bookmarks}
+          folders={library?.folders ?? []}
+          tags={library?.tags ?? []}
+          error={error}
+        />
         <a
           href="#library"
           className="flex items-center gap-2 rounded-md px-3 py-2 text-muted-foreground hover:text-foreground"

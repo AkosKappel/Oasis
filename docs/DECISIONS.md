@@ -108,3 +108,9 @@
 - Share bookmark content and actions between grid cards and compact rows. Rows retain folder/tag labels, favorite status, creation dates and edit/delete controls, including on small screens.
 - Offer natural name ordering in both directions, newest/oldest ordering and Best match. Best match preserves ranked search and existing recent-first order when the query is empty; explicit ordering is applied after filters.
 - Keep view preferences device-local and outside bookmark archives. Existing databases upgrade without changing media, quotes or library records.
+
+## 2026-11-14: on-demand Home links
+
+- Put Home links in a native auto popover with favorites, all bookmarks, folder selection and the shared local search. Show up to 50 matches and offer Library for the complete result set.
+- Keep the shortcut row optional. Dexie v6 switches existing appearance records to the new off-by-default behavior once, preserving all other preferences; users can re-enable Show shortcut row.
+- Render the nonmodal panel in a body portal to use the app theme independently of photo-background colors. Native dismissal handles Escape and outside clicks, with keyboard search-to-link navigation and focus return.

@@ -65,3 +65,7 @@ Dexie v4 adds `quoteCollections`, `quotes` and `quoteSettings`. The repository o
 ## Library preferences
 
 Dexie v5 adds `libraryPreferences`. Its repository merges partial updates atomically and live queries synchronize tabs. Filtering/search runs before an explicit non-mutating sort; grid and list reuse the bookmark component and actions. Dates outside the browser's supported range display a fallback instead of breaking a row.
+
+## Home links
+
+Home's Links control opens a native nonmodal auto popover, rendered through a body portal. It shares bookmark matching and descendant folder filtering with Library. Dexie v6 makes the old favorites row opt-in while preserving the rest of appearance settings. The panel uses normal app colors even over photo backgrounds.

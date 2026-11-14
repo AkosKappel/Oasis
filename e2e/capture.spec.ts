@@ -73,9 +73,13 @@ test('captures a page into the shared library with folders and tags', async ({
   await page.reload();
   await expect(card).toBeVisible();
   await page.getByRole('link', { name: 'Oasis home' }).click();
+  await page.getByRole('button', { name: 'Links', exact: true }).click();
   await expect(
-    page.getByRole('link', { name: /Captured example/ }),
+    page
+      .getByRole('dialog', { name: 'Links', exact: true })
+      .getByRole('link', { name: /Captured example/ }),
   ).toBeVisible();
+  await page.keyboard.press('Escape');
   await page.keyboard.press('Control+k');
   const search = page.getByRole('combobox', {
     name: 'Search bookmarks and actions',
