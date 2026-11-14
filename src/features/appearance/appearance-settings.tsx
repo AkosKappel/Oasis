@@ -17,6 +17,15 @@ export function AppearanceSettings({
 }) {
   const previousFocus = useRef(document.activeElement);
   const dialog = useRef<HTMLDialogElement>(null);
+  const [systemDark, setSystemDark] = useState(
+    () => window.matchMedia('(prefers-color-scheme: dark)').matches,
+  );
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const update = () => setSystemDark(media.matches);
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
   const [draft, setDraft] = useState(appearance);
   const [primaryInput, setPrimaryInput] = useState<string>();
   const [secondaryInput, setSecondaryInput] = useState<string>();
@@ -30,10 +39,7 @@ export function AppearanceSettings({
         previous.focus();
     };
   }, []);
-  const dark =
-    draft.theme === 'system'
-      ? window.matchMedia('(prefers-color-scheme: dark)').matches
-      : draft.theme === 'dark';
+  const dark = draft.theme === 'system' ? systemDark : draft.theme === 'dark';
   const colors = appearanceColors(draft, dark);
   function update(patch: Partial<Appearance>) {
     const next = { ...draft, ...patch };
@@ -162,7 +168,11 @@ export function AppearanceSettings({
             highlights. Text and focus colors adjust automatically for
             readability.
           </p>
-          <div aria-label="Color preview" className="flex flex-wrap gap-2">
+          <div
+            role="group"
+            aria-label="Color preview"
+            className="flex flex-wrap gap-2"
+          >
             <span className="rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground">
               Primary preview
             </span>

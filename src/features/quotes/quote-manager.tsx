@@ -251,7 +251,7 @@ export function QuoteManager({ onClose }: { onClose: () => void }) {
                     {quote.text}
                   </p>
                   {quote.author && (
-                    <p className="mt-2 text-xs text-muted-foreground">
+                    <p className="mt-2 break-words text-xs text-muted-foreground">
                       {quote.author}
                     </p>
                   )}

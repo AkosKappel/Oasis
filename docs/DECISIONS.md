@@ -121,3 +121,9 @@
 - Primary fills buttons; secondary fills highlights and hover states. Choose black/white foregrounds for at least 4.5:1 contrast. Derive separate link/icon/focus colors targeting 7:1 against the app's background and surface instead of forcing arbitrary fills into every role.
 - Preview appearance in the current tab without writing it. Save commits and synchronizes other tabs; Cancel restores the latest saved appearance. Reset colors returns to the selected preset.
 - Keep photo dimming and white overlay text independent of these theme colors. The body-portaled Links panel continues using the app theme.
+
+## 2026-11-14: focused Home usability checks
+
+- Verify Links/search/Appearance keyboard transitions and dismissal, readable custom highlights over bright photo backgrounds, and 320-pixel Home layouts with long quote/author text.
+- Reduce the minimum clock size on narrow screens and wrap long authors in Home and quote management. Keep color controls synchronized with system-theme changes while the dialog is open.
+- Expose color preview as a named accessible group. This focused browser/contrast pass does not replace the broader release accessibility and screen-reader review tracked locally.

@@ -86,7 +86,7 @@ export function Home({
         <h1 className="sr-only">Oasis home</h1>
         <time
           dateTime={now.toISOString()}
-          className="text-[clamp(5rem,18vw,9rem)] leading-none font-extralight tracking-[-0.06em] tabular-nums"
+          className="text-[clamp(4rem,18vw,9rem)] leading-none font-extralight tracking-[-0.06em] tabular-nums"
         >
           {now.toLocaleTimeString(undefined, {
             hour: '2-digit',
@@ -156,7 +156,7 @@ export function Home({
               {dailyQuote.text}
             </blockquote>
             {dailyQuote.author && (
-              <figcaption className="mt-3 text-sm text-muted-foreground">
+              <figcaption className="mt-3 max-w-full break-words text-sm text-muted-foreground">
                 {dailyQuote.author}
               </figcaption>
             )}
