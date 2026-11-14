@@ -6,13 +6,38 @@ import { useLibrary } from '@/features/bookmarks/use-library';
 import { captureTab } from './capture-tab';
 import type { BookmarkInput } from '@/database/bookmarks';
 
-export function CaptureApp() {
+export function CaptureApp({
+  fullPage = false,
+  initialTab,
+  initialError,
+}: {
+  fullPage?: boolean;
+  initialTab?: { title?: string; url?: string };
+  initialError?: string;
+}) {
   useAppearance();
   const { library, error: libraryError } = useLibrary();
-  const [initialValues, setInitialValues] = useState<BookmarkInput>();
-  const [error, setError] = useState<string>();
+  const [request] = useState<{ values?: BookmarkInput; error?: string }>(() => {
+    if (initialError) return { error: initialError };
+    if (!initialTab) return {};
+    try {
+      return { values: captureTab(initialTab) };
+    } catch (cause) {
+      return {
+        error:
+          cause instanceof Error
+            ? cause.message
+            : 'This page could not be captured.',
+      };
+    }
+  });
+  const [initialValues, setInitialValues] = useState<BookmarkInput | undefined>(
+    request.values,
+  );
+  const [error, setError] = useState<string | undefined>(request.error);
   const [saved, setSaved] = useState(false);
   useEffect(() => {
+    if (initialTab || initialError) return;
     let active = true;
     void browser.tabs
       .query({ active: true, currentWindow: true })
@@ -30,9 +55,22 @@ export function CaptureApp() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [initialTab, initialError]);
+  async function close() {
+    if (!fullPage) {
+      window.close();
+      return;
+    }
+    try {
+      const tab = await browser.tabs.getCurrent();
+      if (tab?.id !== undefined) await browser.tabs.remove(tab.id);
+      else window.close();
+    } catch {
+      window.close();
+    }
+  }
   return (
-    <main className="p-5">
+    <main className={fullPage ? 'mx-auto w-full max-w-lg p-6' : 'p-5'}>
       {saved ? (
         <div role="status" className="py-8">
           <h1 className="text-xl font-semibold">Bookmark saved</h1>
@@ -50,13 +88,22 @@ export function CaptureApp() {
           initialValues={initialValues}
           folders={library.folders}
           tags={library.tags}
-          onClose={() => window.close()}
+          onClose={() => void close()}
           onSaved={() => setSaved(true)}
         />
       ) : (
         <p role="status" className="text-sm text-muted-foreground">
           Loading current page…
         </p>
+      )}
+      {fullPage && saved && (
+        <button
+          type="button"
+          className="mt-4 mr-5 rounded text-sm text-primary-content underline"
+          onClick={() => void close()}
+        >
+          Close
+        </button>
       )}
       <a
         className="mt-5 inline-block rounded text-sm text-primary-content underline underline-offset-4"

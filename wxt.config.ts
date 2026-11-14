@@ -7,7 +7,13 @@ export default defineConfig({
   manifest: {
     name: 'Oasis',
     description: 'Your personal space on the web.',
-    permissions: ['activeTab'],
+    permissions: ['activeTab', 'contextMenus'],
+    commands: {
+      'oasis-save-page': {
+        suggested_key: { default: 'Alt+Shift+O' },
+        description: 'Save the current page to Oasis',
+      },
+    },
   },
   vite: () => ({ plugins: [tailwindcss()] }),
 });

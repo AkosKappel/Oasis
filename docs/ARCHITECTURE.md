@@ -38,7 +38,7 @@ Oasis is a Chromium Manifest V3 extension built with WXT and React. WXT generate
 
 ## Permissions
 
-The manifest declares `activeTab` so the toolbar popup can read the current page title and URL after a user opens it. There is no background worker, content script or network integration. Record any additional permission in [DECISIONS.md](DECISIONS.md).
+The manifest declares `activeTab` so the toolbar popup can read the current page title and URL after a user opens it. An event-driven background worker registers context menus and a capture command. No content script or network integration is used. Record any additional permission in [DECISIONS.md](DECISIONS.md).
 
 ## Appearance
 
@@ -71,3 +71,5 @@ Dexie v5 adds `libraryPreferences`. Its repository merges partial updates atomic
 Home's Links control opens a native nonmodal auto popover, rendered through a body portal. It shares bookmark matching and descendant folder filtering with Library. Dexie v6 makes the old favorites row opt-in while preserving the rest of appearance settings. The panel uses normal app colors even over photo backgrounds.
 
 Custom appearance colors are optional in Dexie v7. `colors.ts` handles normalization and contrast, while `apply-appearance.ts` resolves presets/custom fills and readable semantic tokens. The app owns a temporary preview; the appearance hook applies it locally and only persists explicit saves.
+
+Context-menu and keyboard actions open `capture.html`; its request fragment is parsed once and removed before React mounts. The shared capture form validates the page/link and explicitly saves through the bookmark repository. `contextMenus` is the only additional permission.

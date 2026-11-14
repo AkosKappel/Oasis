@@ -138,3 +138,10 @@
 - Dexie v8 adds left/right placement and optional desktop pinning, preserving existing preferences and defaulting to left/on-demand.
 - Show folder navigation directly in Links. Pinning reserves room beside the Home canvas on wide screens; small screens retain an on-demand overlay to avoid covering Home permanently.
 - Keep pinned navigation nonmodal. Unpinning restores the compact trigger; choosing a side also moves the trigger to that side.
+
+## 2026-11-14: context-menu capture
+
+- Add the `contextMenus` permission and a small event-driven background worker for Save page/Save link actions. Reuse temporary `activeTab` access, with no tabs permission, site access or content script.
+- Alt+Shift+O opens the same explicit-save editor for the active page. Link capture defaults its title to the destination hostname; users can edit it and assign folders/tags.
+- Pass validated capture data in the extension editor fragment and immediately scrub that fragment from its history entry. Save still goes through the existing transaction-backed bookmark form.
+- Browser-owned context-menu clicks cannot be driven reliably in headless Chromium. Unit tests dispatch registered listeners; browser tests verify the real capture page, persistence, worker manifest and request scrubbing.
