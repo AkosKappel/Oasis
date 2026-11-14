@@ -31,3 +31,9 @@
 - Use a local CSS background rather than a photo service. The home works offline without new permissions or requests.
 - Use hash navigation so Library can be bookmarked and browser back/forward works. Home searches pass their query to Library.
 - Defer daily focus and appearance controls until the basic home and search flow are established.
+
+## 2026-11-14: keyboard search
+
+- Ctrl/Cmd+K opens a native modal search dialog on Home and Library. Arrow keys select, Enter opens, and Escape restores focus.
+- Reuse the existing local substring matching across titles, URLs, descriptions, folders and tags. Fuzzy search and operators remain S-01; no search dependency is needed for this increment.
+- Limit displayed bookmarks to 20 and include Home and Library navigation actions. Opening a result uses the current tab, matching new-tab launch behavior.

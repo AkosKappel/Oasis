@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ArrowUpRight, Library, Search } from 'lucide-react';
 import { useLibrary } from '@/features/bookmarks/use-library';
 
-export function Home() {
+export function Home({ onSearch }: { onSearch: (query: string) => void }) {
   const [now, setNow] = useState(() => new Date());
   const { library, error } = useLibrary();
   useEffect(() => {
@@ -57,7 +57,7 @@ export function Home() {
             const query = String(
               new FormData(event.currentTarget).get('query') ?? '',
             );
-            window.location.hash = `library?q=${encodeURIComponent(query)}`;
+            onSearch(query);
           }}
           className="mt-10 w-full max-w-sm"
         >
