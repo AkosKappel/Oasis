@@ -206,3 +206,8 @@
 
 - Give floating dialogs and Links a restrained theme-tinted glass surface with bounded backdrop blur. Keep fields and option pickers opaque, and strengthen secondary text for contrast even over extreme backgrounds.
 - Fall back to opaque surfaces when blur is unsupported or reduced transparency is requested. Respect forced colors without blur or decorative shadows. Do not blur or animate the entire Home canvas.
+
+## 2026-11-14: expanded built-in artwork
+
+- Append scenes to existing albums without changing any saved image IDs. Add Woodland for botanical scenery and Quiet spaces for calm architecture/interiors, keeping broad variety without a large category menu.
+- Package generated WebP assets locally with recorded prompts. Keep fixed selections unchanged; daily collections gain the additional scenes. Personal uploads and archives remain independent.

@@ -13,18 +13,27 @@ test('browses bundled albums offline, selects images and preserves daily rotatio
     name: 'Image albums',
     exact: true,
   });
-  const names = ['Quiet geometry', 'Open air', 'Soft forms', 'After dark'];
+  const names = [
+    'Quiet geometry',
+    'Open air',
+    'Soft forms',
+    'After dark',
+    'Woodland',
+    'Quiet spaces',
+  ];
   const firstImages = [
     'jade-ridges',
     'morning-lake',
     'warm-folds',
     'moonlit-dunes',
+    'fern-path',
+    'sunlit-arch',
   ];
   for (const [index, name] of names.entries()) {
     await dialog.getByRole('button', { name, exact: true }).click();
     await expect(
       dialog.getByRole('button', { name: 'Use image', exact: true }),
-    ).toHaveCount(2);
+    ).toHaveCount(index < 4 ? 3 : 2);
     await expect(
       dialog.getByRole('button', { name: 'Rename album', exact: true }),
     ).toHaveCount(0);
@@ -76,7 +85,7 @@ test('browses bundled albums offline, selects images and preserves daily rotatio
   );
   await expect(page.locator('main')).toHaveAttribute(
     'data-background-image',
-    /^oasis:builtin:(jade-ridges|desert-dusk)$/,
+    /^oasis:builtin:(jade-ridges|desert-dusk|snow-lines)$/,
   );
   const chosen = await page
     .locator('main')

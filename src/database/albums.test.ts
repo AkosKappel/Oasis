@@ -124,8 +124,8 @@ it('persists daily rotation and rejects unreadable dimming levels', async () => 
 
 it('provides offline built-ins without seeding storage or replacing existing preferences', async () => {
   const data = await repository.list();
-  expect(data.albums).toHaveLength(4);
-  expect(data.images).toHaveLength(8);
+  expect(data.albums).toHaveLength(6);
+  expect(data.images).toHaveLength(16);
   expect(data.background).toBeUndefined();
   expect(await database.albums.count()).toBe(0);
   expect(await database.albumImages.count()).toBe(0);
@@ -182,5 +182,5 @@ it('protects bundled assets from writes and forged archive IDs', async () => {
       images: [],
     }),
   ).toThrow('invalid records');
-  expect((await repository.list()).images).toHaveLength(8);
+  expect((await repository.list()).images).toHaveLength(16);
 });

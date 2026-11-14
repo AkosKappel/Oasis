@@ -80,7 +80,7 @@ export function AlbumManager({ onClose }: { onClose: () => void }) {
         <h3 id="builtin-albums-title" className="font-semibold">
           Built-in albums
         </h3>
-        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
           {BUILTIN_ALBUMS.map((item) => (
             <button
               key={item.id}

@@ -8,6 +8,7 @@ export const BUILTIN_ALBUMS = [
     images: [
       { id: 'jade-ridges', name: 'Jade ridges' },
       { id: 'desert-dusk', name: 'Desert dusk' },
+      { id: 'snow-lines', name: 'Snow lines' },
     ],
   },
   {
@@ -17,6 +18,7 @@ export const BUILTIN_ALBUMS = [
     images: [
       { id: 'morning-lake', name: 'Morning lake' },
       { id: 'quiet-coast', name: 'Quiet coast' },
+      { id: 'green-valley', name: 'Green valley' },
     ],
   },
   {
@@ -26,6 +28,7 @@ export const BUILTIN_ALBUMS = [
     images: [
       { id: 'warm-folds', name: 'Warm folds' },
       { id: 'cool-drift', name: 'Cool drift' },
+      { id: 'sage-waves', name: 'Sage waves' },
     ],
   },
   {
@@ -35,6 +38,25 @@ export const BUILTIN_ALBUMS = [
     images: [
       { id: 'moonlit-dunes', name: 'Moonlit dunes' },
       { id: 'distant-lights', name: 'Distant lights' },
+      { id: 'northern-lights', name: 'Northern lights' },
+    ],
+  },
+  {
+    id: 'woodland',
+    name: 'Woodland',
+    description: 'Soft forest light, ferns and misty bamboo.',
+    images: [
+      { id: 'fern-path', name: 'Fern path' },
+      { id: 'bamboo-rain', name: 'Bamboo rain' },
+    ],
+  },
+  {
+    id: 'quiet-spaces',
+    name: 'Quiet spaces',
+    description: 'Sunlit arches and sheltered views on rainy evenings.',
+    images: [
+      { id: 'sunlit-arch', name: 'Sunlit arch' },
+      { id: 'rainy-window', name: 'Rainy window' },
     ],
   },
 ] as const;

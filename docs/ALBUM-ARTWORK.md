@@ -37,3 +37,5 @@ Use case: stylized-concept. Final wide 16:10 wallpaper: moonlit desert dunes, sm
 ### After dark: distant-lights.webp
 
 Use case: photorealistic-natural. Final wide 16:10 wallpaper: distant warm lights of a small lakeside settlement at blue hour, viewed from across dark still water, silhouettes of hills on the horizon, deep violet twilight sky and restrained amber reflections low in frame. Refined atmospheric landscape photograph, realistic soft light, serene and spacious. Keep center and upper two-thirds calm for white clock overlay. No foreground buildings, cars, people, text, watermark or UI. Full bleed single image.
+
+Additional scenes and their exact prompts are recorded in [Expanded album artwork](ALBUM-EXPANSION.md). Existing filenames and IDs are retained.
