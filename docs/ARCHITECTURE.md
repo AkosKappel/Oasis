@@ -69,3 +69,5 @@ Dexie v5 adds `libraryPreferences`. Its repository merges partial updates atomic
 ## Home links
 
 Home's Links control opens a native nonmodal auto popover, rendered through a body portal. It shares bookmark matching and descendant folder filtering with Library. Dexie v6 makes the old favorites row opt-in while preserving the rest of appearance settings. The panel uses normal app colors even over photo backgrounds.
+
+Custom appearance colors are optional in Dexie v7. `colors.ts` handles normalization and contrast, while `apply-appearance.ts` resolves presets/custom fills and readable semantic tokens. The app owns a temporary preview; the appearance hook applies it locally and only persists explicit saves.

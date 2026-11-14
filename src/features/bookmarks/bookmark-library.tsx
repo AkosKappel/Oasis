@@ -103,7 +103,7 @@ export function BookmarkLibrary({
             aria-label="Oasis home"
             className="flex items-center gap-3 text-xl font-semibold"
           >
-            <Leaf className="size-6 text-primary" aria-hidden="true" />
+            <Leaf className="size-6 text-primary-content" aria-hidden="true" />
             oasis
             <span className="hidden text-xs font-normal text-muted-foreground sm:inline">
               Your personal space on the web
@@ -257,7 +257,7 @@ export function BookmarkLibrary({
         {visible?.length === 0 && (
           <section className="flex flex-col items-center py-20 text-center">
             <BookmarkIcon
-              className="mb-5 size-10 text-primary"
+              className="mb-5 size-10 text-primary-content"
               strokeWidth={1.25}
               aria-hidden="true"
             />

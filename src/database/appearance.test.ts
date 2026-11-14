@@ -53,3 +53,21 @@ it('rejects invalid settings and cross-space or deleted preference records', asy
     'unavailable',
   );
 });
+
+it('persists canonical custom colors, rejects invalid values and resets to presets', async () => {
+  await repository.save({
+    ...defaultAppearance,
+    primaryColor: '#ABC',
+    secondaryColor: '#000000',
+  });
+  expect(await repository.get()).toMatchObject({
+    primaryColor: '#aabbcc',
+    secondaryColor: '#000000',
+  });
+  await expect(
+    repository.save({ ...defaultAppearance, primaryColor: 'red' }),
+  ).rejects.toThrow('hex');
+  expect((await repository.get()).primaryColor).toBe('#aabbcc');
+  await repository.save({ ...defaultAppearance });
+  expect((await repository.get()).primaryColor).toBeUndefined();
+});

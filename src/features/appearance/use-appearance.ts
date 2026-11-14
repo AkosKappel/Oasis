@@ -1,8 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { liveQuery } from 'dexie';
-import { defaultAppearance, personalAppearance } from '@/database/appearance';
+import { applyAppearance } from './apply-appearance';
+import {
+  defaultAppearance,
+  personalAppearance,
+  validateAppearance,
+  type Appearance,
+} from '@/database/appearance';
 
-export function useAppearance() {
+export function useAppearance(preview?: Appearance) {
   const [appearance, setAppearance] = useState(defaultAppearance);
   const [error, setError] = useState<string>();
   useEffect(() => {
@@ -18,20 +24,18 @@ export function useAppearance() {
     });
     return () => subscription.unsubscribe();
   }, []);
+  const effective = preview ?? appearance;
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)');
-    function apply() {
-      document.documentElement.dataset.theme =
-        appearance.theme === 'system'
-          ? media.matches
-            ? 'dark'
-            : 'light'
-          : appearance.theme;
-      document.documentElement.dataset.accent = appearance.accent;
-    }
+    const apply = () => applyAppearance(effective, media.matches);
     apply();
     media.addEventListener('change', apply);
     return () => media.removeEventListener('change', apply);
-  }, [appearance]);
-  return { appearance, error };
+  }, [effective]);
+  const saveAppearance = useCallback(async (input: Appearance) => {
+    const values = validateAppearance(input);
+    await personalAppearance.save(values);
+    setAppearance(values);
+  }, []);
+  return { appearance, error, saveAppearance };
 }

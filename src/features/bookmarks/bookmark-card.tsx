@@ -39,14 +39,14 @@ export function BookmarkCard({
         }
       >
         <span
-          className="flex size-10 items-center justify-center rounded-lg bg-primary/10 font-semibold text-primary"
+          className="flex size-10 items-center justify-center rounded-lg bg-secondary font-semibold text-secondary-foreground"
           aria-hidden="true"
         >
           {bookmark.title.slice(0, 1).toUpperCase()}
         </span>
         {bookmark.isFavorite && (
           <Star
-            className="size-4 fill-primary text-primary"
+            className="size-4 fill-primary text-primary-content"
             aria-label="Favorite"
             role="img"
           />
@@ -57,7 +57,7 @@ export function BookmarkCard({
           href={bookmark.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-sm font-semibold hover:text-primary"
+          className="rounded-sm font-semibold hover:text-primary-content"
         >
           <span className="line-clamp-2 break-words">{bookmark.title}</span>
           <span className="mt-1 block truncate text-xs font-normal text-muted-foreground">

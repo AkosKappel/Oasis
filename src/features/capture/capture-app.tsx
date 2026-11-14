@@ -59,7 +59,7 @@ export function CaptureApp() {
         </p>
       )}
       <a
-        className="mt-5 inline-block rounded text-sm text-primary underline underline-offset-4"
+        className="mt-5 inline-block rounded text-sm text-primary-content underline underline-offset-4"
         href={`${browser.runtime.getURL('/newtab.html')}#library`}
         target="_blank"
         rel="noreferrer"

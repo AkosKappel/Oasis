@@ -1,3 +1,4 @@
+import type { Appearance } from '@/database/appearance';
 import { useEffect, useState } from 'react';
 import { BookmarkLibrary } from '@/features/bookmarks/bookmark-library';
 import { CommandPalette } from '@/features/search/command-palette';
@@ -8,7 +9,12 @@ import { AlbumManager } from '@/features/albums/album-manager';
 import { Home } from '@/features/home/home';
 
 export function App() {
-  const { appearance, error: appearanceError } = useAppearance();
+  const [preview, setPreview] = useState<Appearance>();
+  const {
+    appearance,
+    error: appearanceError,
+    saveAppearance,
+  } = useAppearance(preview);
   const [quotesOpen, setQuotesOpen] = useState(false);
   const [albumsOpen, setAlbumsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -41,7 +47,7 @@ export function App() {
         <Home
           onQuotes={() => setQuotesOpen(true)}
           onAlbums={() => setAlbumsOpen(true)}
-          appearance={appearance}
+          appearance={preview ?? appearance}
           onAppearance={() => setSettingsOpen(true)}
           onSearch={(query) => setSearch({ query })}
         />
@@ -51,7 +57,12 @@ export function App() {
       {settingsOpen && (
         <AppearanceSettings
           appearance={appearance}
-          onClose={() => setSettingsOpen(false)}
+          onPreview={setPreview}
+          onSave={saveAppearance}
+          onClose={() => {
+            setSettingsOpen(false);
+            setPreview(undefined);
+          }}
         />
       )}
       {appearanceError && (

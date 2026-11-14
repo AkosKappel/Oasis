@@ -52,7 +52,7 @@ it('upgrades a v1 library without changing its bookmarks', async () => {
   );
   legacy.close();
   await database.open();
-  expect(database.verno).toBe(6);
+  expect(database.verno).toBe(7);
   expect(await database.bookmarks.get('saved')).toEqual(bookmark);
   expect(await database.preferences.count()).toBe(0);
 });
@@ -247,4 +247,49 @@ it('migrates the shortcut row to opt-in without changing other appearance prefer
     ...preference,
     showFavorites: false,
   });
+});
+
+it('upgrades v6 appearance records for optional colors without losing saved preferences', async () => {
+  const { default: Dexie } = await import('dexie');
+  const legacy = new Dexie('oasis-test');
+  legacy.version(6).stores({
+    spaces: 'id, name, updatedAt',
+    bookmarks: 'id, spaceId, [spaceId+folderId], *tags, updatedAt',
+    folders: 'id, spaceId, [spaceId+parentId], updatedAt',
+    tags: 'id, spaceId, [spaceId+name], updatedAt',
+    preferences: 'id, spaceId',
+    albums: 'id, spaceId',
+    albumImages: 'id, spaceId, [spaceId+albumId]',
+    backgrounds: 'id, spaceId',
+    quoteCollections: 'id, spaceId',
+    quotes: 'id, spaceId, [spaceId+collectionId]',
+    quoteSettings: 'id, spaceId',
+    libraryPreferences: 'id, spaceId',
+  });
+  await legacy.open();
+  const preference = {
+    id: 'default:appearance',
+    spaceId: 'default',
+    theme: 'light',
+    accent: 'ocean',
+    clock: '12',
+    showDate: true,
+    showFavorites: true,
+    createdAt: 1,
+    updatedAt: 1,
+  };
+  await legacy.transaction(
+    'rw',
+    legacy.table('spaces'),
+    legacy.table('preferences'),
+    async () => {
+      await legacy
+        .table('spaces')
+        .add({ id: 'default', name: 'Personal', createdAt: 1, updatedAt: 1 });
+      await legacy.table('preferences').add(preference);
+    },
+  );
+  legacy.close();
+  await database.open();
+  expect(await database.preferences.get(preference.id)).toEqual(preference);
 });

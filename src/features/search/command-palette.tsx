@@ -124,13 +124,15 @@ export function CommandPalette({
             id={`search-result-${index}`}
             role="option"
             aria-selected={active === index}
-            className={`cursor-pointer rounded-lg px-3 py-3 ${active === index ? 'bg-primary/10' : ''}`}
+            className={`cursor-pointer rounded-lg px-3 py-3 ${active === index ? 'bg-secondary text-secondary-foreground' : ''}`}
             onClick={() => open(index)}
           >
             <span className="block truncate text-sm font-medium">
               {result.title}
             </span>
-            <span className="block truncate text-xs text-muted-foreground">
+            <span
+              className={`block truncate text-xs ${active === index ? 'text-secondary-foreground' : 'text-muted-foreground'}`}
+            >
               {result.url.startsWith('#')
                 ? 'Navigation'
                 : new URL(result.url).hostname}

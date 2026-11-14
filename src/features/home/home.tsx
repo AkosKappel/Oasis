@@ -116,7 +116,7 @@ export function Home({
           }}
           className="mt-10 w-full max-w-sm"
         >
-          <label className="flex items-center gap-3 rounded-full border border-border/60 bg-surface/40 px-5 py-3 focus-within:border-primary">
+          <label className="flex items-center gap-3 rounded-full border border-border/60 bg-surface/40 px-5 py-3 focus-within:border-ring">
             <Search
               className="size-4 shrink-0 text-muted-foreground"
               aria-hidden="true"

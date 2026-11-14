@@ -157,12 +157,12 @@ export function LinksMenu({
                   data-bookmark
                   href={bookmark.url}
                   onClick={() => panel.current?.hidePopover()}
-                  className="block min-w-0 rounded-md px-3 py-2 hover:bg-primary/10"
+                  className="group/link block min-w-0 rounded-md px-3 py-2 hover:bg-secondary hover:text-secondary-foreground"
                 >
                   <span className="block truncate text-sm font-medium">
                     {bookmark.title}
                   </span>
-                  <span className="block truncate text-xs text-muted-foreground">
+                  <span className="block truncate text-xs text-muted-foreground group-hover/link:text-secondary-foreground">
                     {new URL(bookmark.url).hostname}
                   </span>
                 </a>
@@ -177,7 +177,7 @@ export function LinksMenu({
           <a
             href="#library"
             onClick={() => panel.current?.hidePopover()}
-            className="mt-4 inline-block rounded text-sm text-primary underline underline-offset-4"
+            className="mt-4 inline-block rounded text-sm text-primary-content underline underline-offset-4"
           >
             Open Library
           </a>

@@ -114,3 +114,10 @@
 - Put Home links in a native auto popover with favorites, all bookmarks, folder selection and the shared local search. Show up to 50 matches and offer Library for the complete result set.
 - Keep the shortcut row optional. Dexie v6 switches existing appearance records to the new off-by-default behavior once, preserving all other preferences; users can re-enable Show shortcut row.
 - Render the nonmodal panel in a body portal to use the app theme independently of photo-background colors. Native dismissal handles Escape and outside clicks, with keyboard search-to-link navigation and focus return.
+
+## 2026-11-14: custom primary and secondary colors
+
+- Dexie v7 adds optional custom hex colors to appearance records; existing presets and saved preferences remain valid. Normalize three/six-digit hex input and reject invalid values before writing.
+- Primary fills buttons; secondary fills highlights and hover states. Choose black/white foregrounds for at least 4.5:1 contrast. Derive separate link/icon/focus colors targeting 7:1 against the app's background and surface instead of forcing arbitrary fills into every role.
+- Preview appearance in the current tab without writing it. Save commits and synchronizes other tabs; Cancel restores the latest saved appearance. Reset colors returns to the selected preset.
+- Keep photo dimming and white overlay text independent of these theme colors. The body-portaled Links panel continues using the app theme.

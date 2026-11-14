@@ -1,3 +1,4 @@
+import { normalizeHex } from '@/lib/colors';
 import { db, type OasisDatabase } from './schema';
 import { requireSpace } from './records';
 import type { RecordMetadata } from '@/types/entities';
@@ -8,6 +9,8 @@ export interface Appearance {
   clock: 'system' | '12' | '24';
   showDate: boolean;
   showFavorites: boolean;
+  primaryColor?: string;
+  secondaryColor?: string;
 }
 export interface AppearanceRecord extends Appearance, RecordMetadata {
   spaceId: string;
@@ -29,12 +32,27 @@ export function validateAppearance(value: Appearance): Appearance {
   ) {
     throw new Error('Choose valid appearance settings.');
   }
+  const primaryColor =
+    value.primaryColor === undefined
+      ? undefined
+      : normalizeHex(value.primaryColor);
+  const secondaryColor =
+    value.secondaryColor === undefined
+      ? undefined
+      : normalizeHex(value.secondaryColor);
+  if (
+    (value.primaryColor !== undefined && !primaryColor) ||
+    (value.secondaryColor !== undefined && !secondaryColor)
+  )
+    throw new Error('Enter colors as hex values, such as #286443.');
   return {
     theme: value.theme,
     accent: value.accent,
     clock: value.clock,
     showDate: value.showDate,
     showFavorites: value.showFavorites,
+    ...(primaryColor ? { primaryColor } : {}),
+    ...(secondaryColor ? { secondaryColor } : {}),
   };
 }
 export function createAppearanceRepository(

@@ -54,6 +54,7 @@ export class OasisDatabase extends Dexie {
           .toCollection()
           .modify({ showFavorites: false }),
       );
+    this.version(7).stores({ preferences: 'id, spaceId' });
     this.on('populate', (transaction) => {
       const now = Date.now();
       return transaction.table('spaces').add({
