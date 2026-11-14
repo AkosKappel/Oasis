@@ -97,3 +97,7 @@ Dexie v11 adds `focusSessions`. Repository transactions start, pause, resume and
 ## Weather
 
 Dexie v12 adds `weatherSettings` for opt-in city/units, cached current conditions and three daily forecasts, plus refresh timestamps and a lease. The repository validates settings and data, checks ownership and performs atomic claims/commits across tabs. The adapter validates bounded JSON from Open-Meteo. Home refreshes when opened and stale; manual refresh obeys cooldowns. Disabling prevents future requests and removes the two optional host grants. Late results are checked against the current city/unit key and claim. Cached data, location and goals/widgets/sessions stay outside bookmark backups.
+
+## Duplicate review
+
+`duplicates.ts` groups the active Library with conservative HTTP(S) URL equivalence. Deletion validates a keeper and reviewed copy revisions under the same space in one transaction, then writes deletion tombstones. The review dialog follows live Library data, shows metadata and never merges records. No network requests or schema changes are involved.

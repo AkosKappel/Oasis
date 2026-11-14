@@ -189,3 +189,9 @@
 - Dexie v12 stores per-space settings, a bounded three-day forecast and a short transactional refresh lease. Cache for one hour, limit manual refresh to 15 minutes after success and retries to one minute after failure. Tabs share the cache and lease; late responses cannot replace a different city's data.
 - Bound response streams to 64 KB, time out requests, reject redirects and unexpected units/values, and omit credentials and referrers. Preserve cached forecasts on failure, label stale data and expire display after 48 hours. There is no background polling.
 - Browser tests supply the browser-owned permission result and provider responses at the API boundary. A separate live request verifies the public endpoint shape using sample coordinates. Actual permission prompt acceptance remains a manual browser check.
+
+## 2026-11-14: conservative duplicate review
+
+- Group safe HTTP(S) URLs using URL parsing only. Normalize host case/default ports through the browser parser; preserve protocol, path slashes, query order/values and fragments. Do not strip tracking parameters or merge content heuristically.
+- Review the whole Library with a chosen keeper and explicitly selected copies. Show folders, favorites, descriptions, tag counts and notes. Never merge metadata or delete automatically.
+- Recheck ownership, URL equality and reviewed timestamps in one transaction before soft-deleting copies. A concurrent edit or storage failure leaves the batch unchanged. Keep selections on failure and return focus to Done after success. No schema change is needed.

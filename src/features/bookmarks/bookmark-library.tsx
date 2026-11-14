@@ -4,6 +4,7 @@ import {
 } from '@/database/storage-health';
 import { BulkEditor } from './bulk-editor';
 import type { BulkBookmarkAction } from '@/database/bookmarks';
+import { DuplicateReview } from '@/features/duplicates/duplicate-review';
 import { useLibraryPreferences } from './use-library-preferences';
 import { sortBookmarks } from './sort-bookmarks';
 import {
@@ -43,6 +44,7 @@ export function BookmarkLibrary({
   const [bulkEditor, setBulkEditor] = useState<'move' | 'tags'>();
   const [bulkBusy, setBulkBusy] = useState(false);
   const [backupOpen, setBackupOpen] = useState(false);
+  const [duplicatesOpen, setDuplicatesOpen] = useState(false);
   const [organizationOpen, setOrganizationOpen] = useState(false);
   const [folderFilter, setFolderFilter] = useState('');
   const [tagFilter, setTagFilter] = useState('');
@@ -194,6 +196,13 @@ export function BookmarkLibrary({
               disabled={!bookmarks || !!loadError}
             >
               Folders and tags
+            </Button>
+            <Button
+              variant="outline"
+              disabled={!bookmarks || !!loadError}
+              onClick={() => setDuplicatesOpen(true)}
+            >
+              Find duplicates
             </Button>
             <Button
               onClick={() => setEditor({})}
@@ -475,6 +484,13 @@ export function BookmarkLibrary({
           Saved on this device. Always your space.
         </p>
       </main>
+      {duplicatesOpen && bookmarks && (
+        <DuplicateReview
+          bookmarks={bookmarks}
+          folders={folders}
+          onClose={() => setDuplicatesOpen(false)}
+        />
+      )}
       {organizationOpen && (
         <OrganizationManager
           folders={folders}
