@@ -1,3 +1,9 @@
+import { useLibraryPreferences } from './use-library-preferences';
+import { sortBookmarks } from './sort-bookmarks';
+import {
+  personalLibraryPreferences,
+  type LibraryPreferences,
+} from '@/database/library-preferences';
 import { folderPaths } from '@/features/organization/folder-tree';
 import { BackupManager } from '@/features/backup/backup-manager';
 import { BookmarkCard } from './bookmark-card';
@@ -23,6 +29,7 @@ export function BookmarkLibrary({
 }: {
   initialQuery?: string;
 }) {
+  const { preferences, error: preferencesError } = useLibraryPreferences();
   const { library, error: loadError } = useLibrary();
   const { bookmarks, folders = [], tags = [] } = library ?? {};
   const [backupOpen, setBackupOpen] = useState(false);
@@ -43,7 +50,7 @@ export function BookmarkLibrary({
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [error, setError] = useState<string>();
   const [deleting, setDeleting] = useState<string>();
-  const visible = bookmarks
+  const filtered = bookmarks
     ? filterBookmarks(bookmarks, folders, tags, {
         query,
         favoritesOnly,
@@ -51,6 +58,17 @@ export function BookmarkLibrary({
         tagId,
       })
     : undefined;
+  const visible = filtered
+    ? sortBookmarks(filtered, preferences.sort)
+    : undefined;
+  async function savePreferences(patch: Partial<LibraryPreferences>) {
+    setError(undefined);
+    try {
+      await personalLibraryPreferences.save(patch);
+    } catch {
+      setError('Your library view settings could not be saved. Try again.');
+    }
+  }
   const organizationFiltered = !!folderId || !!tagId;
   const paths = folderPaths(folders);
   const folderMap = new Map(
@@ -172,7 +190,8 @@ export function BookmarkLibrary({
         >
           Folder filters include subfolders. Search titles, URLs, notes, folders
           and tags. Use quotes for phrases or names with spaces, such as
-          tag:"Read later".
+          tag:"Read later". Best match uses recent additions when search is
+          empty.
         </p>
         {bookmarks && (
           <OrganizationFilters
@@ -185,12 +204,49 @@ export function BookmarkLibrary({
             onTagChange={setTagFilter}
           />
         )}
-        {(loadError || error) && (
+        <div className="mt-5 flex flex-wrap items-end justify-between gap-3">
+          <div className="flex gap-2" role="group" aria-label="Library view">
+            <Button
+              variant={preferences.view === 'grid' ? 'default' : 'outline'}
+              size="sm"
+              aria-pressed={preferences.view === 'grid'}
+              onClick={() => void savePreferences({ view: 'grid' })}
+            >
+              Grid view
+            </Button>
+            <Button
+              variant={preferences.view === 'list' ? 'default' : 'outline'}
+              size="sm"
+              aria-pressed={preferences.view === 'list'}
+              onClick={() => void savePreferences({ view: 'list' })}
+            >
+              List view
+            </Button>
+          </div>
+          <label className="field">
+            Sort by
+            <select
+              value={preferences.sort}
+              onChange={(event) =>
+                void savePreferences({
+                  sort: event.target.value as LibraryPreferences['sort'],
+                })
+              }
+            >
+              <option value="relevance">Best match</option>
+              <option value="name-asc">Name, A to Z</option>
+              <option value="name-desc">Name, Z to A</option>
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+          </label>
+        </div>
+        {(loadError || error || preferencesError) && (
           <p
             role="alert"
             className="mt-6 rounded-lg border border-danger/30 bg-danger/10 p-4 text-sm text-danger"
           >
-            {loadError || error}
+            {loadError || error || preferencesError}
           </p>
         )}
         {!bookmarks && !loadError && (
@@ -231,10 +287,18 @@ export function BookmarkLibrary({
           </section>
         )}
         {!!visible?.length && (
-          <ul className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul
+            aria-label="Bookmarks"
+            className={
+              preferences.view === 'list'
+                ? 'mt-7 flex flex-col gap-3'
+                : 'mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3'
+            }
+          >
             {visible.map((bookmark) => (
               <BookmarkCard
                 key={bookmark.id}
+                compact={preferences.view === 'list'}
                 bookmark={bookmark}
                 folder={folderMap.get(bookmark.folderId ?? '')}
                 tags={bookmark.tags.flatMap((id) => {

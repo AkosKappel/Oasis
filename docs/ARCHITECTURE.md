@@ -61,3 +61,7 @@ Dexie v3 adds `albums`, `albumImages` and `backgrounds`. Images are re-encoded l
 ## Quotes
 
 Dexie v4 adds `quoteCollections`, `quotes` and `quoteSettings`. The repository owns validation, ownership, display selection and additive archives. Home chooses a daily entry from the selected active collection, while the dialog manages plain text and optional authors. Quote archives are separate from bookmark and image backups.
+
+## Library preferences
+
+Dexie v5 adds `libraryPreferences`. Its repository merges partial updates atomically and live queries synchronize tabs. Filtering/search runs before an explicit non-mutating sort; grid and list reuse the bookmark component and actions. Dates outside the browser's supported range display a fallback instead of breaking a row.

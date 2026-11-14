@@ -101,3 +101,10 @@
 - Allow up to 50 collections and 2,000 entries, with 500 characters per quote and 120 per optional author. All writes check active space/collection ownership and retain deletion tombstones.
 - Provide a separate small quote archive with IDs and relationships. Validate the whole graph before additive atomic restore, preserve existing active records and reject deleted/cross-space ID collisions.
 - Custom entries need no API or network permission. Provider quotes remain a later integration with attribution and content-rights checks documented in API-SOURCES.md.
+
+## 2026-11-14: Library list view and sorting
+
+- Dexie v5 adds independent space-owned Library view/sort preferences. Partial preference writes merge inside a transaction so concurrent view and sort changes do not clobber one another.
+- Share bookmark content and actions between grid cards and compact rows. Rows retain folder/tag labels, favorite status, creation dates and edit/delete controls, including on small screens.
+- Offer natural name ordering in both directions, newest/oldest ordering and Best match. Best match preserves ranked search and existing recent-first order when the query is empty; explicit ordering is applied after filters.
+- Keep view preferences device-local and outside bookmark archives. Existing databases upgrade without changing media, quotes or library records.

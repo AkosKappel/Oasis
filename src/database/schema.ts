@@ -1,3 +1,4 @@
+import type { LibraryPreferenceRecord } from './library-preferences';
 import type { AppearanceRecord } from './appearance';
 import Dexie, { type EntityTable } from 'dexie';
 import type {
@@ -13,6 +14,7 @@ import type {
   QuoteSettings,
 } from '@/types/entities';
 export class OasisDatabase extends Dexie {
+  libraryPreferences!: EntityTable<LibraryPreferenceRecord, 'id'>;
   quoteCollections!: EntityTable<QuoteCollection, 'id'>;
   quotes!: EntityTable<Quote, 'id'>;
   quoteSettings!: EntityTable<QuoteSettings, 'id'>;
@@ -43,6 +45,7 @@ export class OasisDatabase extends Dexie {
       quotes: 'id, spaceId, [spaceId+collectionId]',
       quoteSettings: 'id, spaceId',
     });
+    this.version(5).stores({ libraryPreferences: 'id, spaceId' });
     this.on('populate', (transaction) => {
       const now = Date.now();
       return transaction.table('spaces').add({

@@ -27,6 +27,10 @@ A minimal new-tab home with a clock, date, favorite links and appearance control
 
 The toolbar popup saves the current page to your library. Oasis JSON backup preserves bookmarks, folders, tags, favorites and notes. Browser bookmark HTML import/export preserves folder hierarchy, titles, URLs and descriptions; import previews valid records, skips unsafe links and merges exact URLs within each folder. Appearance preferences are device-local and excluded from backups.
 
+Home supports personal image albums, fixed or daily backgrounds with dimming, and optional daily quotes from custom collections. Uploads are resized locally; album and quote managers provide separate portable backups. The Library offers grid/list views and saved name/date sorting.
+
+Optional online content providers are researched in [API sources](docs/API-SOURCES.md). No weather, image or quote API is connected yet.
+
 Data stays on the device in IndexedDB; there is no backend, account or analytics. Planned work is tracked in the local `BACKLOG.md`, the full product vision in the blueprint below.
 
 ## Documentation
