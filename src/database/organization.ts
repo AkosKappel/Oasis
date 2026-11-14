@@ -1,5 +1,5 @@
 import { db, type OasisDatabase } from './schema';
-import { requireOwnedRecord, requireSpace } from './records';
+import { requireOwnedRecord, requireSpace, requireUniqueName } from './records';
 
 export interface TagInput {
   name: string;
@@ -45,18 +45,13 @@ export function createOrganizationRepository(
           await requireSpace(database, spaceId);
           if (id)
             await requireOwnedRecord(database.folders, id, spaceId, 'folder');
-          const duplicate = await database.folders
-            .where('spaceId')
-            .equals(spaceId)
-            .filter(
-              (folder) =>
-                folder.deletedAt === undefined &&
-                folder.id !== id &&
-                folder.name.toLowerCase() === value.toLowerCase(),
-            )
-            .first();
-          if (duplicate)
-            throw new Error('A folder with this name already exists.');
+          await requireUniqueName(
+            database.folders,
+            spaceId,
+            value,
+            id,
+            'folder',
+          );
           const now = Date.now();
           if (id) {
             await database.folders.update(id, { name: value, updatedAt: now });
@@ -86,18 +81,7 @@ export function createOrganizationRepository(
         async () => {
           await requireSpace(database, spaceId);
           if (id) await requireOwnedRecord(database.tags, id, spaceId, 'tag');
-          const duplicate = await database.tags
-            .where('spaceId')
-            .equals(spaceId)
-            .filter(
-              (tag) =>
-                tag.deletedAt === undefined &&
-                tag.id !== id &&
-                tag.name.toLowerCase() === name.toLowerCase(),
-            )
-            .first();
-          if (duplicate)
-            throw new Error('A tag with this name already exists.');
+          await requireUniqueName(database.tags, spaceId, name, id, 'tag');
           const now = Date.now();
           const values = {
             name,

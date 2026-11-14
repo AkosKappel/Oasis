@@ -1,4 +1,4 @@
-import type { Table } from 'dexie';
+import type { EntityTable, Table } from 'dexie';
 import type { OasisDatabase } from './schema';
 import type { RecordMetadata } from '@/types/entities';
 
@@ -22,4 +22,26 @@ export async function requireOwnedRecord<
     throw new Error(`This ${label} is no longer available.`);
   }
   return record;
+}
+
+export async function requireUniqueName<
+  T extends RecordMetadata & { spaceId: string; name: string },
+>(
+  table: EntityTable<T, 'id'>,
+  spaceId: string,
+  name: string,
+  id: string | undefined,
+  label: string,
+) {
+  const duplicate = await table
+    .where('spaceId')
+    .equals(spaceId)
+    .filter(
+      (record) =>
+        record.deletedAt === undefined &&
+        record.id !== id &&
+        record.name.toLowerCase() === name.toLowerCase(),
+    )
+    .first();
+  if (duplicate) throw new Error(`A ${label} with this name already exists.`);
 }
