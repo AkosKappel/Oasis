@@ -8,6 +8,10 @@ export default defineConfig({
     name: 'Oasis',
     description: 'Your personal space on the web.',
     permissions: ['activeTab', 'contextMenus'],
+    optional_host_permissions: [
+      'https://api.open-meteo.com/*',
+      'https://geocoding-api.open-meteo.com/*',
+    ],
     commands: {
       'oasis-save-page': {
         suggested_key: { default: 'Alt+Shift+O' },

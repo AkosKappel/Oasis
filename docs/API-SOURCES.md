@@ -1,6 +1,6 @@
 # Optional content APIs
 
-Research checked 2026-11-14. No provider is integrated or selected yet. Personal albums and quote collections work locally. Recheck terms and availability before adding an integration.
+Research checked 2026-11-14. Open-Meteo powers optional weather with manual city selection, runtime host access, attribution and local caching. Its free endpoint is restricted to personal/non-commercial use. Personal albums and quote collections work locally; no photo or quote API is connected. Recheck provider terms before commercial distribution.
 
 | Use     | Candidate                                                       | Free access and constraints                                                                                                                                                                                                                |
 | ------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -13,7 +13,7 @@ Research checked 2026-11-14. No provider is integrated or selected yet. Personal
 
 ## Integration direction
 
-- Prefer Open-Meteo for a non-commercial weather experiment; WeatherAPI is an alternative when its key-based free plan fits the intended distribution.
+- Open-Meteo is the current personal/non-commercial weather provider; WeatherAPI remains an alternative when its key-based plan fits distribution.
 - Evaluate Unsplash for an opt-in daily photo source. Provider images need their own attribution and delivery behavior; do not assume offline album storage is permitted under API terms.
 - Keep custom quotes usable offline. Cache provider quote responses conservatively and show required attribution; an API being free does not establish rights to redistribute every quotation.
 - Clocks, countdowns and daily rotation need no external API. Use local dates and browser time-zone support.

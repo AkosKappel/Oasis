@@ -29,11 +29,11 @@ Save pages through the toolbar popup, the page/link context menu or Alt+Shift+O 
 
 Home includes offline starter albums in illustrated landscape, nature, abstract and night styles. Choose a fixed image or daily rotation with dimming, upload personal image albums, and optionally show daily quotes from custom collections. Uploads are resized locally; album and quote managers provide separate portable backups. Built-in artwork stays separate from personal uploads and is excluded from album backups. The Library offers grid/list views, saved name/date sorting and selection actions to move bookmarks, add/remove tags or soft-delete them together.
 
-Optional online content providers are researched in [API sources](docs/API-SOURCES.md). No weather, image or quote API is connected yet.
+Optional online content providers are researched in [API sources](docs/API-SOURCES.md). Weather uses Open-Meteo only after explicit enablement and city selection, with current conditions, a three-day forecast, Celsius/Fahrenheit, shared caching and offline fallback. Its free endpoint is for personal/non-commercial use. No image or quote API is connected.
 
 Storage warnings offer non-destructive retry, backup access and guidance for quota or upgrade problems. Failed saves retain open form fields.
 
-Data stays on the device in IndexedDB; there is no backend, account or analytics. Planned work is tracked in the local `BACKLOG.md`, the full product vision in the blueprint below.
+Saved data stays on the device in IndexedDB; there is no backend, account or analytics. Optional weather sends city searches and chosen coordinates to Open-Meteo after permission is granted. It does not request device location. Planned work is tracked in the local `BACKLOG.md`, the full product vision in the blueprint below.
 
 ## Documentation
 

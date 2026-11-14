@@ -181,3 +181,11 @@
 
 - Dexie v11 stores one current session per space. Absolute deadlines avoid interval drift after sleep, tab suspension or reload; paused sessions store remaining time. Transactional actions always read current state across tabs.
 - Running sessions replace Home controls with the timer and pause/end actions. Pausing or completing restores Home. No website blocking, sound, background alarm, notifications permission or automatic repeated sessions are included.
+
+## 2026-11-14: opt-in weather
+
+- Use Open-Meteo's free personal/non-commercial endpoint, with provider terms and attribution in settings and attribution beside forecasts. Geocoding attribution names GeoNames. Revisit the provider plan before commercial distribution.
+- Add only optional host access to `api.open-meteo.com` and `geocoding-api.open-meteo.com`. Request it from an explicit user action; use manual city selection, never geolocation. Settings explain city/coordinate and IP disclosure. Turning weather off disables it and removes access.
+- Dexie v12 stores per-space settings, a bounded three-day forecast and a short transactional refresh lease. Cache for one hour, limit manual refresh to 15 minutes after success and retries to one minute after failure. Tabs share the cache and lease; late responses cannot replace a different city's data.
+- Bound response streams to 64 KB, time out requests, reject redirects and unexpected units/values, and omit credentials and referrers. Preserve cached forecasts on failure, label stale data and expire display after 48 hours. There is no background polling.
+- Browser tests supply the browser-owned permission result and provider responses at the API boundary. A separate live request verifies the public endpoint shape using sample coordinates. Actual permission prompt acceptance remains a manual browser check.

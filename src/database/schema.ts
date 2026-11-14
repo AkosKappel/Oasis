@@ -1,3 +1,4 @@
+import type { WeatherSettings } from './weather';
 import type { FocusSession } from './focus-session';
 import type { HomeWidget } from './home-widgets';
 import type { DailyFocus } from './daily-focus';
@@ -18,6 +19,7 @@ import type {
   QuoteSettings,
 } from '@/types/entities';
 export class OasisDatabase extends Dexie {
+  weatherSettings!: EntityTable<WeatherSettings, 'id'>;
   focusSessions!: EntityTable<FocusSession, 'id'>;
   homeWidgets!: EntityTable<HomeWidget, 'id'>;
   dailyFocus!: EntityTable<DailyFocus, 'id'>;
@@ -76,6 +78,7 @@ export class OasisDatabase extends Dexie {
     this.version(9).stores({ dailyFocus: 'id, spaceId, [spaceId+day]' });
     this.version(10).stores({ homeWidgets: 'id, spaceId' });
     this.version(11).stores({ focusSessions: 'id, spaceId' });
+    this.version(12).stores({ weatherSettings: 'id, spaceId' });
     this.on('blocked', () => reportStorageIssue('blocked'));
     this.on('versionchange', () => {
       this.close();

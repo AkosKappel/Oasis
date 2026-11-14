@@ -1,3 +1,4 @@
+import { WeatherSettingsPanel } from '@/features/weather/weather-settings';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -215,6 +216,7 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
           </li>
         ))}
       </ul>
+      <WeatherSettingsPanel />
       {(error || loadError) && (
         <p role="alert" className="mt-3 text-sm text-danger">
           {error || loadError}

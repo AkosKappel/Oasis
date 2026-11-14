@@ -1,3 +1,4 @@
+import { WeatherWidget } from '@/features/weather/weather-widget';
 import { useFocusSession } from '@/features/focus/use-focus-session';
 import { FocusTimer } from '@/features/focus/focus-mode';
 import { focusRemaining } from '@/database/focus-session';
@@ -192,6 +193,7 @@ export function Home({
               </nav>
             )}
             <HomeWidgets now={now} clock={appearance.clock} />
+            <WeatherWidget now={now} />
             {dailyQuote && (
               <figure
                 aria-label="Daily quote"
