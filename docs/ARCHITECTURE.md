@@ -85,3 +85,7 @@ Context-menu and keyboard actions open `capture.html`; its request fragment is p
 ## Daily focus
 
 Dexie v9 adds `dailyFocus`, indexed by space and local day. Its repository validates dates and bounded titles in space-scoped transactions. The optional appearance flag controls Home visibility. A date-keyed live component follows completion and edits across tabs, retains drafts on failure and refreshes on storage retry. Daily goals are not included in bookmark backups.
+
+## Home widgets
+
+Dexie v10 adds `homeWidgets` for clock and countdown records, validated by the repository with per-kind bounds. Visibility and soft deletion synchronize through live queries. Home uses its existing clock tick, IANA formatting and stored countdown instants; there is no network dependency or second timer loop.

@@ -1,3 +1,4 @@
+import { WidgetManager } from '@/features/widgets/widget-manager';
 import { StorageRecovery } from '@/features/storage/storage-recovery';
 import type { Appearance } from '@/database/appearance';
 import { useEffect, useState } from 'react';
@@ -16,6 +17,7 @@ export function App() {
     error: appearanceError,
     saveAppearance,
   } = useAppearance(preview);
+  const [widgetsOpen, setWidgetsOpen] = useState(false);
   const [quotesOpen, setQuotesOpen] = useState(false);
   const [albumsOpen, setAlbumsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -51,6 +53,7 @@ export function App() {
           onPinLinks={(pinned) =>
             saveAppearance({ ...appearance, linksPinned: pinned })
           }
+          onWidgets={() => setWidgetsOpen(true)}
           onQuotes={() => setQuotesOpen(true)}
           onAlbums={() => setAlbumsOpen(true)}
           appearance={preview ?? appearance}
@@ -58,6 +61,7 @@ export function App() {
           onSearch={(query) => setSearch({ query })}
         />
       )}
+      {widgetsOpen && <WidgetManager onClose={() => setWidgetsOpen(false)} />}
       {quotesOpen && <QuoteManager onClose={() => setQuotesOpen(false)} />}
       {albumsOpen && <AlbumManager onClose={() => setAlbumsOpen(false)} />}
       {settingsOpen && (

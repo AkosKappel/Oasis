@@ -1,3 +1,4 @@
+import { HomeWidgets } from '@/features/widgets/home-widgets';
 import { DailyFocus } from '@/features/focus/daily-focus';
 import { localDay } from '@/database/daily-focus';
 import { useEffect, useState } from 'react';
@@ -15,6 +16,7 @@ export function Home({
   onAppearance,
   onAlbums,
   onQuotes,
+  onWidgets,
   onPinLinks,
 }: {
   onSearch: (query: string) => void;
@@ -22,6 +24,7 @@ export function Home({
   onAppearance: () => void;
   onAlbums: () => void;
   onQuotes: () => void;
+  onWidgets: () => void;
   onPinLinks: (pinned: boolean) => Promise<void>;
 }) {
   const { data: quotes } = useQuotes();
@@ -160,6 +163,7 @@ export function Home({
             ))}
           </nav>
         )}
+        <HomeWidgets now={now} clock={appearance.clock} />
         {dailyQuote && (
           <figure
             aria-label="Daily quote"
@@ -182,6 +186,13 @@ export function Home({
         )}
       </section>
       <footer className="flex flex-wrap justify-end gap-3">
+        <button
+          type="button"
+          className="rounded-md px-2 text-sm text-muted-foreground hover:text-foreground"
+          onClick={onWidgets}
+        >
+          Widgets
+        </button>
         <button
           type="button"
           className="rounded-md px-2 text-sm text-muted-foreground hover:text-foreground"

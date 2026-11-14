@@ -52,7 +52,7 @@ it('upgrades a v1 library without changing its bookmarks', async () => {
   );
   legacy.close();
   await database.open();
-  expect(database.verno).toBe(9);
+  expect(database.verno).toBe(10);
   expect(await database.bookmarks.get('saved')).toEqual(bookmark);
   expect(await database.preferences.count()).toBe(0);
 });
@@ -383,4 +383,38 @@ it('upgrades v8 without replacing appearance or existing records', async () => {
   expect(await database.preferences.get(preference.id)).toEqual(preference);
   expect(await database.spaces.get('default')).toEqual(space);
   expect(await database.dailyFocus.count()).toBe(0);
+});
+
+it('upgrades v9 daily focus without losing goals', async () => {
+  const { default: Dexie } = await import('dexie');
+  const legacy = new Dexie('oasis-test');
+  legacy.version(9).stores({
+    spaces: 'id, name, updatedAt',
+    dailyFocus: 'id, spaceId, [spaceId+day]',
+  });
+  await legacy.open();
+  const goal = {
+    id: 'goal',
+    spaceId: 'default',
+    day: '2026-11-14',
+    title: 'Keep me',
+    completed: true,
+    createdAt: 1,
+    updatedAt: 1,
+  };
+  await legacy.transaction(
+    'rw',
+    legacy.table('spaces'),
+    legacy.table('dailyFocus'),
+    async () => {
+      await legacy
+        .table('spaces')
+        .add({ id: 'default', name: 'Personal', createdAt: 1, updatedAt: 1 });
+      await legacy.table('dailyFocus').add(goal);
+    },
+  );
+  legacy.close();
+  await database.open();
+  expect(await database.dailyFocus.get('goal')).toEqual(goal);
+  expect(await database.homeWidgets.count()).toBe(0);
 });

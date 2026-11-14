@@ -170,3 +170,9 @@
 
 - Keep daily focus optional in Appearance, hidden by default. Store one short goal and completion status per space and local calendar day; the next day never inherits a previous goal.
 - Dexie v9 adds daily focus entries. The optional appearance flag needs no backfill; older appearance records remain unchanged. Goals remain device-local and separate from bookmark backups.
+
+## 2026-11-14: optional clocks and countdowns
+
+- Dexie v10 adds space-owned Home widgets with visibility flags and deletion tombstones. Start empty, limit to three clocks and three countdowns, and manage them through Widgets.
+- Use browser IANA time zones for clocks and daylight-saving behavior, with a date alongside the time. Countdown entry uses local time and saves an absolute instant; reject nonexistent local times instead of silently shifting them.
+- Keep labels short and widgets compact. No location API, permission or dependency is needed. Widgets remain device-local and outside bookmark backups.

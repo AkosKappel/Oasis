@@ -1,3 +1,4 @@
+import type { HomeWidget } from './home-widgets';
 import type { DailyFocus } from './daily-focus';
 import { reportStorageIssue } from './storage-health';
 import type { LibraryPreferenceRecord } from './library-preferences';
@@ -16,6 +17,7 @@ import type {
   QuoteSettings,
 } from '@/types/entities';
 export class OasisDatabase extends Dexie {
+  homeWidgets!: EntityTable<HomeWidget, 'id'>;
   dailyFocus!: EntityTable<DailyFocus, 'id'>;
   libraryPreferences!: EntityTable<LibraryPreferenceRecord, 'id'>;
   quoteCollections!: EntityTable<QuoteCollection, 'id'>;
@@ -70,6 +72,7 @@ export class OasisDatabase extends Dexie {
           }),
       );
     this.version(9).stores({ dailyFocus: 'id, spaceId, [spaceId+day]' });
+    this.version(10).stores({ homeWidgets: 'id, spaceId' });
     this.on('blocked', () => reportStorageIssue('blocked'));
     this.on('versionchange', () => {
       this.close();
