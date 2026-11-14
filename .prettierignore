@@ -3,3 +3,5 @@ node_modules
 .wxt
 pnpm-lock.yaml
 docs/PROJECT.md
+test-results
+playwright-report

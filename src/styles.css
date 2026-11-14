@@ -23,3 +23,35 @@
     font-family: system-ui, sans-serif;
   }
 }
+
+@layer base {
+  button,
+  a,
+  input,
+  textarea {
+    @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary;
+  }
+  button:not(:disabled),
+  a {
+    cursor: pointer;
+  }
+}
+@layer components {
+  .eyebrow {
+    @apply text-xs font-medium uppercase tracking-widest text-muted-foreground;
+  }
+  .editor {
+    @apply fixed inset-0 m-auto w-[calc(100%-2rem)] max-w-lg max-h-[90dvh] overflow-y-auto rounded-2xl border border-border bg-background p-6 text-foreground shadow-xl sm:p-8;
+  }
+  .editor::backdrop {
+    background: rgb(10 30 20 / 35%);
+    backdrop-filter: blur(4px);
+  }
+  .field {
+    @apply flex flex-col gap-2 text-sm font-medium;
+  }
+  .field input,
+  .field textarea {
+    @apply w-full rounded-md border border-border bg-white px-3 py-2 font-normal;
+  }
+}

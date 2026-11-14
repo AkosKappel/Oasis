@@ -17,11 +17,13 @@ WXT starts a Chromium development browser. To use an existing Chrome or Edge pro
 pnpm check       # TypeScript, ESLint, formatting, database tests
 pnpm build       # Production Manifest V3 extension
 pnpm zip         # Distribution archive
+pnpm exec playwright install chromium
+pnpm test:e2e    # Build and test the actual extension in Chromium
 ```
 
 ## Current scope
 
-The foundation includes WXT, React, strict TypeScript, Tailwind CSS, shadcn/ui configuration and a Button primitive, Lucide icons, and a versioned Dexie schema. The new-tab page is a placeholder. Bookmark management and dashboard features are not implemented yet.
+The foundation includes WXT, React, strict TypeScript, Tailwind CSS, shadcn/ui configuration and a Button primitive, Lucide icons, and a versioned Dexie schema. The new-tab page provides a bookmark library with add, edit, delete, favorites, and basic text filtering. Bookmarks open in a new tab. Folders, tags, import/export, and dashboard widgets are not implemented yet.
 
 The database creates a Personal space on first open. All data stays in IndexedDB; no backend, analytics, or account is configured. Cloud synchronization remains an open decision.
 

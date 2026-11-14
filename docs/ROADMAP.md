@@ -10,7 +10,13 @@
 
 ## Next: bookmark management
 
-Implement validated data access, creation, editing, deletion, folders, tags, favorites, and import/export. Decide folder deletion behavior and the initial MVP scope before expanding the schema.
+- [x] Validated data access, bookmark creation, editing, and soft deletion.
+- [x] Bookmark cards, favorites, basic text filtering, and opening links in new tabs.
+- [x] Reactive local queries, loading and error states, database tests, and Chromium interaction test.
+- [ ] Folders and tags.
+- [ ] Import/export.
+
+Decide folder deletion behavior and the initial MVP scope before expanding the schema.
 
 ## Later
 
