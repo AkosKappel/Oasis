@@ -7,6 +7,7 @@ test('manages bookmarks in the new-tab extension', async ({
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('chrome://newtab/');
+  await page.getByRole('link', { name: 'Library', exact: true }).click();
   await expect(
     page.getByRole('heading', { name: 'Your library' }),
   ).toBeVisible();
@@ -29,6 +30,7 @@ test('manages bookmarks in the new-tab extension', async ({
   await expect(bookmark).toHaveAttribute('target', '_blank');
   const secondTab = await context.newPage();
   await secondTab.goto('chrome://newtab/');
+  await secondTab.getByRole('link', { name: 'Library', exact: true }).click();
   await expect(
     secondTab.getByRole('link', { name: /Example site/ }),
   ).toBeVisible();

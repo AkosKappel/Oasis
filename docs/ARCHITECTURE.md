@@ -32,3 +32,5 @@ Oasis is a Chromium Manifest V3 extension built with WXT and React. WXT generate
 ## Permissions
 
 The manifest declares no permissions, background worker, content scripts or network integrations. Add them only when a feature needs them, and record the reason in [DECISIONS.md](DECISIONS.md).
+
+- New tabs open Home; `#library` opens bookmark management. Home reads the same live library query for favorites and passes searches through the hash query string.

@@ -7,6 +7,7 @@ test('organizes bookmarks with folders and tags without losing them on deletion'
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('chrome://newtab/');
+  await page.getByRole('link', { name: 'Library', exact: true }).click();
   await page
     .getByRole('button', { name: 'Folders and tags', exact: true })
     .click();
@@ -139,6 +140,7 @@ test('organizes bookmarks with folders and tags without losing them on deletion'
   await expect(bookmark.getByText('Resources', { exact: true })).toBeVisible();
   const secondTab = await context.newPage();
   await secondTab.goto('chrome://newtab/');
+  await secondTab.getByRole('link', { name: 'Library', exact: true }).click();
   await expect(
     secondTab.getByRole('link', { name: /Useful reference/ }),
   ).toBeVisible();

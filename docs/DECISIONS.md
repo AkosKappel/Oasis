@@ -24,3 +24,10 @@
 
 - Track planned work only in the local `BACKLOG.md` and history only in Git. The blueprint's `docs/ROADMAP.md` and `docs/CHANGELOG.md` are dropped because they repeated both; add a changelog with the first public release.
 - `AGENTS.md` holds the rules for coding agents (Codex, Claude); `CLAUDE.md` imports it.
+
+## 2026-11-14: minimal new-tab home
+
+- Open new tabs on a separate home with a clock, date, bookmark search and up to six favorites. Keep folders, tags and editing in Library.
+- Use a local CSS background rather than a photo service. The home works offline without new permissions or requests.
+- Use hash navigation so Library can be bookmarked and browser back/forward works. Home searches pass their query to Library.
+- Defer daily focus and appearance controls until the basic home and search flow are established.

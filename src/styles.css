@@ -57,3 +57,13 @@
     @apply w-full rounded-md border border-border bg-white px-3 py-2 font-normal;
   }
 }
+
+.home {
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(
+    ellipse at 50% 38%,
+    oklch(0.97 0.025 155),
+    transparent 70%
+  );
+}

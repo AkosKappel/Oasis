@@ -16,7 +16,11 @@ import { filterBookmarks } from './filter-bookmarks';
 import { OrganizationManager } from '@/features/organization/organization-manager';
 import { OrganizationFilters } from '@/features/organization/organization-filters';
 
-export function BookmarkLibrary() {
+export function BookmarkLibrary({
+  initialQuery = '',
+}: {
+  initialQuery?: string;
+}) {
   const { library, error: loadError } = useLibrary();
   const { bookmarks, folders = [], tags = [] } = library ?? {};
   const [organizationOpen, setOrganizationOpen] = useState(false);
@@ -32,7 +36,7 @@ export function BookmarkLibrary() {
       ? tagFilter
       : '';
   const [editor, setEditor] = useState<{ bookmark?: Bookmark }>();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialQuery);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [error, setError] = useState<string>();
   const [deleting, setDeleting] = useState<string>();
