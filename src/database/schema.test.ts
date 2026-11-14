@@ -52,7 +52,7 @@ it('upgrades a v1 library without changing its bookmarks', async () => {
   );
   legacy.close();
   await database.open();
-  expect(database.verno).toBe(7);
+  expect(database.verno).toBe(8);
   expect(await database.bookmarks.get('saved')).toEqual(bookmark);
   expect(await database.preferences.count()).toBe(0);
 });
@@ -95,6 +95,8 @@ it('upgrades v2 preferences while adding empty media tables', async () => {
   expect(await database.preferences.get(preference.id)).toEqual({
     ...preference,
     showFavorites: false,
+    linksSide: 'left',
+    linksPinned: false,
   });
   expect(await database.albums.count()).toBe(0);
   expect(await database.albumImages.count()).toBe(0);
@@ -246,6 +248,8 @@ it('migrates the shortcut row to opt-in without changing other appearance prefer
   expect(await database.preferences.get(preference.id)).toEqual({
     ...preference,
     showFavorites: false,
+    linksSide: 'left',
+    linksPinned: false,
   });
 });
 
@@ -291,5 +295,59 @@ it('upgrades v6 appearance records for optional colors without losing saved pref
   );
   legacy.close();
   await database.open();
-  expect(await database.preferences.get(preference.id)).toEqual(preference);
+  expect(await database.preferences.get(preference.id)).toEqual({
+    ...preference,
+    linksSide: 'left',
+    linksPinned: false,
+  });
+});
+
+it('adds Links placement defaults to v7 appearance records', async () => {
+  const { default: Dexie } = await import('dexie');
+  const legacy = new Dexie('oasis-test');
+  legacy.version(7).stores({
+    spaces: 'id, name, updatedAt',
+    bookmarks: 'id, spaceId, [spaceId+folderId], *tags, updatedAt',
+    folders: 'id, spaceId, [spaceId+parentId], updatedAt',
+    tags: 'id, spaceId, [spaceId+name], updatedAt',
+    preferences: 'id, spaceId',
+    albums: 'id, spaceId',
+    albumImages: 'id, spaceId, [spaceId+albumId]',
+    backgrounds: 'id, spaceId',
+    quoteCollections: 'id, spaceId',
+    quotes: 'id, spaceId, [spaceId+collectionId]',
+    quoteSettings: 'id, spaceId',
+    libraryPreferences: 'id, spaceId',
+  });
+  await legacy.open();
+  const record = {
+    id: 'default:appearance',
+    spaceId: 'default',
+    theme: 'dark',
+    accent: 'ocean',
+    clock: '24',
+    showDate: true,
+    showFavorites: false,
+    primaryColor: '#456789',
+    createdAt: 1,
+    updatedAt: 1,
+  };
+  await legacy.transaction(
+    'rw',
+    legacy.table('spaces'),
+    legacy.table('preferences'),
+    async () => {
+      await legacy
+        .table('spaces')
+        .add({ id: 'default', name: 'Personal', createdAt: 1, updatedAt: 1 });
+      await legacy.table('preferences').add(record);
+    },
+  );
+  legacy.close();
+  await database.open();
+  expect(await database.preferences.get(record.id)).toEqual({
+    ...record,
+    linksSide: 'left',
+    linksPinned: false,
+  });
 });

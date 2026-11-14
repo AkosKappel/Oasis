@@ -58,9 +58,7 @@ test('shows links on demand with folder search, keyboard access and focus return
   await expect(
     menu.getByRole('link', { name: /Design reference/ }),
   ).toBeVisible();
-  await menu
-    .getByRole('combobox', { name: 'Show links' })
-    .selectOption({ label: 'Reading' });
+  await menu.getByRole('button', { name: 'Reading', exact: true }).click();
   await menu.getByRole('searchbox').fill('desgin');
   await expect(
     menu.getByRole('link', { name: /Design reference/ }),

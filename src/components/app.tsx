@@ -24,7 +24,8 @@ export function App() {
     function shortcut(event: KeyboardEvent) {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
-        document.getElementById('home-links')?.hidePopover();
+        const links = document.getElementById('home-links');
+        if (links?.hasAttribute('popover')) links.hidePopover();
         if (!document.querySelector('dialog[open]')) setSearch({ query: '' });
       }
     }
@@ -45,6 +46,9 @@ export function App() {
         />
       ) : (
         <Home
+          onPinLinks={(pinned) =>
+            saveAppearance({ ...appearance, linksPinned: pinned })
+          }
           onQuotes={() => setQuotesOpen(true)}
           onAlbums={() => setAlbumsOpen(true)}
           appearance={preview ?? appearance}

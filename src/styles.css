@@ -202,3 +202,32 @@ select option {
     color: inherit;
   }
 }
+
+.links-panel[data-side='right'] {
+  left: auto;
+  right: 1.5rem;
+}
+.links-panel[data-pinned='true'] {
+  display: block;
+  height: calc(100dvh - 6rem);
+  width: 20rem;
+}
+@media (min-width: 640px) {
+  .links-panel[data-side='right'] {
+    right: 2.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .home[data-links-pinned] > section {
+    max-width: min(36rem, calc(100% - 22rem));
+  }
+  .home[data-links-pinned='left'] > section {
+    translate: 11rem;
+  }
+  .home[data-links-pinned='right'] > section {
+    translate: -11rem;
+  }
+  .home[data-links-pinned='right'] > footer {
+    padding-right: 22rem;
+  }
+}

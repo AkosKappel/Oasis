@@ -9,6 +9,8 @@ export interface Appearance {
   clock: 'system' | '12' | '24';
   showDate: boolean;
   showFavorites: boolean;
+  linksSide: 'left' | 'right';
+  linksPinned: boolean;
   primaryColor?: string;
   secondaryColor?: string;
 }
@@ -21,6 +23,8 @@ export const defaultAppearance: Appearance = {
   clock: 'system',
   showDate: true,
   showFavorites: false,
+  linksSide: 'left',
+  linksPinned: false,
 };
 export function validateAppearance(value: Appearance): Appearance {
   if (
@@ -28,7 +32,9 @@ export function validateAppearance(value: Appearance): Appearance {
     !['forest', 'ocean', 'plum'].includes(value.accent) ||
     !['system', '12', '24'].includes(value.clock) ||
     typeof value.showDate !== 'boolean' ||
-    typeof value.showFavorites !== 'boolean'
+    typeof value.showFavorites !== 'boolean' ||
+    !['left', 'right'].includes(value.linksSide ?? 'left') ||
+    (value.linksPinned !== undefined && typeof value.linksPinned !== 'boolean')
   ) {
     throw new Error('Choose valid appearance settings.');
   }
@@ -51,6 +57,8 @@ export function validateAppearance(value: Appearance): Appearance {
     clock: value.clock,
     showDate: value.showDate,
     showFavorites: value.showFavorites,
+    linksSide: value.linksSide ?? 'left',
+    linksPinned: value.linksPinned ?? false,
     ...(primaryColor ? { primaryColor } : {}),
     ...(secondaryColor ? { secondaryColor } : {}),
   };

@@ -71,3 +71,18 @@ it('persists canonical custom colors, rejects invalid values and resets to prese
   await repository.save({ ...defaultAppearance });
   expect((await repository.get()).primaryColor).toBeUndefined();
 });
+
+it('persists Links side/pinning and rejects unsupported placement', async () => {
+  await repository.save({
+    ...defaultAppearance,
+    linksSide: 'right',
+    linksPinned: true,
+  });
+  expect(await repository.get()).toMatchObject({
+    linksSide: 'right',
+    linksPinned: true,
+  });
+  await expect(
+    repository.save({ ...defaultAppearance, linksSide: 'top' as 'left' }),
+  ).rejects.toThrow('valid');
+});

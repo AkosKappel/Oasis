@@ -132,3 +132,9 @@
 
 - Keep native select controls and form/keyboard behavior. Use customizable native pickers in Chromium 135+ to style arrows, option spacing, selected/hover states and popup colors consistently with the theme.
 - Older browsers retain native option lists and a CSS chevron fallback. No replacement dropdown library or browser minimum is introduced.
+
+## 2026-11-14: configurable Links side panel
+
+- Dexie v8 adds left/right placement and optional desktop pinning, preserving existing preferences and defaulting to left/on-demand.
+- Show folder navigation directly in Links. Pinning reserves room beside the Home canvas on wide screens; small screens retain an on-demand overlay to avoid covering Home permanently.
+- Keep pinned navigation nonmodal. Unpinning restores the compact trigger; choosing a side also moves the trigger to that side.

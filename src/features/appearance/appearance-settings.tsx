@@ -205,6 +205,30 @@ export function AppearanceSettings({
               <option value="24">24-hour</option>
             </select>
           </label>
+          <label className="field">
+            Links side
+            <select
+              value={draft.linksSide}
+              onChange={(event) =>
+                update({
+                  linksSide: event.target.value as Appearance['linksSide'],
+                })
+              }
+            >
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+            </select>
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={draft.linksPinned}
+              onChange={(event) =>
+                update({ linksPinned: event.target.checked })
+              }
+            />
+            Keep Links open on desktop
+          </label>
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"

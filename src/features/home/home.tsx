@@ -13,12 +13,14 @@ export function Home({
   onAppearance,
   onAlbums,
   onQuotes,
+  onPinLinks,
 }: {
   onSearch: (query: string) => void;
   appearance: Appearance;
   onAppearance: () => void;
   onAlbums: () => void;
   onQuotes: () => void;
+  onPinLinks: (pinned: boolean) => Promise<void>;
 }) {
   const { data: quotes } = useQuotes();
   const { data: albums } = useAlbums();
@@ -51,6 +53,9 @@ export function Home({
   return (
     <main
       className={`home min-h-dvh px-6 py-6 sm:px-10 sm:py-8 ${backgroundImage ? 'home-photo' : ''}`}
+      data-links-pinned={
+        appearance.linksPinned ? appearance.linksSide : undefined
+      }
       data-background-image={backgroundImage?.id}
       style={
         backgroundImage
@@ -64,9 +69,12 @@ export function Home({
     >
       <nav
         aria-label="Main navigation"
-        className="flex items-center justify-between text-sm"
+        className={`flex items-center justify-between text-sm ${appearance.linksSide === 'right' ? 'flex-row-reverse' : ''}`}
       >
         <LinksMenu
+          side={appearance.linksSide}
+          pinned={appearance.linksPinned}
+          onPin={onPinLinks}
           bookmarks={library?.bookmarks}
           folders={library?.folders ?? []}
           tags={library?.tags ?? []}
