@@ -344,8 +344,12 @@ export function createAlbumRepository(
       return validateAlbumArchive({
         format: 'oasis-albums',
         version: 1,
-        albums: data.albums.filter((album) => !isBuiltinAlbum(album.id)),
-        images: data.images.filter((image) => !isBuiltinAlbum(image.albumId)),
+        albums: data.albums
+          .filter((album) => !isBuiltinAlbum(album.id))
+          .map((record) => ({ ...record, spaceId: 'default' })),
+        images: data.images
+          .filter((image) => !isBuiltinAlbum(image.albumId))
+          .map((record) => ({ ...record, spaceId: 'default' })),
       });
     },
     async restore(input: AlbumArchive) {
@@ -357,10 +361,6 @@ export function createAlbumRepository(
         database.albumImages,
         async () => {
           await requireSpace(database, spaceId);
-          if (spaceId !== 'default')
-            throw new Error(
-              'Album backups currently restore to Personal only.',
-            );
           const current = await active();
           const albums = [...current.albums];
           const images = [...current.images];
@@ -400,11 +400,15 @@ export function createAlbumRepository(
           validateAlbumArchive({
             format: 'oasis-albums',
             version: 1,
-            albums,
-            images,
+            albums: albums.map((record) => ({ ...record, spaceId: 'default' })),
+            images: images.map((record) => ({ ...record, spaceId: 'default' })),
           });
-          await database.albums.bulkAdd(additions.albums);
-          await database.albumImages.bulkAdd(additions.images);
+          await database.albums.bulkAdd(
+            additions.albums.map((record) => ({ ...record, spaceId })),
+          );
+          await database.albumImages.bulkAdd(
+            additions.images.map((record) => ({ ...record, spaceId })),
+          );
           return additions;
         },
       );

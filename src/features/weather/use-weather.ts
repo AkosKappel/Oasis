@@ -1,9 +1,11 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { useEffect, useState } from 'react';
 import { liveQuery } from 'dexie';
-import { personalWeather, type WeatherSettings } from '@/database/weather';
+import { type WeatherSettings } from '@/database/weather';
 import { reportStorageError } from '@/database/storage-health';
 import { useStorageHealth } from '@/features/storage/use-storage-health';
 export function useWeather() {
+  const { personalWeather } = useSpaceRepositories();
   const { retryVersion } = useStorageHealth();
   const [settings, setSettings] = useState<WeatherSettings>();
   const [error, setError] = useState<string>();
@@ -19,6 +21,6 @@ export function useWeather() {
       },
     });
     return () => sub.unsubscribe();
-  }, [retryVersion]);
+  }, [retryVersion, personalWeather]);
   return { settings, error };
 }

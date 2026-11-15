@@ -1,6 +1,7 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { duplicateGroups, personalDuplicates } from '@/database/duplicates';
+import { duplicateGroups } from '@/database/duplicates';
 import { reportStorageError } from '@/database/storage-health';
 import { folderPaths } from '@/features/organization/folder-tree';
 import type { Bookmark, Folder } from '@/types/entities';
@@ -116,6 +117,7 @@ export function DuplicateReview({
   folders: Folder[];
   onClose: () => void;
 }) {
+  const { personalDuplicates } = useSpaceRepositories();
   const ref = useRef<HTMLDialogElement>(null),
     done = useRef<HTMLButtonElement>(null),
     previous = useRef(document.activeElement);

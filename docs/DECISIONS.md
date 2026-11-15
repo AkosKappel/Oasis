@@ -229,3 +229,9 @@
 - Render Library results in batches of 60 with an explicit Show more action. Keep all matches available to search and sorting, announce the visible/total count, and reset the batch when filters change.
 - Memoize filtering and sorting so selection and dialog state changes do not rerun a large query. Select visible applies to displayed results, capped at 1,000.
 - Prefer batching over virtualized cards initially: it preserves native list semantics, keyboard access and variable card heights without another dependency. Revisit indexing or a worker if measured search latency becomes a problem; batching bounds initial DOM work, not total search cost.
+
+## 2026-11-15: independent local spaces
+
+- Keep active selection per tab rather than synchronizing a global selection and unexpectedly changing another tab’s work. Subscribe to active spaces so rename/deletion still updates every tab. Remount features on switching to discard stale forms and ensure repositories remain bound to their original space during asynchronous writes.
+- Use the existing schema and ownership checks. Protect the default from deletion, soft-delete the complete owned graph atomically, and release deleted image payloads. No schema migration or permission is needed.
+- Preserve version-1 portable content archives with a canonical archive namespace, explicitly mapping the selected target at restore. Preserve IDs and reject cross-space conflicts; do not silently turn restore into a copy operation. Settings stay device-local and per-space.

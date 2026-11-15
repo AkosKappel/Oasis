@@ -1,3 +1,4 @@
+import { SpaceSwitcher } from '@/features/spaces/space-switcher';
 import { searchEngine, webSearchUrl } from '@/lib/search-engines';
 import { WeatherWidget } from '@/features/weather/weather-widget';
 import { useFocusSession } from '@/features/focus/use-focus-session';
@@ -94,6 +95,7 @@ export function Home({
         </section>
       ) : (
         <>
+          <SpaceSwitcher />
           <nav
             aria-label="Main navigation"
             className={`flex items-center justify-between text-sm ${appearance.linksSide === 'right' ? 'flex-row-reverse' : ''}`}

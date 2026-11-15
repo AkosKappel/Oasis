@@ -302,7 +302,14 @@ export function createQuoteRepository(
       return validateQuoteArchive({
         format: 'oasis-quotes',
         version: 1,
-        ...data,
+        collections: data.collections.map((record) => ({
+          ...record,
+          spaceId: 'default',
+        })),
+        quotes: data.quotes.map((record) => ({
+          ...record,
+          spaceId: 'default',
+        })),
       });
     },
     async restore(input: QuoteArchive) {
@@ -314,8 +321,6 @@ export function createQuoteRepository(
         database.quotes,
         async () => {
           await requireSpace(database, spaceId);
-          if (spaceId !== 'default')
-            throw new Error('Quote backups restore to Personal only.');
           const current = await active();
           const collections = [...current.collections];
           const quotes = [...current.quotes];
@@ -351,11 +356,18 @@ export function createQuoteRepository(
           validateQuoteArchive({
             format: 'oasis-quotes',
             version: 1,
-            collections,
-            quotes,
+            collections: collections.map((record) => ({
+              ...record,
+              spaceId: 'default',
+            })),
+            quotes: quotes.map((record) => ({ ...record, spaceId: 'default' })),
           });
-          await database.quoteCollections.bulkAdd(addedCollections);
-          await database.quotes.bulkAdd(addedQuotes);
+          await database.quoteCollections.bulkAdd(
+            addedCollections.map((record) => ({ ...record, spaceId })),
+          );
+          await database.quotes.bulkAdd(
+            addedQuotes.map((record) => ({ ...record, spaceId })),
+          );
         },
       );
     },

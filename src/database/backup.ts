@@ -86,7 +86,7 @@ export function validateBackup(value: unknown): Backup {
     input.version !== 1 ||
     input.spaceId !== 'default'
   ) {
-    throw new Error('Choose an Oasis version 1 backup of your Personal space.');
+    throw new Error('Choose an Oasis version 1 bookmark backup.');
   }
   const folders: Folder[] = array(input.folders, (record) => ({
     ...metadata(record),
@@ -196,32 +196,35 @@ export function parseBackup(json: string): Backup {
   return validateBackup(value);
 }
 
-export function createBackupRepository(database: OasisDatabase = db) {
+export function createBackupRepository(
+  database: OasisDatabase = db,
+  spaceId = 'default',
+) {
   async function snapshot(): Promise<Backup> {
-    await requireSpace(database, 'default');
+    await requireSpace(database, spaceId);
     const active = <T extends { deletedAt?: number }>(record: T) =>
       record.deletedAt === undefined;
     const [bookmarks, folders, tags] = await Promise.all([
       database.bookmarks
         .where('spaceId')
-        .equals('default')
+        .equals(spaceId)
         .filter(active)
         .toArray(),
       database.folders
         .where('spaceId')
-        .equals('default')
+        .equals(spaceId)
         .filter(active)
         .toArray(),
-      database.tags.where('spaceId').equals('default').filter(active).toArray(),
+      database.tags.where('spaceId').equals(spaceId).filter(active).toArray(),
     ]);
     return {
       format: 'oasis',
       version: 1,
       spaceId: 'default',
       exportedAt: Date.now(),
-      bookmarks,
-      folders,
-      tags,
+      bookmarks: bookmarks.map((record) => ({ ...record, spaceId: 'default' })),
+      folders: folders.map((record) => ({ ...record, spaceId: 'default' })),
+      tags: tags.map((record) => ({ ...record, spaceId: 'default' })),
     };
   }
   return {
@@ -244,7 +247,7 @@ export function createBackupRepository(database: OasisDatabase = db) {
         database.folders,
         database.tags,
         async () => {
-          await requireSpace(database, 'default');
+          await requireSpace(database, spaceId);
           const additions: Pick<Backup, 'bookmarks' | 'folders' | 'tags'> = {
             bookmarks: [],
             folders: [],
@@ -260,7 +263,7 @@ export function createBackupRepository(database: OasisDatabase = db) {
               const existing = existingRecords[index];
               if (existing) {
                 if (
-                  existing.spaceId !== 'default' ||
+                  existing.spaceId !== spaceId ||
                   existing.deletedAt !== undefined
                 )
                   throw new Error(
@@ -280,9 +283,15 @@ export function createBackupRepository(database: OasisDatabase = db) {
             tags: [...current.tags, ...additions.tags],
             bookmarks: [...current.bookmarks, ...additions.bookmarks],
           });
-          await database.folders.bulkAdd(additions.folders);
-          await database.tags.bulkAdd(additions.tags);
-          await database.bookmarks.bulkAdd(additions.bookmarks);
+          await database.folders.bulkAdd(
+            additions.folders.map((record) => ({ ...record, spaceId })),
+          );
+          await database.tags.bulkAdd(
+            additions.tags.map((record) => ({ ...record, spaceId })),
+          );
+          await database.bookmarks.bulkAdd(
+            additions.bookmarks.map((record) => ({ ...record, spaceId })),
+          );
           return {
             added:
               additions.bookmarks.length +

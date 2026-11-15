@@ -1,9 +1,7 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  MAX_NOTE_LENGTH,
-  personalBookmarkNotes,
-} from '@/database/bookmark-notes';
+import { MAX_NOTE_LENGTH } from '@/database/bookmark-notes';
 import {
   reportStorageError,
   storageWriteSucceeded,
@@ -16,6 +14,7 @@ export function BookmarkNotesEditor({
   bookmark: Bookmark;
   onClose: () => void;
 }) {
+  const { personalBookmarkNotes } = useSpaceRepositories();
   const ref = useRef<HTMLDialogElement>(null),
     previous = useRef(document.activeElement);
   const [draft, setDraft] = useState(

@@ -1,6 +1,6 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { personalOrganization } from '@/database/organization';
 import type { Folder, Tag } from '@/types/entities';
 import { OrganizationSection } from './organization-section';
 
@@ -15,6 +15,7 @@ export function OrganizationManager({
   tags,
   onClose,
 }: OrganizationManagerProps) {
+  const { personalOrganization } = useSpaceRepositories();
   const dialog = useRef<HTMLDialogElement>(null);
   const [busy, setBusy] = useState(false);
   const previousFocus = useRef(document.activeElement);
@@ -38,7 +39,7 @@ export function OrganizationManager({
     >
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <p className="eyebrow">Personal library</p>
+          <p className="eyebrow">Bookmark library</p>
           <h2 id="organization-heading" className="mt-2 text-2xl font-semibold">
             Folders and tags
           </h2>

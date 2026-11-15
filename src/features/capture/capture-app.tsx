@@ -1,3 +1,5 @@
+import { SpaceProvider, useSpace } from '@/features/spaces/space-context';
+import { SpaceSwitcher } from '@/features/spaces/space-switcher';
 import { StorageRecovery } from '@/features/storage/storage-recovery';
 import { useAppearance } from '@/features/appearance/use-appearance';
 import { useEffect, useState } from 'react';
@@ -7,7 +9,7 @@ import { useLibrary } from '@/features/bookmarks/use-library';
 import { captureTab } from './capture-tab';
 import type { BookmarkInput } from '@/database/bookmarks';
 
-export function CaptureApp({
+function CaptureContent({
   fullPage = false,
   initialTab,
   initialError,
@@ -16,6 +18,7 @@ export function CaptureApp({
   initialTab?: { title?: string; url?: string };
   initialError?: string;
 }) {
+  const { list, spaceId } = useSpace();
   useAppearance();
   const { library, error: libraryError } = useLibrary();
   const [request] = useState<{ values?: BookmarkInput; error?: string }>(() => {
@@ -73,11 +76,14 @@ export function CaptureApp({
   return (
     <main className={fullPage ? 'mx-auto w-full max-w-lg p-6' : 'p-5'}>
       <StorageRecovery />
+      <SpaceSwitcher />
       {saved ? (
         <div role="status" className="py-8">
           <h1 className="text-xl font-semibold">Bookmark saved</h1>
           <p className="mt-3 text-sm text-muted-foreground">
-            You can find it in your Personal library.
+            You can find it in{' '}
+            {list.find((space) => space.id === spaceId)?.name ?? 'your'}{' '}
+            library.
           </p>
         </div>
       ) : error || libraryError ? (
@@ -116,5 +122,13 @@ export function CaptureApp({
         Open Library
       </a>
     </main>
+  );
+}
+
+export function CaptureApp(props: Parameters<typeof CaptureContent>[0]) {
+  return (
+    <SpaceProvider>
+      <CaptureContent {...props} />
+    </SpaceProvider>
   );
 }

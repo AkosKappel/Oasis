@@ -109,3 +109,9 @@ Dexie v13 supports an optional preferred Home search source in appearance prefer
 ## Bookmark notes
 
 The Library notes editor uses the existing optional `Bookmark.notes` field. Its repository updates only notes after checking space ownership and the reviewed note value in one transaction. Conflicts keep the draft instead of replacing a newer note. The field remains plain text, participates in existing local search and JSON backup/restore, and needs no database version change. New content is bounded; unchanged longer imported content remains valid.
+
+## Space selection
+
+Spaces already exist in the schema. The space provider loads active spaces and binds repository instances to the selected ID. The entire feature tree remounts on switching, closing drafts and resetting subscriptions. Per-tab selection lives in sessionStorage; another tab deleting the selected space falls back to the default. Capture has an explicit selector and starts in the default space in a fresh tab. Libraries, appearance, media, quotes, focus, widgets and weather settings are isolated. Optional weather host access remains browser-wide.
+
+Space deletion tombstones all owned records transactionally and releases personal image payloads. The default cannot be deleted. Bookmark/HTML, album and quote archives operate on the selected space. Version-1 archives retain the canonical `default` namespace at the boundary for compatibility, then map records into the chosen space when restoring. Existing IDs belonging to another space or tombstones are rejected; cross-space copying/remapping remains separate work. Appearance and widget settings remain outside content archives.

@@ -1,14 +1,13 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { useEffect, useRef, useState } from 'react';
 import { liveQuery } from 'dexie';
-import {
-  personalDailyFocus,
-  type DailyFocus as FocusRecord,
-} from '@/database/daily-focus';
+import { type DailyFocus as FocusRecord } from '@/database/daily-focus';
 import { reportStorageError } from '@/database/storage-health';
 import { useStorageHealth } from '@/features/storage/use-storage-health';
 import { Button } from '@/components/ui/button';
 
 export function DailyFocus({ day }: { day: string }) {
+  const { personalDailyFocus } = useSpaceRepositories();
   const { retryVersion } = useStorageHealth();
   const [record, setRecord] = useState<FocusRecord>();
   const [loaded, setLoaded] = useState(false);
@@ -32,7 +31,7 @@ export function DailyFocus({ day }: { day: string }) {
       },
     );
     return () => subscription.unsubscribe();
-  }, [day, retryVersion]);
+  }, [day, retryVersion, personalDailyFocus]);
   async function run(action: () => Promise<void>) {
     setBusy(true);
     setError(undefined);

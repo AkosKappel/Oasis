@@ -1,15 +1,13 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { useEffect, useRef, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { Button } from '@/components/ui/button';
-import {
-  personalWeather,
-  type WeatherLocation,
-  type TemperatureUnit,
-} from '@/database/weather';
+import { type WeatherLocation, type TemperatureUnit } from '@/database/weather';
 import { reportStorageError } from '@/database/storage-health';
 import { searchCities, WEATHER_ORIGINS } from './weather-api';
 import { useWeather } from './use-weather';
 export function WeatherSettingsPanel() {
+  const { personalWeather } = useSpaceRepositories();
   const { settings, error: loadError } = useWeather();
   const [allowed, setAllowed] = useState(false),
     [busy, setBusy] = useState(false),

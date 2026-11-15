@@ -1,9 +1,11 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { reportStorageError } from '@/database/storage-health';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { personalQuotes, validateQuoteArchive } from '@/database/quotes';
+import { validateQuoteArchive } from '@/database/quotes';
 import { useQuotes } from './use-quotes';
 export function QuoteManager({ onClose }: { onClose: () => void }) {
+  const { personalQuotes } = useSpaceRepositories();
   const dialog = useRef<HTMLDialogElement>(null);
   const previous = useRef(document.activeElement);
   const { data, error: loadError } = useQuotes();

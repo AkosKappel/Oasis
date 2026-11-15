@@ -1,9 +1,11 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { useEffect, useState } from 'react';
 import { liveQuery } from 'dexie';
-import { personalHomeWidgets, type HomeWidget } from '@/database/home-widgets';
+import { type HomeWidget } from '@/database/home-widgets';
 import { reportStorageError } from '@/database/storage-health';
 import { useStorageHealth } from '@/features/storage/use-storage-health';
 export function useHomeWidgets() {
+  const { personalHomeWidgets } = useSpaceRepositories();
   const { retryVersion } = useStorageHealth();
   const [widgets, setWidgets] = useState<HomeWidget[]>([]);
   const [error, setError] = useState<string>();
@@ -19,6 +21,6 @@ export function useHomeWidgets() {
       },
     });
     return () => sub.unsubscribe();
-  }, [retryVersion]);
+  }, [retryVersion, personalHomeWidgets]);
   return { widgets, error };
 }

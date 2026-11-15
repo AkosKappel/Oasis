@@ -1,12 +1,11 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { useEffect, useState } from 'react';
 import { liveQuery } from 'dexie';
-import {
-  personalFocusSession,
-  type FocusSession,
-} from '@/database/focus-session';
+import { type FocusSession } from '@/database/focus-session';
 import { reportStorageError } from '@/database/storage-health';
 import { useStorageHealth } from '@/features/storage/use-storage-health';
 export function useFocusSession() {
+  const { personalFocusSession } = useSpaceRepositories();
   const { retryVersion } = useStorageHealth();
   const [session, setSession] = useState<FocusSession>();
   const [error, setError] = useState<string>();
@@ -22,6 +21,6 @@ export function useFocusSession() {
       },
     });
     return () => sub.unsubscribe();
-  }, [retryVersion]);
+  }, [retryVersion, personalFocusSession]);
   return { session, error };
 }

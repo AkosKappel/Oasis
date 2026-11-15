@@ -1,3 +1,5 @@
+import { SpaceSwitcher } from '@/features/spaces/space-switcher';
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import {
   reportStorageError,
   storageWriteSucceeded,
@@ -8,10 +10,7 @@ import type { BulkBookmarkAction } from '@/database/bookmarks';
 import { DuplicateReview } from '@/features/duplicates/duplicate-review';
 import { useLibraryPreferences } from './use-library-preferences';
 import { sortBookmarks } from './sort-bookmarks';
-import {
-  personalLibraryPreferences,
-  type LibraryPreferences,
-} from '@/database/library-preferences';
+import { type LibraryPreferences } from '@/database/library-preferences';
 import { folderPaths } from '@/features/organization/folder-tree';
 import { BackupManager } from '@/features/backup/backup-manager';
 import { BookmarkCard } from './bookmark-card';
@@ -24,7 +23,6 @@ import {
   Star,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { personalBookmarks } from '@/database/bookmarks';
 import type { Bookmark } from '@/types/entities';
 import { BookmarkEditor } from './bookmark-editor';
 import { useLibrary } from './use-library';
@@ -37,6 +35,8 @@ export function BookmarkLibrary({
 }: {
   initialQuery?: string;
 }) {
+  const { personalBookmarks, personalLibraryPreferences } =
+    useSpaceRepositories();
   const { preferences, error: preferencesError } = useLibraryPreferences();
   const { library, error: loadError } = useLibrary();
   const { bookmarks, folders = [], tags = [] } = library ?? {};
@@ -173,7 +173,7 @@ export function BookmarkLibrary({
       </button>
       {backupOpen && <BackupManager onClose={() => setBackupOpen(false)} />}
       <header className="border-b border-border">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 sm:px-10">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-6 sm:px-10">
           <a
             href="#"
             aria-label="Oasis home"
@@ -185,9 +185,7 @@ export function BookmarkLibrary({
               Your personal space on the web
             </span>
           </a>
-          <span className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
-            Personal space
-          </span>
+          <SpaceSwitcher />
         </div>
       </header>
       <main

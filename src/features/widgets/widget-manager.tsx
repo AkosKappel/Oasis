@@ -1,8 +1,8 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { WeatherSettingsPanel } from '@/features/weather/weather-settings';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
-  personalHomeWidgets,
   localDateTime,
   parseDeadline,
   type HomeWidget,
@@ -11,6 +11,7 @@ import { reportStorageError } from '@/database/storage-health';
 import { useHomeWidgets } from './use-home-widgets';
 const timeZones = ['UTC', ...Intl.supportedValuesOf('timeZone')];
 export function WidgetManager({ onClose }: { onClose: () => void }) {
+  const { personalHomeWidgets } = useSpaceRepositories();
   const ref = useRef<HTMLDialogElement>(null),
     previous = useRef(document.activeElement);
   const { widgets, error: loadError } = useHomeWidgets();

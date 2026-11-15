@@ -162,11 +162,14 @@ export function serializeBookmarkHtml(input: Backup): string {
   return `${lines.join('\n')}\n`;
 }
 
-export function createBookmarkHtmlRepository(database: OasisDatabase = db) {
+export function createBookmarkHtmlRepository(
+  database: OasisDatabase = db,
+  spaceId = 'default',
+) {
   return {
     async export() {
       return serializeBookmarkHtml(
-        await createBackupRepository(database).export(),
+        await createBackupRepository(database, spaceId).export(),
       );
     },
     async import(input: HtmlImport) {
@@ -177,15 +180,15 @@ export function createBookmarkHtmlRepository(database: OasisDatabase = db) {
         database.folders,
         database.bookmarks,
         async () => {
-          await requireSpace(database, 'default');
+          await requireSpace(database, spaceId);
           const folders = await database.folders
             .where('spaceId')
-            .equals('default')
+            .equals(spaceId)
             .filter((record) => record.deletedAt === undefined)
             .toArray();
           const bookmarks = await database.bookmarks
             .where('spaceId')
-            .equals('default')
+            .equals(spaceId)
             .filter((record) => record.deletedAt === undefined)
             .toArray();
           const siblingKey = (parent: string | undefined, name: string) =>
@@ -211,7 +214,7 @@ export function createBookmarkHtmlRepository(database: OasisDatabase = db) {
               existingFolders.set(key, id);
               addedFolders.push({
                 id,
-                spaceId: 'default',
+                spaceId,
                 name: folder.name,
                 parentId,
                 sortOrder: now + addedFolders.length,
@@ -244,7 +247,7 @@ export function createBookmarkHtmlRepository(database: OasisDatabase = db) {
             addedBookmarks.push({
               ...bookmark.input,
               id: crypto.randomUUID(),
-              spaceId: 'default',
+              spaceId,
               folderId,
               tags: [],
               isFavorite: false,

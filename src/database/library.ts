@@ -1,8 +1,8 @@
 import { db } from './schema';
-import { personalBookmarks } from './bookmarks';
-import { personalOrganization } from './organization';
+import { createBookmarkRepository } from './bookmarks';
+import { createOrganizationRepository } from './organization';
 
-export function getPersonalLibrary() {
+export function getPersonalLibrary(spaceId = 'default') {
   return db.transaction(
     'r',
     db.spaces,
@@ -11,8 +11,8 @@ export function getPersonalLibrary() {
     db.tags,
     async () => {
       const [bookmarks, organization] = await Promise.all([
-        personalBookmarks.list(),
-        personalOrganization.list(),
+        createBookmarkRepository(spaceId).list(),
+        createOrganizationRepository(spaceId).list(),
       ]);
       return { bookmarks, ...organization };
     },

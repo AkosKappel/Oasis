@@ -1,12 +1,11 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { reportStorageError } from '@/database/storage-health';
 import { useStorageHealth } from '@/features/storage/use-storage-health';
 import { useEffect, useState } from 'react';
 import { liveQuery } from 'dexie';
-import {
-  defaultLibraryPreferences,
-  personalLibraryPreferences,
-} from '@/database/library-preferences';
+import { defaultLibraryPreferences } from '@/database/library-preferences';
 export function useLibraryPreferences() {
+  const { personalLibraryPreferences } = useSpaceRepositories();
   const { retryVersion } = useStorageHealth();
   const [preferences, setPreferences] = useState(defaultLibraryPreferences);
   const [error, setError] = useState<string>();
@@ -24,6 +23,6 @@ export function useLibraryPreferences() {
       },
     });
     return () => sub.unsubscribe();
-  }, [retryVersion]);
+  }, [retryVersion, personalLibraryPreferences]);
   return { preferences, error };
 }

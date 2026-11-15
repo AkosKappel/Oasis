@@ -1,9 +1,10 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import {
   reportStorageError,
   storageWriteSucceeded,
 } from '@/database/storage-health';
 import { useEffect, useRef, useState, type SubmitEvent } from 'react';
-import { personalBookmarks, type BookmarkInput } from '@/database/bookmarks';
+import { type BookmarkInput } from '@/database/bookmarks';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
 import { folderOptions } from '@/features/organization/folder-tree';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,7 @@ export function BookmarkEditor({
   defaultFolderId,
   onClose,
 }: BookmarkEditorProps) {
+  const { personalBookmarks } = useSpaceRepositories();
   const dialog = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState<string>();
   const [saving, setSaving] = useState(false);
@@ -77,7 +79,7 @@ export function BookmarkEditor({
   const form = (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <div>
-        <p className="eyebrow">Personal library</p>
+        <p className="eyebrow">Bookmark library</p>
         <h2 id="editor-title" className="mt-2 text-2xl font-semibold">
           {bookmark ? 'Edit bookmark' : 'Save a bookmark'}
         </h2>

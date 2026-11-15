@@ -1,9 +1,10 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { reportStorageError } from '@/database/storage-health';
 import { useStorageHealth } from '@/features/storage/use-storage-health';
 import { useEffect, useState } from 'react';
 import { liveQuery } from 'dexie';
-import { personalAlbums } from '@/database/albums';
 export function useAlbums() {
+  const { personalAlbums } = useSpaceRepositories();
   const { retryVersion } = useStorageHealth();
   const [data, setData] =
     useState<Awaited<ReturnType<typeof personalAlbums.list>>>();
@@ -20,6 +21,6 @@ export function useAlbums() {
       },
     });
     return () => sub.unsubscribe();
-  }, [retryVersion]);
+  }, [retryVersion, personalAlbums]);
   return { data, error };
 }

@@ -1,9 +1,10 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { reportStorageError } from '@/database/storage-health';
 import { useStorageHealth } from '@/features/storage/use-storage-health';
 import { useEffect, useState } from 'react';
 import { liveQuery } from 'dexie';
-import { personalQuotes } from '@/database/quotes';
 export function useQuotes() {
+  const { personalQuotes } = useSpaceRepositories();
   const { retryVersion } = useStorageHealth();
   const [data, setData] =
     useState<Awaited<ReturnType<typeof personalQuotes.list>>>();
@@ -20,6 +21,6 @@ export function useQuotes() {
       },
     });
     return () => sub.unsubscribe();
-  }, [retryVersion]);
+  }, [retryVersion, personalQuotes]);
   return { data, error };
 }

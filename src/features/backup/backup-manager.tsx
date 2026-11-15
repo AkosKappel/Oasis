@@ -1,17 +1,9 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { reportStorageError } from '@/database/storage-health';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  MAX_BACKUP_BYTES,
-  parseBackup,
-  personalBackup,
-  type Backup,
-} from '@/database/backup';
-import {
-  MAX_HTML_BYTES,
-  personalBookmarkHtml,
-  type HtmlImport,
-} from '@/database/bookmark-html';
+import { MAX_BACKUP_BYTES, parseBackup, type Backup } from '@/database/backup';
+import { MAX_HTML_BYTES, type HtmlImport } from '@/database/bookmark-html';
 import { parseBookmarkHtml } from '@/features/transfer/parse-bookmark-html';
 
 function downloadFile(content: string, type: string, name: string) {
@@ -23,6 +15,7 @@ function downloadFile(content: string, type: string, name: string) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 export function BackupManager({ onClose }: { onClose: () => void }) {
+  const { personalBackup, personalBookmarkHtml } = useSpaceRepositories();
   const dialog = useRef<HTMLDialogElement>(null);
   const previousFocus = useRef(document.activeElement);
   const [backup, setBackup] = useState<Backup>();

@@ -1,3 +1,4 @@
+import { SpaceProvider } from '@/features/spaces/space-context';
 import { FocusModeDialog } from '@/features/focus/focus-mode';
 import { WidgetManager } from '@/features/widgets/widget-manager';
 import { StorageRecovery } from '@/features/storage/storage-recovery';
@@ -12,6 +13,14 @@ import { AlbumManager } from '@/features/albums/album-manager';
 import { Home } from '@/features/home/home';
 
 export function App() {
+  return (
+    <SpaceProvider>
+      <AppContent />
+    </SpaceProvider>
+  );
+}
+
+function AppContent() {
   const [preview, setPreview] = useState<Appearance>();
   const {
     appearance,

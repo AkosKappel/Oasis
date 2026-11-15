@@ -1,11 +1,8 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { reportStorageError } from '@/database/storage-health';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  personalAlbums,
-  validateAlbumArchive,
-  type PreparedImage,
-} from '@/database/albums';
+import { validateAlbumArchive, type PreparedImage } from '@/database/albums';
 import { useAlbums } from './use-albums';
 import {
   BUILTIN_ALBUMS,
@@ -15,6 +12,7 @@ import {
 import { prepareImage, verifyArchivedImages } from './prepare-image';
 
 export function AlbumManager({ onClose }: { onClose: () => void }) {
+  const { personalAlbums } = useSpaceRepositories();
   const dialog = useRef<HTMLDialogElement>(null);
   const previous = useRef(document.activeElement);
   const { data, error: loadError } = useAlbums();

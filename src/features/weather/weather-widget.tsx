@@ -1,3 +1,4 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { useEffect, useState } from 'react';
 import {
   WEATHER_CACHE_MS,
@@ -10,6 +11,7 @@ import { useWeather } from './use-weather';
 import { refreshWeather } from './weather-service';
 import { weatherDescription } from './weather-api';
 export function WeatherWidget({ now }: { now: Date }) {
+  const { personalWeather } = useSpaceRepositories();
   const { settings, error: loadError } = useWeather();
   const [busy, setBusy] = useState(false),
     [error, setError] = useState<string>(),
@@ -19,7 +21,7 @@ export function WeatherWidget({ now }: { now: Date }) {
   useEffect(() => {
     if (!enabled) return;
     let active = true;
-    void refreshWeather()
+    void refreshWeather(false, personalWeather)
       .then(() => {
         if (active) setError(undefined);
       })
@@ -35,7 +37,7 @@ export function WeatherWidget({ now }: { now: Date }) {
     return () => {
       active = false;
     };
-  }, [key, enabled]);
+  }, [key, enabled, personalWeather]);
   if (!settings?.enabled)
     return loadError ? (
       <p role="alert" className="mt-4 text-sm">
@@ -122,7 +124,7 @@ export function WeatherWidget({ now }: { now: Date }) {
             setBusy(true);
             setError(undefined);
             setMessage('');
-            void refreshWeather(true)
+            void refreshWeather(true, personalWeather)
               .then((updated) =>
                 setMessage(
                   updated

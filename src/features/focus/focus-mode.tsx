@@ -1,13 +1,14 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   focusRemaining,
   timerText,
-  personalFocusSession,
   type FocusSession,
 } from '@/database/focus-session';
 import { reportStorageError } from '@/database/storage-health';
 export function FocusModeDialog({ onClose }: { onClose: () => void }) {
+  const { personalFocusSession } = useSpaceRepositories();
   const ref = useRef<HTMLDialogElement>(null),
     previous = useRef(document.activeElement);
   const [minutes, setMinutes] = useState(25),
@@ -102,6 +103,7 @@ export function FocusTimer({
   session: FocusSession;
   now: number;
 }) {
+  const { personalFocusSession } = useSpaceRepositories();
   const [busy, setBusy] = useState(false),
     [error, setError] = useState<string>();
   const remaining = focusRemaining(session, now);

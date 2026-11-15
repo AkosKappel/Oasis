@@ -1,3 +1,4 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
 import {
   reportStorageError,
   storageWriteSucceeded,
@@ -8,12 +9,12 @@ import { liveQuery } from 'dexie';
 import { applyAppearance } from './apply-appearance';
 import {
   defaultAppearance,
-  personalAppearance,
   validateAppearance,
   type Appearance,
 } from '@/database/appearance';
 
 export function useAppearance(preview?: Appearance) {
+  const { personalAppearance } = useSpaceRepositories();
   const { retryVersion } = useStorageHealth();
   const [appearance, setAppearance] = useState(defaultAppearance);
   const [error, setError] = useState<string>();
@@ -31,7 +32,7 @@ export function useAppearance(preview?: Appearance) {
       },
     });
     return () => subscription.unsubscribe();
-  }, [retryVersion]);
+  }, [retryVersion, personalAppearance]);
   const effective = preview ?? appearance;
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)');
@@ -40,11 +41,14 @@ export function useAppearance(preview?: Appearance) {
     media.addEventListener('change', apply);
     return () => media.removeEventListener('change', apply);
   }, [effective]);
-  const saveAppearance = useCallback(async (input: Appearance) => {
-    const values = validateAppearance(input);
-    await personalAppearance.save(values);
-    setAppearance(values);
-    storageWriteSucceeded();
-  }, []);
+  const saveAppearance = useCallback(
+    async (input: Appearance) => {
+      const values = validateAppearance(input);
+      await personalAppearance.save(values);
+      setAppearance(values);
+      storageWriteSucceeded();
+    },
+    [personalAppearance],
+  );
   return { appearance, error, saveAppearance };
 }
