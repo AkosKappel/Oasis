@@ -1,3 +1,4 @@
+import { smartCollection, type SmartCollection } from './smart-collections';
 import { SpaceSwitcher } from '@/features/spaces/space-switcher';
 import { useSpaceRepositories } from '@/features/spaces/space-context';
 import {
@@ -62,20 +63,35 @@ export function BookmarkLibrary({
       : '';
   const [editor, setEditor] = useState<{ bookmark?: Bookmark }>();
   const [query, setQuery] = useState(initialQuery);
-  const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const [collection, setCollection] = useState<SmartCollection>('all');
+  const favoritesOnly = collection === 'favorites';
   const [error, setError] = useState<string>();
   const [deleting, setDeleting] = useState<string>();
   const filtered = useMemo(
     () =>
       bookmarks
-        ? filterBookmarks(bookmarks, folders, tags, {
-            query,
-            favoritesOnly,
-            folderId,
-            tagId,
-          })
+        ? filterBookmarks(
+            smartCollection(bookmarks, collection),
+            folders,
+            tags,
+            {
+              query,
+              favoritesOnly,
+              folderId,
+              tagId,
+            },
+          )
         : undefined,
-    [bookmarks, folders, tags, query, favoritesOnly, folderId, tagId],
+    [
+      bookmarks,
+      folders,
+      tags,
+      query,
+      favoritesOnly,
+      folderId,
+      tagId,
+      collection,
+    ],
   );
   const visible = useMemo(
     () => (filtered ? sortBookmarks(filtered, preferences.sort) : undefined),
@@ -137,7 +153,10 @@ export function BookmarkLibrary({
       setBulkBusy(false);
     }
   }
-  const organizationFiltered = !!folderId || !!tagId;
+  const organizationFiltered =
+    !!folderId ||
+    !!tagId ||
+    (collection !== 'all' && collection !== 'favorites');
   const paths = folderPaths(folders);
   const folderMap = new Map(
     folders.map((folder) => [
@@ -239,12 +258,12 @@ export function BookmarkLibrary({
             aria-label="Library filters"
           >
             <Button
-              variant={favoritesOnly ? 'outline' : 'default'}
+              variant={collection === 'all' ? 'default' : 'outline'}
               onClick={() => {
-                setFavoritesOnly(false);
+                setCollection('all');
                 clearSelection();
               }}
-              aria-pressed={!favoritesOnly}
+              aria-pressed={collection === 'all'}
             >
               All bookmarks{' '}
               {bookmarks && (
@@ -254,7 +273,7 @@ export function BookmarkLibrary({
             <Button
               variant={favoritesOnly ? 'default' : 'outline'}
               onClick={() => {
-                setFavoritesOnly(true);
+                setCollection('favorites');
                 clearSelection();
               }}
               aria-pressed={favoritesOnly}
@@ -291,6 +310,27 @@ export function BookmarkLibrary({
           tag:"Read later". Best match uses recent additions when search is
           empty.
         </p>
+        <label className="field mt-4 max-w-sm">
+          Smart collection
+          <select
+            aria-label="Smart collection"
+            value={collection}
+            onChange={(event) => {
+              setCollection(event.target.value as SmartCollection);
+              clearSelection();
+            }}
+          >
+            <option value="all">All bookmarks</option>
+            <option value="recent">Recently added</option>
+            <option value="favorites">Favorites</option>
+            <option value="untagged">Untagged</option>
+            <option value="unorganized">Unorganized</option>
+          </select>
+          <span className="text-xs font-normal text-muted-foreground">
+            Recently added includes the 50 newest bookmarks. Folder, tag and
+            search filters also apply.
+          </span>
+        </label>
         {bookmarks && (
           <OrganizationFilters
             bookmarks={bookmarks}

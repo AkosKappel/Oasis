@@ -235,3 +235,8 @@
 - Keep active selection per tab rather than synchronizing a global selection and unexpectedly changing another tab’s work. Subscribe to active spaces so rename/deletion still updates every tab. Remount features on switching to discard stale forms and ensure repositories remain bound to their original space during asynchronous writes.
 - Use the existing schema and ownership checks. Protect the default from deletion, soft-delete the complete owned graph atomically, and release deleted image payloads. No schema migration or permission is needed.
 - Preserve version-1 portable content archives with a canonical archive namespace, explicitly mapping the selected target at restore. Preserve IDs and reject cross-space conflicts; do not silently turn restore into a copy operation. Settings stay device-local and per-space.
+
+## 2026-11-15: built-in smart collections
+
+- Derive Recently added, Favorites, Untagged and Unorganized directly from active bookmarks in the selected space. Recently added means the 50 newest records, with deterministic ID ties, rather than a date window that can unexpectedly empty the collection.
+- Apply folder, tag and search filters within the collection, retaining the user’s sort preference. Recompute after live updates; do not store duplicate membership records or add custom rules yet.
