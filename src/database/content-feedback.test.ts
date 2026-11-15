@@ -99,3 +99,38 @@ it('upgrades v17 without changing background choices or adding ratings', async (
     await upgraded.delete();
   }
 });
+it('clears stale targets and resets only the requested kind and owned space', async () => {
+  await database.open();
+  const repo = createContentFeedbackRepository('default', database);
+  const image = builtinAlbums('default').images[0]!.id;
+  await repo.rate('image', image, 'like');
+  await database.quotes.add({
+    id: 'local',
+    spaceId: 'default',
+    collectionId: 'c',
+    text: 'Keep going',
+    author: '',
+    createdAt: 1,
+    updatedAt: 1,
+  });
+  await repo.rate('quote', 'local', 'dislike');
+  await database.quotes.update('local', { deletedAt: 2 });
+  const other = await createSpaceRepository(database).save('Other');
+  const otherRepo = createContentFeedbackRepository(other, database);
+  await otherRepo.rate('image', image, 'dislike');
+  const foreign = (await otherRepo.list())[0]!;
+  await expect(repo.clear(foreign.id)).rejects.toThrow();
+  const stale = (await repo.list()).find((record) => record.kind === 'quote')!;
+  await repo.clear(stale.id);
+  expect((await repo.list()).map((record) => record.kind)).toEqual(['image']);
+  await repo.reset('quote');
+  expect(await repo.list()).toHaveLength(1);
+  await repo.reset();
+  expect(await repo.list()).toEqual([]);
+  expect(await otherRepo.list()).toHaveLength(1);
+  expect(
+    (await database.contentFeedback.toArray())
+      .filter((record) => record.spaceId === 'default')
+      .every((record) => record.deletedAt !== undefined),
+  ).toBe(true);
+});

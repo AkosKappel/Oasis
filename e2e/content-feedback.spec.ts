@@ -4,6 +4,7 @@ test('rates local images and quotes, persists across tabs and skips disliked dai
   page,
   context,
 }, testInfo) => {
+  test.setTimeout(60_000);
   await context.setOffline(true);
   await page.goto('chrome://newtab/');
   await page.getByRole('button', { name: 'Image albums', exact: true }).click();
@@ -113,11 +114,121 @@ test('rates local images and quotes, persists across tabs and skips disliked dai
   await page
     .getByRole('button', { name: 'Dislike this quote', exact: true })
     .click();
+  await expect(
+    page.getByRole('button', { name: 'Content preferences', exact: true }),
+  ).toBeFocused();
   await expect(page.getByRole('figure', { name: 'Daily quote' })).toHaveCount(
     0,
   );
   await page.reload();
   await expect(page.getByRole('figure', { name: 'Daily quote' })).toHaveCount(
     0,
+  );
+  await page
+    .getByRole('button', { name: 'Content preferences', exact: true })
+    .click();
+  const preferences = page.getByRole('dialog', {
+    name: 'Content preferences',
+    exact: true,
+  });
+  await expect(
+    preferences
+      .getByRole('list', { name: 'Saved content preferences' })
+      .getByRole('listitem'),
+  ).toHaveCount(2);
+  await preferences
+    .getByRole('combobox', { name: 'Content type', exact: true })
+    .selectOption('quote');
+  await expect(preferences.getByRole('listitem')).toHaveCount(1);
+  await preferences
+    .getByRole('button', { name: /Clear preference for Make room/ })
+    .click();
+  await expect(preferences.getByRole('status')).toHaveText(
+    'Preference cleared.',
+  );
+  await expect(
+    preferences.getByRole('textbox', { name: 'Find a preference' }),
+  ).toBeFocused();
+  await preferences
+    .getByRole('combobox', { name: 'Content type', exact: true })
+    .selectOption('all');
+  await preferences
+    .getByRole('textbox', { name: 'Find a preference' })
+    .fill('no matching content');
+  await preferences
+    .getByRole('button', { name: 'Clear all preferences', exact: true })
+    .click();
+  await expect(
+    preferences.getByText(
+      'This includes choices hidden by search or rating filters.',
+      { exact: false },
+    ),
+  ).toBeVisible();
+  await preferences
+    .getByRole('button', { name: 'Cancel clear', exact: true })
+    .click();
+  await expect(
+    preferences.getByRole('button', {
+      name: 'Clear all preferences',
+      exact: true,
+    }),
+  ).toBeFocused();
+  await preferences
+    .getByRole('textbox', { name: 'Find a preference' })
+    .fill('');
+  expect(
+    (
+      await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+        .analyze()
+    ).violations,
+  ).toEqual([]);
+  await page.screenshot({
+    path: testInfo.outputPath('preferences-mobile.png'),
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.screenshot({
+    path: testInfo.outputPath('preferences-desktop.png'),
+    fullPage: true,
+  });
+  await preferences
+    .getByRole('button', { name: 'Clear all preferences', exact: true })
+    .click();
+  await preferences
+    .getByRole('button', { name: 'Confirm clear preferences', exact: true })
+    .click();
+  await expect(preferences.getByRole('listitem')).toHaveCount(0);
+  await preferences.getByRole('button', { name: 'Done', exact: true }).click();
+  await expect(
+    page.getByRole('button', { name: 'Content preferences', exact: true }),
+  ).toBeFocused();
+  await expect(page.getByRole('figure', { name: 'Daily quote' })).toBeVisible();
+  await page.getByRole('button', { name: 'Image albums', exact: true }).click();
+  const fixedAlbums = page.getByRole('dialog', {
+    name: 'Image albums',
+    exact: true,
+  });
+  await fixedAlbums
+    .getByRole('button', { name: 'Quiet geometry', exact: true })
+    .click();
+  await fixedAlbums
+    .getByRole('button', { name: 'Use image', exact: true })
+    .first()
+    .click();
+  await fixedAlbums.getByRole('button', { name: 'Done', exact: true }).click();
+  await expect(page.locator('main')).toHaveAttribute(
+    'data-background-image',
+    'oasis:builtin:jade-ridges',
+  );
+  await page
+    .getByRole('button', { name: 'Dislike this background', exact: true })
+    .click();
+  await expect(
+    page.getByRole('button', { name: 'Dislike this background', exact: true }),
+  ).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('main')).toHaveAttribute(
+    'data-background-image',
+    'oasis:builtin:jade-ridges',
   );
 });

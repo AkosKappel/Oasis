@@ -1,3 +1,4 @@
+import { ContentPreferences } from '@/features/content/content-preferences';
 import { defaultDashboardItems } from '@/database/dashboard-layout';
 import { useDashboardLayout } from './use-dashboard-layout';
 import { BookmarkSections } from './bookmark-sections';
@@ -11,7 +12,7 @@ import { focusRemaining } from '@/database/focus-session';
 import { HomeWidgets } from '@/features/widgets/home-widgets';
 import { DailyFocus } from '@/features/focus/daily-focus';
 import { localDay } from '@/database/daily-focus';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Library, Search, SlidersHorizontal } from 'lucide-react';
 import { LinksMenu } from '@/features/links/links-menu';
 import { preferredDailyItem } from '@/lib/preferred-daily-item';
@@ -53,6 +54,9 @@ export function Home({
   onPinLinks: (pinned: boolean) => Promise<void>;
 }) {
   const { layout, error: layoutError } = useDashboardLayout();
+  const [preferencesOpen, setPreferencesOpen] = useState(false);
+  const preferenceTrigger = useRef<HTMLButtonElement>(null);
+  const pendingFocus = useRef<HTMLElement | null>(null);
   const { contentFeedback } = useSpaceRepositories();
   const { feedback: storedFeedback, error: feedbackError } =
     useContentFeedback();
@@ -62,6 +66,10 @@ export function Home({
   const [ratingError, setRatingError] = useState<string>();
   async function rate(kind: ContentKind, id: string, value: Rating | null) {
     if (ratingBusy) return;
+    pendingFocus.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     setRatingBusy(true);
     setRatingError(undefined);
     try {
@@ -85,6 +93,16 @@ export function Home({
       setRatingBusy(false);
     }
   }
+  useEffect(() => {
+    if (
+      !ratingBusy &&
+      pendingFocus.current &&
+      !pendingFocus.current.isConnected
+    ) {
+      preferenceTrigger.current?.focus();
+      pendingFocus.current = null;
+    }
+  }, [storedFeedback, ratingBusy]);
   const source = searchEngine(appearance.searchEngine);
   const { session, error: focusError } = useFocusSession();
   const { data: quotes } = useQuotes();
@@ -285,6 +303,17 @@ export function Home({
             />
           </figure>
         )}
+        {storedFeedback &&
+          quotes?.settings?.visible &&
+          !dailyQuote &&
+          quotes.quotes.some(
+            (quote) => quote.collectionId === quotes.settings?.collectionId,
+          ) && (
+            <p className="text-sm">
+              All quotes in this collection are disliked. Clear a choice in
+              Content preferences to show quotes again.
+            </p>
+          )}
       </>
     ),
   };
@@ -397,7 +426,24 @@ export function Home({
               />
             </div>
           )}
+          {storedFeedback &&
+            albums?.background?.rotateDaily &&
+            albumImages.length > 0 &&
+            !backgroundImage && (
+              <p className="mb-4 text-center text-sm">
+                All backgrounds in this rotation are disliked. Clear a choice in
+                Content preferences to show images again.
+              </p>
+            )}
           <footer className="flex flex-wrap justify-end gap-3">
+            <button
+              ref={preferenceTrigger}
+              type="button"
+              className="rounded-md px-2 text-sm text-muted-foreground hover:text-foreground"
+              onClick={() => setPreferencesOpen(true)}
+            >
+              Content preferences
+            </button>
             <button
               type="button"
               className="rounded-md px-2 text-sm text-muted-foreground hover:text-foreground"
@@ -443,6 +489,9 @@ export function Home({
             </button>
           </footer>
         </>
+      )}
+      {preferencesOpen && (
+        <ContentPreferences onClose={() => setPreferencesOpen(false)} />
       )}
     </main>
   );

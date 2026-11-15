@@ -23,6 +23,49 @@ export function createContentFeedbackRepository(
         .filter((record) => record.deletedAt === undefined)
         .toArray();
     },
+    async clear(id: string) {
+      await database.transaction(
+        'rw',
+        database.spaces,
+        database.contentFeedback,
+        async () => {
+          await requireSpace(database, spaceId);
+          await requireOwnedRecord(
+            database.contentFeedback,
+            id,
+            spaceId,
+            'preference',
+          );
+          const now = Date.now();
+          await database.contentFeedback.update(id, {
+            deletedAt: now,
+            updatedAt: now,
+          });
+        },
+      );
+    },
+    async reset(kind?: ContentKind) {
+      if (kind !== undefined && !['image', 'quote'].includes(kind))
+        throw new Error('Choose backgrounds or quotes to clear.');
+      await database.transaction(
+        'rw',
+        database.spaces,
+        database.contentFeedback,
+        async () => {
+          await requireSpace(database, spaceId);
+          const now = Date.now();
+          await database.contentFeedback
+            .where('spaceId')
+            .equals(spaceId)
+            .filter(
+              (record) =>
+                record.deletedAt === undefined &&
+                (kind === undefined || record.kind === kind),
+            )
+            .modify({ deletedAt: now, updatedAt: now });
+        },
+      );
+    },
     async rate(
       kind: ContentKind,
       itemId: string,
