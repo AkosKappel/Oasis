@@ -1,3 +1,4 @@
+import { TrackedBookmarkLink } from '@/features/bookmarks/tracked-bookmark-link';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link as LinkIcon } from 'lucide-react';
@@ -222,7 +223,8 @@ export function LinksMenu({
           <ul aria-label="Saved links" className="mt-4 flex flex-col gap-1">
             {matches.slice(0, 50).map((bookmark) => (
               <li key={bookmark.id}>
-                <a
+                <TrackedBookmarkLink
+                  bookmarkId={bookmark.id}
                   data-bookmark
                   href={bookmark.url}
                   onClick={() =>
@@ -237,7 +239,7 @@ export function LinksMenu({
                   <span className="block truncate text-xs text-muted-foreground group-hover/link:text-secondary-foreground">
                     {new URL(bookmark.url).hostname}
                   </span>
-                </a>
+                </TrackedBookmarkLink>
               </li>
             ))}
           </ul>

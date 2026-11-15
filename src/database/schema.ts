@@ -80,6 +80,16 @@ export class OasisDatabase extends Dexie {
     this.version(11).stores({ focusSessions: 'id, spaceId' });
     this.version(12).stores({ weatherSettings: 'id, spaceId' });
     this.version(13).stores({ preferences: 'id, spaceId' });
+    this.version(14)
+      .stores({ libraryPreferences: 'id, spaceId' })
+      .upgrade((transaction) =>
+        transaction
+          .table('libraryPreferences')
+          .toCollection()
+          .modify((record) => {
+            record.trackOpens ??= false;
+          }),
+      );
     this.on('blocked', () => reportStorageIssue('blocked'));
     this.on('versionchange', () => {
       this.close();

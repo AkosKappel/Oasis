@@ -1,3 +1,5 @@
+import { useSpaceRepositories } from '@/features/spaces/space-context';
+import { reportStorageError } from '@/database/storage-health';
 import {
   searchEngine,
   webSearchUrl,
@@ -16,6 +18,7 @@ export function CommandPalette({
   preferredEngine?: SearchEngine;
   onClose: () => void;
 }) {
+  const { openHistory } = useSpaceRepositories();
   const dialog = useRef<HTMLDialogElement>(null);
   const [query, setQuery] = useState(initialQuery);
   const [selected, setSelected] = useState(0);
@@ -67,8 +70,12 @@ export function CommandPalette({
   function open(index: number) {
     const result = results[index];
     if (!result) return;
-    window.location.assign(result.url);
-    onClose();
+    const tracking =
+      'spaceId' in result ? openHistory.record(result.id) : Promise.resolve();
+    void tracking.catch(reportStorageError).then(() => {
+      window.location.assign(result.url);
+      onClose();
+    });
   }
   return (
     <dialog

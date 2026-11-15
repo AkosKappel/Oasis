@@ -24,5 +24,5 @@ export function useLibraryPreferences() {
     });
     return () => sub.unsubscribe();
   }, [retryVersion, personalLibraryPreferences]);
-  return { preferences, error };
+  return { preferences, error, setPreferences };
 }

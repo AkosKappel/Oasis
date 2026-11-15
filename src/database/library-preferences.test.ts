@@ -6,16 +6,28 @@ const repository = createLibraryPreferencesRepository('default', database);
 beforeEach(() => database.open());
 afterEach(() => database.delete());
 it('persists partial changes atomically without clobbering the other preference', async () => {
-  expect(await repository.get()).toEqual({ view: 'grid', sort: 'relevance' });
+  expect(await repository.get()).toEqual({
+    view: 'grid',
+    sort: 'relevance',
+    trackOpens: false,
+  });
   await Promise.all([
     repository.save({ view: 'list' }),
     repository.save({ sort: 'name-asc' }),
   ]);
-  expect(await repository.get()).toEqual({ view: 'list', sort: 'name-asc' });
+  expect(await repository.get()).toEqual({
+    view: 'list',
+    sort: 'name-asc',
+    trackOpens: false,
+  });
   await expect(
     repository.save({ sort: 'invalid' as 'oldest' }),
   ).rejects.toThrow('valid');
-  expect(await repository.get()).toEqual({ view: 'list', sort: 'name-asc' });
+  expect(await repository.get()).toEqual({
+    view: 'list',
+    sort: 'name-asc',
+    trackOpens: false,
+  });
 });
 it('rejects unavailable spaces and foreign preference records', async () => {
   await database.transaction('rw', database.libraryPreferences, () =>

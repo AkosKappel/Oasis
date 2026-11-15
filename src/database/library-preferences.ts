@@ -3,6 +3,7 @@ import { requireSpace } from './records';
 import type { RecordMetadata } from '@/types/entities';
 export interface LibraryPreferences {
   view: 'grid' | 'list';
+  trackOpens?: boolean;
   sort: 'relevance' | 'name-asc' | 'name-desc' | 'newest' | 'oldest';
 }
 export interface LibraryPreferenceRecord
@@ -11,19 +12,25 @@ export interface LibraryPreferenceRecord
 }
 export const defaultLibraryPreferences: LibraryPreferences = {
   view: 'grid',
+  trackOpens: false,
   sort: 'relevance',
 };
 export function validateLibraryPreferences(
   input: LibraryPreferences,
 ): LibraryPreferences {
   if (
+    (input.trackOpens !== undefined && typeof input.trackOpens !== 'boolean') ||
     !['grid', 'list'].includes(input.view) ||
     !['relevance', 'name-asc', 'name-desc', 'newest', 'oldest'].includes(
       input.sort,
     )
   )
     throw new Error('Choose a valid library view and sort order.');
-  return { view: input.view, sort: input.sort };
+  return {
+    view: input.view,
+    sort: input.sort,
+    trackOpens: input.trackOpens ?? false,
+  };
 }
 export function createLibraryPreferencesRepository(
   spaceId: string,

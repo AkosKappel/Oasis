@@ -1,3 +1,4 @@
+import { TrackedBookmarkLink } from '@/features/bookmarks/tracked-bookmark-link';
 import { FileText, Pencil, Star, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
@@ -70,7 +71,8 @@ export function BookmarkCard({
         )}
       </div>
       <div className={compact ? 'min-w-0 flex-1' : 'contents'}>
-        <a
+        <TrackedBookmarkLink
+          bookmarkId={bookmark.id}
           href={bookmark.url}
           target="_blank"
           rel="noopener noreferrer"
@@ -81,7 +83,7 @@ export function BookmarkCard({
             {new URL(bookmark.url).hostname}
           </span>
           <span className="sr-only"> (opens in a new tab)</span>
-        </a>
+        </TrackedBookmarkLink>
         {!compact && bookmark.description && (
           <p className="mt-3 line-clamp-3 break-words text-sm leading-relaxed text-muted-foreground">
             {bookmark.description}
@@ -128,6 +130,20 @@ export function BookmarkCard({
             ) : (
               'Date unavailable'
             )}
+          </p>
+        )}
+        {bookmark.openCount > 0 && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Opened {bookmark.openCount}{' '}
+            {bookmark.openCount === 1 ? 'time' : 'times'}
+            {bookmark.lastOpenedAt !== undefined &&
+              Number.isFinite(new Date(bookmark.lastOpenedAt).getTime()) && (
+                <>
+                  {' '}
+                  · Last opened{' '}
+                  {new Date(bookmark.lastOpenedAt).toLocaleDateString()}
+                </>
+              )}
           </p>
         )}
       </div>

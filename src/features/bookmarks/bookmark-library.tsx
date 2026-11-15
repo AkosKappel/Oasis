@@ -36,9 +36,14 @@ export function BookmarkLibrary({
 }: {
   initialQuery?: string;
 }) {
-  const { personalBookmarks, personalLibraryPreferences } =
+  const { personalBookmarks, personalLibraryPreferences, openHistory } =
     useSpaceRepositories();
-  const { preferences, error: preferencesError } = useLibraryPreferences();
+  const {
+    preferences,
+    error: preferencesError,
+    setPreferences,
+  } = useLibraryPreferences();
+  const [savingPreferences, setSavingPreferences] = useState(false);
   const { library, error: loadError } = useLibrary();
   const { bookmarks, folders = [], tags = [] } = library ?? {};
   const [resultLimit, setResultLimit] = useState(60);
@@ -99,12 +104,19 @@ export function BookmarkLibrary({
   );
   const displayed = visible?.slice(0, resultLimit);
   async function savePreferences(patch: Partial<LibraryPreferences>) {
+    if (savingPreferences) return;
+    const previous = preferences;
+    setSavingPreferences(true);
+    setPreferences({ ...preferences, ...patch });
     setError(undefined);
     try {
       await personalLibraryPreferences.save(patch);
     } catch (cause) {
       reportStorageError(cause);
+      setPreferences(previous);
       setError('Your library view settings could not be saved. Try again.');
+    } finally {
+      setSavingPreferences(false);
     }
   }
   const activeSelected =
@@ -325,10 +337,13 @@ export function BookmarkLibrary({
             <option value="favorites">Favorites</option>
             <option value="untagged">Untagged</option>
             <option value="unorganized">Unorganized</option>
+            <option value="recently-opened">Recently opened</option>
+            <option value="frequently-opened">Frequently opened</option>
           </select>
           <span className="text-xs font-normal text-muted-foreground">
-            Recently added includes the 50 newest bookmarks. Folder, tag and
-            search filters also apply.
+            Recent and frequent collections include up to 50 bookmarks. Opened
+            collections use saved counts; enable counting below to populate
+            them. Folder, tag and search filters also apply.
           </span>
         </label>
         {bookmarks && (
@@ -353,6 +368,7 @@ export function BookmarkLibrary({
             <Button
               variant={preferences.view === 'grid' ? 'default' : 'outline'}
               size="sm"
+              disabled={savingPreferences}
               aria-pressed={preferences.view === 'grid'}
               onClick={() => void savePreferences({ view: 'grid' })}
             >
@@ -361,6 +377,7 @@ export function BookmarkLibrary({
             <Button
               variant={preferences.view === 'list' ? 'default' : 'outline'}
               size="sm"
+              disabled={savingPreferences}
               aria-pressed={preferences.view === 'list'}
               onClick={() => void savePreferences({ view: 'list' })}
             >
@@ -370,6 +387,7 @@ export function BookmarkLibrary({
           <label className="field">
             Sort by
             <select
+              disabled={savingPreferences}
               value={preferences.sort}
               onChange={(event) =>
                 void savePreferences({
@@ -384,6 +402,41 @@ export function BookmarkLibrary({
               <option value="oldest">Oldest first</option>
             </select>
           </label>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              disabled={savingPreferences}
+              checked={preferences.trackOpens ?? false}
+              onChange={(event) =>
+                void savePreferences({ trackOpens: event.target.checked })
+              }
+            />
+            Count bookmark opens in Oasis
+          </label>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              if (
+                confirm(
+                  'Clear open counts and last-opened times in this space?',
+                )
+              )
+                void openHistory.clear().catch((cause: unknown) => {
+                  reportStorageError(cause);
+                  setError('Open history could not be cleared. Try again.');
+                });
+            }}
+          >
+            Clear open history
+          </Button>
+          <p className="w-full text-xs text-muted-foreground">
+            Off by default. Counts only opens made from Oasis; other browsing
+            activity is never tracked. Turning it off keeps existing counts
+            until you clear them.
+          </p>
         </div>
         <div className="mt-4">
           <Button

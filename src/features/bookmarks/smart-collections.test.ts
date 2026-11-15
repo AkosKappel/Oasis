@@ -38,3 +38,17 @@ it('updates derived collections when a bookmark is organized or favorited', () =
   expect(smartCollection([bookmark], 'favorites')).toEqual([bookmark]);
   expect(smartCollection([], 'recent')).toEqual([]);
 });
+
+it('orders opened collections using counts and times, excluding unopened records', () => {
+  const opened = [
+    { ...records[0]!, openCount: 3, lastOpenedAt: 10 },
+    { ...records[1]!, openCount: 1, lastOpenedAt: 20 },
+    records[2]!,
+  ];
+  expect(
+    smartCollection(opened, 'recently-opened').map((item) => item.id),
+  ).toEqual(['1', '0']);
+  expect(
+    smartCollection(opened, 'frequently-opened').map((item) => item.id),
+  ).toEqual(['0', '1']);
+});

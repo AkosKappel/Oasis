@@ -1,3 +1,4 @@
+import { createOpenHistoryRepository } from '@/database/open-history';
 import {
   createContext,
   useContext,
@@ -95,6 +96,7 @@ export function useSpaceRepositories() {
   const { spaceId } = useSpace();
   return useMemo(
     () => ({
+      openHistory: createOpenHistoryRepository(spaceId),
       personalBookmarks: createBookmarkRepository(spaceId),
       personalOrganization: createOrganizationRepository(spaceId),
       personalBookmarkNotes: createBookmarkNotesRepository(spaceId),

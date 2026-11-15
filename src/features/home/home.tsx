@@ -1,3 +1,4 @@
+import { TrackedBookmarkLink } from '@/features/bookmarks/tracked-bookmark-link';
 import { SpaceSwitcher } from '@/features/spaces/space-switcher';
 import { searchEngine, webSearchUrl } from '@/lib/search-engines';
 import { WeatherWidget } from '@/features/weather/weather-widget';
@@ -195,7 +196,8 @@ export function Home({
                 className="mt-8 flex max-w-full flex-wrap justify-center gap-x-6 gap-y-3"
               >
                 {favorites.map((bookmark) => (
-                  <a
+                  <TrackedBookmarkLink
+                    bookmarkId={bookmark.id}
                     key={bookmark.id}
                     href={bookmark.url}
                     className="flex max-w-40 items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -205,7 +207,7 @@ export function Home({
                       className="size-3 shrink-0"
                       aria-hidden="true"
                     />
-                  </a>
+                  </TrackedBookmarkLink>
                 ))}
               </nav>
             )}

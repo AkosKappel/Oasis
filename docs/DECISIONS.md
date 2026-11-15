@@ -240,3 +240,10 @@
 
 - Derive Recently added, Favorites, Untagged and Unorganized directly from active bookmarks in the selected space. Recently added means the 50 newest records, with deterministic ID ties, rather than a date window that can unexpectedly empty the collection.
 - Apply folder, tag and search filters within the collection, retaining the user’s sort preference. Recompute after live updates; do not store duplicate membership records or add custom rules yet.
+
+## 2026-11-15: optional local open history
+
+- Count clicks and keyboard opens made through Oasis only after a per-space opt-in. Do not request browser history or observe unrelated tabs. Native browser context-menu opens are outside these counts.
+- Read consent and update the bookmark in one transaction so concurrent opens do not lose increments. Same-tab navigation waits for the local write attempt; failures still allow navigation. New-tab links keep native modifier/middle-click behavior.
+- Turning counting off preserves earlier counts. Offer explicit clearing and derive recent/frequent collections from saved data. Existing bookmark JSON includes these fields; settings remain outside content backups.
+- Dexie v14 adds the optional Library preference with counting disabled for existing records. Existing open metadata is preserved during migration.

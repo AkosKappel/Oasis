@@ -25,7 +25,7 @@ Oasis is a Chromium Manifest V3 extension built with WXT and React. WXT generate
 - Schema changes need a new Dexie version and a migration test.
 - Open the database only from extension pages: ordinary web origins have separate storage.
 
-- `src/database/backup.ts` validates and exports active Personal-space records. Restore checks the merged graph inside a write transaction, preserves existing active IDs and adds only missing records. It never removes records or revives tombstones.
+- `src/database/backup.ts` validates and exports active records in the selected space. Restore checks the merged graph inside a write transaction, preserves existing active IDs and adds only missing records. It never removes records or revives tombstones.
 
 ## UI
 
@@ -52,7 +52,7 @@ Folder path and descendant helpers are shared by management, assignment, cards, 
 
 ## Browser bookmark transfer
 
-The browser-only parser in `src/features/transfer` converts an inert HTML template into a typed import plan. `src/database/bookmark-html.ts` validates folder references and limits, maps source folders to active Personal-space records, deduplicates exact URLs within folders and commits additions atomically. Export validates the library graph before serializing escaped Netscape HTML. JSON and HTML controls share the Backup and restore dialog.
+The browser-only parser in `src/features/transfer` converts an inert HTML template into a typed import plan. `src/database/bookmark-html.ts` validates folder references and limits, maps source folders to active records in the selected space, deduplicates exact URLs within folders and commits additions atomically. Export validates the library graph before serializing escaped Netscape HTML. JSON and HTML controls share the Backup and restore dialog.
 
 ## Image albums
 
@@ -115,3 +115,7 @@ The Library notes editor uses the existing optional `Bookmark.notes` field. Its 
 Spaces already exist in the schema. The space provider loads active spaces and binds repository instances to the selected ID. The entire feature tree remounts on switching, closing drafts and resetting subscriptions. Per-tab selection lives in sessionStorage; another tab deleting the selected space falls back to the default. Capture has an explicit selector and starts in the default space in a fresh tab. Libraries, appearance, media, quotes, focus, widgets and weather settings are isolated. Optional weather host access remains browser-wide.
 
 Space deletion tombstones all owned records transactionally and releases personal image payloads. The default cannot be deleted. Bookmark/HTML, album and quote archives operate on the selected space. Version-1 archives retain the canonical `default` namespace at the boundary for compatibility, then map records into the chosen space when restoring. Existing IDs belonging to another space or tombstones are rejected; cross-space copying/remapping remains separate work. Appearance and widget settings remain outside content archives.
+
+## Optional open history
+
+Dexie v14 adds `trackOpens` to per-space Library preferences, defaulting to false. The open-history repository checks current consent and space ownership inside each transaction, then updates existing bookmark `openCount`/`lastOpenedAt` fields. Tracked bookmark anchors cover Library cards, Home favorites and Links; command-palette navigation awaits the same write attempt. Native context-menu opens are not counted. Disabling retains metadata; explicit clearing resets active records in the selected space. Recent/frequent collections derive up to 50 records from saved metadata. No browsing-history permission is used.
