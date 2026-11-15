@@ -251,3 +251,8 @@
 ## 2026-11-15: weather access shared across spaces
 
 - Disabling weather changes the selected space. Revoke browser-wide optional host access only when no other active space uses weather; otherwise keep the grant and explain why. Deleted spaces do not retain access. Browser extension settings can still revoke access globally.
+
+## 2026-11-15: public MIT distribution
+
+- The owner chose to prepare a public release under the MIT license. Keep third-party licenses and bundled-artwork provenance available with the source and distribution. The license does not replace external provider terms.
+- Keep npm publication disabled with `private: true`; the distribution target is a browser-extension archive. Repository creation, pushing, support/privacy hosting and store submission remain owner actions.

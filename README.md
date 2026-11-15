@@ -42,4 +42,4 @@ Saved data stays on the device in IndexedDB; there is no backend, account or ana
 - [Decisions](docs/DECISIONS.md)
 - [Album artwork and prompts](docs/ALBUM-ARTWORK.md)
 
-License and open-source distribution are undecided. This repository is private by default and has no publication configuration.
+Licensed under [MIT](LICENSE). Public repository and extension-store publication are prepared separately; no release is published by the development workflow.
