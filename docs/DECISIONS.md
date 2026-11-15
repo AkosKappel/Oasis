@@ -279,3 +279,9 @@
 - Use native browser drag-and-drop with a space-scoped Oasis payload. External URL/file drops and foreign-space payloads do not trigger writes. Keep Edit/folder controls and Move up/Move down as keyboard/touch alternatives.
 - Bookmark manual order is per-space and available with cleared filters. Folder ordering applies among siblings; moving into a folder reuses transactional ownership, unique-name and cycle checks. Alphabetical folder order remains the default; manual folder order also drives Home Links and Library filter options.
 - Most rank changes update one record. Rebalance with positive rank gaps only for ties or exhausted numeric precision. Rank and preference writes share a transaction. Dexie v17 records optional folder-order/manual-sort preferences without rewriting existing views or content.
+
+## 2026-11-15: reviewed space transfers
+
+- Transfer selected bookmarks using new destination IDs. Reuse case-insensitive sibling folder paths and tag names without changing destination names/colors; create only the missing organization graph. Never deduplicate destination bookmarks silently.
+- Copy preserves content, notes and favorites while keeping originals. Move writes the destination and source tombstones in one transaction. Destination creation dates start at transfer time, and open counts restart at zero so activity is not carried into another space.
+- Preview without writes, then rebuild inside the write transaction and compare complete source/dependency and destination-organization fingerprints. Changed or unavailable data requires a fresh review. Per-review IDs prevent retries from adding duplicate copies.

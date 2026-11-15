@@ -1,3 +1,4 @@
+import { SpaceTransferDialog } from '@/features/spaces/space-transfer-dialog';
 import type { DragEvent } from 'react';
 import { useSpace } from '@/features/spaces/space-context';
 import {
@@ -63,6 +64,7 @@ export function BookmarkLibrary({
   const { library, error: loadError } = useLibrary();
   const { bookmarks, folders = [], tags = [] } = library ?? {};
   const [resultLimit, setResultLimit] = useState(60);
+  const [transferIds, setTransferIds] = useState<string[]>();
   const [selecting, setSelecting] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [bulkEditor, setBulkEditor] = useState<'move' | 'tags'>();
@@ -659,6 +661,14 @@ export function BookmarkLibrary({
               size="sm"
               variant="outline"
               disabled={!activeSelected.length || bulkBusy}
+              onClick={() => setTransferIds([...activeSelected])}
+            >
+              Transfer to space
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={!activeSelected.length || bulkBusy}
               onClick={() => void deleteSelected()}
             >
               Delete selected
@@ -817,6 +827,21 @@ export function BookmarkLibrary({
           Saved on this device. Always your space.
         </p>
       </main>
+      {transferIds && (
+        <SpaceTransferDialog
+          ids={transferIds}
+          onClose={() => setTransferIds(undefined)}
+          onComplete={(message) => {
+            setTransferIds(undefined);
+            clearSelection();
+            setSelecting(false);
+            setOrganizationMessage(message);
+            requestAnimationFrame(() =>
+              document.getElementById('bookmark-selection-toggle')?.focus(),
+            );
+          }}
+        />
+      )}
       {statisticsOpen && library && (
         <StatisticsDialog
           library={library}

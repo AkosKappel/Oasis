@@ -1,3 +1,4 @@
+import { createSpaceTransferRepository } from '@/database/space-transfer';
 import { createDashboardLayoutRepository } from '@/database/dashboard-layout';
 import { createOpenHistoryRepository } from '@/database/open-history';
 import {
@@ -103,6 +104,7 @@ export function useSpaceRepositories() {
   const { spaceId } = useSpace();
   return useMemo(
     () => ({
+      spaceTransfers: createSpaceTransferRepository(spaceId),
       dashboardLayout: createDashboardLayoutRepository(spaceId),
       openHistory: createOpenHistoryRepository(spaceId),
       personalBookmarks: createBookmarkRepository(spaceId),
