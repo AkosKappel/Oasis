@@ -297,3 +297,7 @@ Sources: [optional permissions](https://developer.chrome.com/docs/extensions/ref
 Store one current like/dislike per image or quote in each space, without impression logs, network requests or new permissions. Daily rotation uses a deterministic weighted exponential race: liked items have weight 8, neutral items related to a liked item have weight 2, others weight 1; disliked items are excluded. Related means the same image album or normalized non-empty quote author within the selected collection. This uses catalog metadata, not visual or semantic analysis. Daily choices may repeat, and selection agrees across tabs on the same local calendar day.
 
 Mixed-album rotation is explicit and off by default; otherwise the selected album remains the pool. Fixed backgrounds remain fixed despite ratings. If every eligible item is disliked, show a plain background or no quote rather than overriding the choice. Preferences are device-local and outside content archives. Schema v18 adds the feedback table without rewriting existing settings or creating votes.
+
+## 2026-11-15: Saved queries for custom smart collections
+
+Reuse the existing search language rather than introducing a second rules engine. A saved query is a named, editable local smart collection; results stay live. Load it into the visible search box and reset other filters so hidden filter combinations do not change its meaning. Queries match current names, so renamed folder/tag references may need editing. Keep these per-space preferences outside portable bookmark archives.

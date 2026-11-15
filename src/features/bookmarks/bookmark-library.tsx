@@ -1,3 +1,4 @@
+import { SavedSearches } from '@/features/saved-searches/saved-searches';
 import { SpaceTransferDialog } from '@/features/spaces/space-transfer-dialog';
 import type { DragEvent } from 'react';
 import { useSpace } from '@/features/spaces/space-context';
@@ -459,6 +460,16 @@ export function BookmarkLibrary({
             them. Folder, tag and search filters also apply.
           </span>
         </label>
+        <SavedSearches
+          query={query}
+          onApply={(value) => {
+            setQuery(value);
+            setCollection('all');
+            setFolderFilter('');
+            setTagFilter('');
+            clearSelection();
+          }}
+        />
         {bookmarks && (
           <OrganizationFilters
             bookmarks={bookmarks}
