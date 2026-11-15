@@ -1,3 +1,4 @@
+import { StatisticsDialog } from '@/features/statistics/statistics-dialog';
 import { smartCollection, type SmartCollection } from './smart-collections';
 import { SpaceSwitcher } from '@/features/spaces/space-switcher';
 import { useSpaceRepositories } from '@/features/spaces/space-context';
@@ -52,6 +53,7 @@ export function BookmarkLibrary({
   const [bulkEditor, setBulkEditor] = useState<'move' | 'tags'>();
   const [bulkBusy, setBulkBusy] = useState(false);
   const [notesFor, setNotesFor] = useState<Bookmark>();
+  const [statisticsOpen, setStatisticsOpen] = useState(false);
   const [backupOpen, setBackupOpen] = useState(false);
   const [duplicatesOpen, setDuplicatesOpen] = useState(false);
   const [organizationOpen, setOrganizationOpen] = useState(false);
@@ -242,6 +244,13 @@ export function BookmarkLibrary({
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              disabled={!library || !!loadError}
+              onClick={() => setStatisticsOpen(true)}
+            >
+              Statistics
+            </Button>
             <Button variant="outline" onClick={() => setBackupOpen(true)}>
               Backup and restore
             </Button>
@@ -621,6 +630,13 @@ export function BookmarkLibrary({
           Saved on this device. Always your space.
         </p>
       </main>
+      {statisticsOpen && library && (
+        <StatisticsDialog
+          library={library}
+          tracking={preferences.trackOpens ?? false}
+          onClose={() => setStatisticsOpen(false)}
+        />
+      )}
       {duplicatesOpen && bookmarks && (
         <DuplicateReview
           bookmarks={bookmarks}

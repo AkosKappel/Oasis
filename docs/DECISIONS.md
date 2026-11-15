@@ -256,3 +256,8 @@
 
 - The owner chose to prepare a public release under the MIT license. Keep third-party licenses and bundled-artwork provenance available with the source and distribution. The license does not replace external provider terms.
 - Keep npm publication disabled with `private: true`; the distribution target is a browser-extension archive. Repository creation, pushing, support/privacy hosting and store submission remain owner actions.
+
+## 2026-11-15: Library statistics
+
+- Derive statistics from active records in the selected space. Group exact hostnames without a suffix-list dependency or network requests, and show twelve local-calendar months of retained additions using creation dates.
+- Reuse optional saved open counts. Do not invent historical activity, deleted-record trends or a heatmap from last-open timestamps. Turning tracking off retains existing statistics until the user clears them.
