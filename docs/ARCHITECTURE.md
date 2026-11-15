@@ -127,3 +127,5 @@ The manifest uses packaged PNG icons exported from the original SVG in `public/i
 Library statistics are a pure projection of the active library snapshot. They do not add tables, collection events or network requests. Saved creation dates drive monthly retained additions; existing opt-in open counts drive frequency totals.
 
 Dexie v15 adds optional recent/frequent bookmark-section visibility to appearance preferences. Home derives links from its existing library snapshot and shares the Library ranking helpers and tracked anchors. These sections do not change tracking consent or add queries/providers.
+
+Dexie v16 adds `dashboardLayouts` (`id`, `spaceId`). The layout repository validates complete unique section lists, checks ownership and saves with revision comparison. Home renders enabled section components in saved order with bounded widths; optional source settings remain independent. The layout editor keeps drafts local until Save and offers accessible ordering/reset controls.

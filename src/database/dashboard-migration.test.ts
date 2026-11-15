@@ -1,3 +1,7 @@
+import {
+  createDashboardLayoutRepository,
+  defaultDashboardItems,
+} from './dashboard-layout';
 import Dexie from 'dexie';
 import { expect, it } from 'vitest';
 import { OasisDatabase } from './schema';
@@ -45,7 +49,11 @@ it('upgrades v14 without enabling Home bookmark sections or changing saved prefe
   const database = new OasisDatabase(name);
   try {
     await database.open();
-    expect(database.verno).toBe(15);
+    expect(database.verno).toBe(16);
+    expect(await database.dashboardLayouts.count()).toBe(0);
+    expect(
+      (await createDashboardLayoutRepository('default', database).get()).items,
+    ).toEqual(defaultDashboardItems());
     expect(await database.preferences.get(preference.id)).toEqual(preference);
     const appearance = await createAppearanceRepository(
       'default',

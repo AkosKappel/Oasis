@@ -1,3 +1,4 @@
+import type { DashboardLayout } from './dashboard-layout';
 import type { WeatherSettings } from './weather';
 import type { FocusSession } from './focus-session';
 import type { HomeWidget } from './home-widgets';
@@ -19,6 +20,7 @@ import type {
   QuoteSettings,
 } from '@/types/entities';
 export class OasisDatabase extends Dexie {
+  dashboardLayouts!: EntityTable<DashboardLayout, 'id'>;
   weatherSettings!: EntityTable<WeatherSettings, 'id'>;
   focusSessions!: EntityTable<FocusSession, 'id'>;
   homeWidgets!: EntityTable<HomeWidget, 'id'>;
@@ -91,6 +93,7 @@ export class OasisDatabase extends Dexie {
           }),
       );
     this.version(15).stores({ preferences: 'id, spaceId' });
+    this.version(16).stores({ dashboardLayouts: 'id, spaceId' });
     this.on('blocked', () => reportStorageIssue('blocked'));
     this.on('versionchange', () => {
       this.close();

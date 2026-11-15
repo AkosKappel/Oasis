@@ -267,3 +267,9 @@
 - Offer Recently added and Frequently opened independently in Appearance, both off by default. Reuse Library smart-collection ordering and show at most six links per section.
 - Frequent links use only saved opt-in counts, including counts retained after disabling tracking. Enabling a section never enables tracking. Missing counts show a plain explanation instead of an invented recommendation.
 - Dexie v15 records optional appearance fields without rewriting older preferences. Missing fields remain off. Settings are per-space, synchronized across tabs and excluded from bookmark backups.
+
+## 2026-11-15: per-space Home layout
+
+- Store an ordered, validated list of section IDs with visibility and normal/wide bounds. Keep the default centered layout and existing opt-ins; layout visibility never grants permissions, enables content or changes its settings.
+- Provide keyboard-operable Move up/Move down controls with announcements, local unsaved drafts and a reset limited to layout. Compare the opening revision on save so another tab cannot silently replace a draft.
+- Dexie v16 adds a space-owned layout table. Earlier preferences/content stay unchanged, and layouts remain outside content backups. Hidden weather is not mounted and does not refresh from Home.

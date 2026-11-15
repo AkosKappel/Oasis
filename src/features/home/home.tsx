@@ -1,3 +1,5 @@
+import { defaultDashboardItems } from '@/database/dashboard-layout';
+import { useDashboardLayout } from './use-dashboard-layout';
 import { BookmarkSections } from './bookmark-sections';
 import { TrackedBookmarkLink } from '@/features/bookmarks/tracked-bookmark-link';
 import { SpaceSwitcher } from '@/features/spaces/space-switcher';
@@ -19,6 +21,7 @@ import { useAlbums } from '@/features/albums/use-albums';
 import { useLibrary } from '@/features/bookmarks/use-library';
 
 export function Home({
+  onLayout,
   onSearch,
   appearance,
   onAppearance,
@@ -28,6 +31,7 @@ export function Home({
   onFocus,
   onPinLinks,
 }: {
+  onLayout: () => void;
   onSearch: (query: string) => void;
   appearance: Appearance;
   onAppearance: () => void;
@@ -37,6 +41,7 @@ export function Home({
   onFocus: () => void;
   onPinLinks: (pinned: boolean) => Promise<void>;
 }) {
+  const { layout, error: layoutError } = useDashboardLayout();
   const source = searchEngine(appearance.searchEngine);
   const { session, error: focusError } = useFocusSession();
   const { data: quotes } = useQuotes();
@@ -71,6 +76,146 @@ export function Home({
     .filter((bookmark) => bookmark.isFavorite)
     .slice(0, 6);
 
+  const sections = {
+    clock: (
+      <>
+        <div className="flex flex-col items-center">
+          {' '}
+          <time
+            dateTime={now.toISOString()}
+            className="text-[clamp(4rem,18vw,9rem)] leading-none font-extralight tracking-[-0.06em] tabular-nums"
+          >
+            {now.toLocaleTimeString(undefined, {
+              hour: '2-digit',
+              minute: '2-digit',
+              ...(appearance.clock === 'system'
+                ? {}
+                : { hour12: appearance.clock === '12' }),
+            })}
+          </time>
+          {appearance.showDate && (
+            <p className="mt-5 text-sm text-muted-foreground sm:text-base">
+              {now.toLocaleDateString(undefined, {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </p>
+          )}
+        </div>
+      </>
+    ),
+    search: (
+      <>
+        <form
+          action="#library"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const query = String(
+              new FormData(event.currentTarget).get('query') ?? '',
+            );
+            if (source.id === 'bookmarks') onSearch(query);
+            else {
+              const url = webSearchUrl(source.id, query);
+              if (url) window.location.assign(url);
+            }
+          }}
+          className="mt-10 w-full"
+        >
+          <label className="flex items-center gap-3 rounded-full border border-border/60 bg-surface/40 px-5 py-3 focus-within:border-ring">
+            <Search
+              className="size-4 shrink-0 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <span className="sr-only">
+              {source.id === 'bookmarks'
+                ? 'Search bookmarks'
+                : `Search ${source.name}`}
+            </span>
+            <input
+              type="search"
+              name="query"
+              maxLength={2000}
+              placeholder={
+                source.id === 'bookmarks'
+                  ? 'Find a bookmark'
+                  : `Search ${source.name}`
+              }
+              className="min-w-0 flex-1 bg-transparent text-sm outline-none focus-visible:outline-none"
+            />
+          </label>
+        </form>
+      </>
+    ),
+    focus: (
+      <>
+        {session && <FocusTimer session={session} now={now.getTime()} />}
+        {appearance.showDailyFocus && (
+          <DailyFocus key={localDay(now)} day={localDay(now)} />
+        )}
+      </>
+    ),
+    favorites: (
+      <>
+        {appearance.showFavorites && !!favorites?.length && (
+          <nav
+            aria-label="Favorite bookmarks"
+            className="mt-8 flex max-w-full flex-wrap justify-center gap-x-6 gap-y-3"
+          >
+            {favorites.map((bookmark) => (
+              <TrackedBookmarkLink
+                bookmarkId={bookmark.id}
+                key={bookmark.id}
+                href={bookmark.url}
+                className="flex max-w-40 items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+              >
+                <span className="truncate">{bookmark.title}</span>
+                <ArrowUpRight className="size-3 shrink-0" aria-hidden="true" />
+              </TrackedBookmarkLink>
+            ))}
+          </nav>
+        )}
+      </>
+    ),
+    bookmarks: (
+      <>
+        <BookmarkSections
+          bookmarks={library?.bookmarks ?? []}
+          recent={appearance.showRecentBookmarks ?? false}
+          frequent={appearance.showFrequentBookmarks ?? false}
+        />
+      </>
+    ),
+    widgets: (
+      <>
+        <HomeWidgets now={now} clock={appearance.clock} />
+      </>
+    ),
+    weather: (
+      <>
+        <WeatherWidget now={now} />
+      </>
+    ),
+    quote: (
+      <>
+        {dailyQuote && (
+          <figure
+            aria-label="Daily quote"
+            className="mt-10 w-full min-w-0 text-center"
+          >
+            <blockquote className="whitespace-pre-line break-words text-base leading-relaxed">
+              {dailyQuote.text}
+            </blockquote>
+            {dailyQuote.author && (
+              <figcaption className="mt-3 max-w-full break-words text-sm text-muted-foreground">
+                {dailyQuote.author}
+              </figcaption>
+            )}
+          </figure>
+        )}
+      </>
+    ),
+  };
   return (
     <main
       className={`home min-h-dvh px-6 py-6 sm:px-10 sm:py-8 ${backgroundImage ? 'home-photo' : ''}`}
@@ -120,119 +265,30 @@ export function Home({
           </nav>
           <section
             aria-label="Home"
-            className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center pb-20 text-center"
+            className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center gap-8 py-12 text-center"
           >
             <h1 className="sr-only">Oasis home</h1>
-            <time
-              dateTime={now.toISOString()}
-              className="text-[clamp(4rem,18vw,9rem)] leading-none font-extralight tracking-[-0.06em] tabular-nums"
-            >
-              {now.toLocaleTimeString(undefined, {
-                hour: '2-digit',
-                minute: '2-digit',
-                ...(appearance.clock === 'system'
-                  ? {}
-                  : { hour12: appearance.clock === '12' }),
-              })}
-            </time>
-            {appearance.showDate && (
-              <p className="mt-5 text-sm text-muted-foreground sm:text-base">
-                {now.toLocaleDateString(undefined, {
-                  weekday: 'long',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </p>
+            {(layout?.items ?? defaultDashboardItems()).map(
+              (item) =>
+                item.visible && (
+                  <div
+                    key={item.id}
+                    data-home-section={item.id}
+                    className={`flex w-full flex-col items-center gap-4 empty:hidden [&>*]:!mt-0 ${item.width === 'wide' ? 'max-w-4xl' : item.id === 'search' ? 'max-w-sm' : item.id === 'quote' ? 'max-w-lg' : 'max-w-xl'}`}
+                  >
+                    {sections[item.id]}
+                  </div>
+                ),
             )}
-            <form
-              action="#library"
-              onSubmit={(event) => {
-                event.preventDefault();
-                const query = String(
-                  new FormData(event.currentTarget).get('query') ?? '',
-                );
-                if (source.id === 'bookmarks') onSearch(query);
-                else {
-                  const url = webSearchUrl(source.id, query);
-                  if (url) window.location.assign(url);
-                }
-              }}
-              className="mt-10 w-full max-w-sm"
-            >
-              <label className="flex items-center gap-3 rounded-full border border-border/60 bg-surface/40 px-5 py-3 focus-within:border-ring">
-                <Search
-                  className="size-4 shrink-0 text-muted-foreground"
-                  aria-hidden="true"
-                />
-                <span className="sr-only">
-                  {source.id === 'bookmarks'
-                    ? 'Search bookmarks'
-                    : `Search ${source.name}`}
-                </span>
-                <input
-                  type="search"
-                  name="query"
-                  maxLength={2000}
-                  placeholder={
-                    source.id === 'bookmarks'
-                      ? 'Find a bookmark'
-                      : `Search ${source.name}`
-                  }
-                  className="min-w-0 flex-1 bg-transparent text-sm outline-none focus-visible:outline-none"
-                />
-              </label>
-            </form>
-            {session && <FocusTimer session={session} now={now.getTime()} />}
             {focusError && (
               <p role="alert" className="mt-4 text-sm">
                 {focusError}
               </p>
             )}
-            {appearance.showDailyFocus && (
-              <DailyFocus key={localDay(now)} day={localDay(now)} />
-            )}
-            {appearance.showFavorites && !!favorites?.length && (
-              <nav
-                aria-label="Favorite bookmarks"
-                className="mt-8 flex max-w-full flex-wrap justify-center gap-x-6 gap-y-3"
-              >
-                {favorites.map((bookmark) => (
-                  <TrackedBookmarkLink
-                    bookmarkId={bookmark.id}
-                    key={bookmark.id}
-                    href={bookmark.url}
-                    className="flex max-w-40 items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-                  >
-                    <span className="truncate">{bookmark.title}</span>
-                    <ArrowUpRight
-                      className="size-3 shrink-0"
-                      aria-hidden="true"
-                    />
-                  </TrackedBookmarkLink>
-                ))}
-              </nav>
-            )}
-            <BookmarkSections
-              bookmarks={library?.bookmarks ?? []}
-              recent={appearance.showRecentBookmarks ?? false}
-              frequent={appearance.showFrequentBookmarks ?? false}
-            />
-            <HomeWidgets now={now} clock={appearance.clock} />
-            <WeatherWidget now={now} />
-            {dailyQuote && (
-              <figure
-                aria-label="Daily quote"
-                className="mt-10 w-full min-w-0 max-w-lg text-center"
-              >
-                <blockquote className="whitespace-pre-line break-words text-base leading-relaxed">
-                  {dailyQuote.text}
-                </blockquote>
-                {dailyQuote.author && (
-                  <figcaption className="mt-3 max-w-full break-words text-sm text-muted-foreground">
-                    {dailyQuote.author}
-                  </figcaption>
-                )}
-              </figure>
+            {layoutError && (
+              <p role="alert" className="text-sm text-danger">
+                {layoutError}
+              </p>
             )}
             {error && (
               <p role="alert" className="mt-6 text-sm text-danger">
@@ -241,6 +297,13 @@ export function Home({
             )}
           </section>
           <footer className="flex flex-wrap justify-end gap-3">
+            <button
+              type="button"
+              className="rounded-md px-2 text-sm text-muted-foreground hover:text-foreground"
+              onClick={onLayout}
+            >
+              Layout
+            </button>
             <button
               type="button"
               className="rounded-md px-2 text-sm text-muted-foreground hover:text-foreground"

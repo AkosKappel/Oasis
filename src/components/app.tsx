@@ -1,3 +1,4 @@
+import { LayoutManager } from '@/features/home/layout-manager';
 import { SpaceProvider } from '@/features/spaces/space-context';
 import { FocusModeDialog } from '@/features/focus/focus-mode';
 import { WidgetManager } from '@/features/widgets/widget-manager';
@@ -27,6 +28,7 @@ function AppContent() {
     error: appearanceError,
     saveAppearance,
   } = useAppearance(preview);
+  const [layoutOpen, setLayoutOpen] = useState(false);
   const [focusOpen, setFocusOpen] = useState(false);
   const [widgetsOpen, setWidgetsOpen] = useState(false);
   const [quotesOpen, setQuotesOpen] = useState(false);
@@ -64,6 +66,7 @@ function AppContent() {
           onPinLinks={(pinned) =>
             saveAppearance({ ...appearance, linksPinned: pinned })
           }
+          onLayout={() => setLayoutOpen(true)}
           onFocus={() => setFocusOpen(true)}
           onWidgets={() => setWidgetsOpen(true)}
           onQuotes={() => setQuotesOpen(true)}
@@ -73,6 +76,7 @@ function AppContent() {
           onSearch={(query) => setSearch({ query })}
         />
       )}
+      {layoutOpen && <LayoutManager onClose={() => setLayoutOpen(false)} />}
       {focusOpen && <FocusModeDialog onClose={() => setFocusOpen(false)} />}
       {widgetsOpen && <WidgetManager onClose={() => setWidgetsOpen(false)} />}
       {quotesOpen && <QuoteManager onClose={() => setQuotesOpen(false)} />}

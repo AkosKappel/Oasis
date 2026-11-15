@@ -1,3 +1,4 @@
+import { createDashboardLayoutRepository } from '@/database/dashboard-layout';
 import { createOpenHistoryRepository } from '@/database/open-history';
 import {
   createContext,
@@ -102,6 +103,7 @@ export function useSpaceRepositories() {
   const { spaceId } = useSpace();
   return useMemo(
     () => ({
+      dashboardLayout: createDashboardLayoutRepository(spaceId),
       openHistory: createOpenHistoryRepository(spaceId),
       personalBookmarks: createBookmarkRepository(spaceId),
       personalOrganization: createOrganizationRepository(spaceId),
