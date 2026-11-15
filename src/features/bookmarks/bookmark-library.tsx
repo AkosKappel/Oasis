@@ -205,17 +205,22 @@ export function BookmarkLibrary({
       {backupOpen && <BackupManager onClose={() => setBackupOpen(false)} />}
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-6 sm:px-10">
-          <a
-            href="#"
-            aria-label="Oasis home"
-            className="flex items-center gap-3 text-xl font-semibold"
-          >
-            <Leaf className="size-6 text-primary-content" aria-hidden="true" />
-            oasis
+          <div className="flex items-center gap-3">
+            <a
+              href="#"
+              aria-label="Oasis home"
+              className="flex items-center gap-3 text-xl font-semibold"
+            >
+              <Leaf
+                className="size-6 text-primary-content"
+                aria-hidden="true"
+              />
+              oasis
+            </a>
             <span className="hidden text-xs font-normal text-muted-foreground sm:inline">
               Your personal space on the web
             </span>
-          </a>
+          </div>
           <SpaceSwitcher />
         </div>
       </header>
