@@ -125,3 +125,5 @@ Dexie v14 adds `trackOpens` to per-space Library preferences, defaulting to fals
 The manifest uses packaged PNG icons exported from the original SVG in `public/icon/`. Export uses the existing Playwright dependency. `assets:notices` copies the project MIT license and assembles runtime dependency notices, including WXT/browser, Tailwind CSS and shadcn component patterns, into public files for the extension bundle. The release smoke flow verifies packaged icon dimensions and captures offline sample-data screenshots. `OASIS_EXTENSION_PATH` lets focused tests load a browser-target build; the default remains Chrome MV3.
 
 Library statistics are a pure projection of the active library snapshot. They do not add tables, collection events or network requests. Saved creation dates drive monthly retained additions; existing opt-in open counts drive frequency totals.
+
+Dexie v15 adds optional recent/frequent bookmark-section visibility to appearance preferences. Home derives links from its existing library snapshot and shares the Library ranking helpers and tracked anchors. These sections do not change tracking consent or add queries/providers.

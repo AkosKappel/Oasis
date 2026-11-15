@@ -1,3 +1,4 @@
+import { BookmarkSections } from './bookmark-sections';
 import { TrackedBookmarkLink } from '@/features/bookmarks/tracked-bookmark-link';
 import { SpaceSwitcher } from '@/features/spaces/space-switcher';
 import { searchEngine, webSearchUrl } from '@/lib/search-engines';
@@ -211,6 +212,11 @@ export function Home({
                 ))}
               </nav>
             )}
+            <BookmarkSections
+              bookmarks={library?.bookmarks ?? []}
+              recent={appearance.showRecentBookmarks ?? false}
+              frequent={appearance.showFrequentBookmarks ?? false}
+            />
             <HomeWidgets now={now} clock={appearance.clock} />
             <WeatherWidget now={now} />
             {dailyQuote && (

@@ -283,6 +283,22 @@ export function AppearanceSettings({
             />
             Show shortcut row
           </label>
+          {(['showRecentBookmarks', 'showFrequentBookmarks'] as const).map(
+            (field) => (
+              <label key={field} className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={draft[field] ?? false}
+                  onChange={(event) =>
+                    update({ [field]: event.target.checked })
+                  }
+                />
+                {field === 'showRecentBookmarks'
+                  ? 'Show recently added bookmarks'
+                  : 'Show frequently opened bookmarks'}
+              </label>
+            ),
+          )}
         </fieldset>
         {error && (
           <p role="alert" className="text-sm text-danger">

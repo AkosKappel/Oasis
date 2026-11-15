@@ -98,3 +98,22 @@ it('persists an optional search engine and rejects unknown providers', async () 
   ).rejects.toThrow('appearance');
   expect((await repository.get()).searchEngine).toBe('duckduckgo');
 });
+
+it('keeps recent/frequent sections opt-in and preserves per-space choices', async () => {
+  expect((await repository.get()).showRecentBookmarks ?? false).toBe(false);
+  await repository.save({
+    ...defaultAppearance,
+    showRecentBookmarks: true,
+    showFrequentBookmarks: true,
+  });
+  expect(await repository.get()).toMatchObject({
+    showRecentBookmarks: true,
+    showFrequentBookmarks: true,
+  });
+  await expect(
+    repository.save({
+      ...defaultAppearance,
+      showRecentBookmarks: 'yes' as unknown as boolean,
+    }),
+  ).rejects.toThrow('valid');
+});

@@ -90,6 +90,7 @@ export class OasisDatabase extends Dexie {
             record.trackOpens ??= false;
           }),
       );
+    this.version(15).stores({ preferences: 'id, spaceId' });
     this.on('blocked', () => reportStorageIssue('blocked'));
     this.on('versionchange', () => {
       this.close();

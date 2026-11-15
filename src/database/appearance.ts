@@ -12,6 +12,8 @@ export interface Appearance {
   showDailyFocus?: boolean;
   searchEngine?: SearchEngine;
   showFavorites: boolean;
+  showRecentBookmarks?: boolean;
+  showFrequentBookmarks?: boolean;
   linksSide: 'left' | 'right';
   linksPinned: boolean;
   primaryColor?: string;
@@ -39,6 +41,10 @@ export function validateAppearance(value: Appearance): Appearance {
       !SEARCH_ENGINES.some((engine) => engine.id === value.searchEngine)) ||
     (value.showDailyFocus !== undefined &&
       typeof value.showDailyFocus !== 'boolean') ||
+    (value.showRecentBookmarks !== undefined &&
+      typeof value.showRecentBookmarks !== 'boolean') ||
+    (value.showFrequentBookmarks !== undefined &&
+      typeof value.showFrequentBookmarks !== 'boolean') ||
     typeof value.showFavorites !== 'boolean' ||
     !['left', 'right'].includes(value.linksSide ?? 'left') ||
     (value.linksPinned !== undefined && typeof value.linksPinned !== 'boolean')
@@ -70,6 +76,12 @@ export function validateAppearance(value: Appearance): Appearance {
       ? { showDailyFocus: value.showDailyFocus }
       : {}),
     showFavorites: value.showFavorites,
+    ...(value.showRecentBookmarks !== undefined
+      ? { showRecentBookmarks: value.showRecentBookmarks }
+      : {}),
+    ...(value.showFrequentBookmarks !== undefined
+      ? { showFrequentBookmarks: value.showFrequentBookmarks }
+      : {}),
     linksSide: value.linksSide ?? 'left',
     linksPinned: value.linksPinned ?? false,
     ...(primaryColor ? { primaryColor } : {}),

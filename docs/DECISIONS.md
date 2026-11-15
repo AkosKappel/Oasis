@@ -261,3 +261,9 @@
 
 - Derive statistics from active records in the selected space. Group exact hostnames without a suffix-list dependency or network requests, and show twelve local-calendar months of retained additions using creation dates.
 - Reuse optional saved open counts. Do not invent historical activity, deleted-record trends or a heatmap from last-open timestamps. Turning tracking off retains existing statistics until the user clears them.
+
+## 2026-11-15: optional Home bookmark sections
+
+- Offer Recently added and Frequently opened independently in Appearance, both off by default. Reuse Library smart-collection ordering and show at most six links per section.
+- Frequent links use only saved opt-in counts, including counts retained after disabling tracking. Enabling a section never enables tracking. Missing counts show a plain explanation instead of an invented recommendation.
+- Dexie v15 records optional appearance fields without rewriting older preferences. Missing fields remain off. Settings are per-space, synchronized across tabs and excluded from bookmark backups.
