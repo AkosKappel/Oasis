@@ -101,6 +101,7 @@ export class OasisDatabase extends Dexie {
     this.version(17).stores({ libraryPreferences: 'id, spaceId' });
     this.version(18).stores({ contentFeedback: 'id, spaceId, [spaceId+kind]' });
     this.version(19).stores({ savedSearches: 'id, spaceId' });
+    this.version(20).stores({ homeWidgets: 'id, spaceId' });
     this.on('blocked', () => reportStorageIssue('blocked'));
     this.on('versionchange', () => {
       this.close();

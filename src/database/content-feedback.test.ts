@@ -92,7 +92,7 @@ it('upgrades v17 without changing background choices or adding ratings', async (
   const upgraded = new OasisDatabase(name);
   try {
     await upgraded.open();
-    expect(upgraded.verno).toBe(19);
+    expect(upgraded.verno).toBe(20);
     expect(await upgraded.backgrounds.get(background.id)).toEqual(background);
     expect(await upgraded.contentFeedback.count()).toBe(0);
   } finally {

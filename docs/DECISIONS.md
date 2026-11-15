@@ -305,3 +305,7 @@ Reuse the existing search language rather than introducing a second rules engine
 ## 2026-11-15: Reviewed same-host tag suggestions
 
 Suggest existing tags from other active bookmarks with the exact same hostname in the selected space. Rank by distinct bookmark support, show counts and offer at most five. Exclude the bookmark being edited and inactive/foreign records. Users explicitly add suggestions to the draft and still confirm the bookmark save. This local heuristic avoids an external model, page fetch, semantic inference or background processing; semantic search remains separate future work.
+
+## 2026-11-15: Optional scratchpad previews with explicit saves
+
+Keep scratchpads inside the existing Widgets manager, hidden by default, rather than adding a permanent Home editor. Use plain text, explicit saves, revision checks and a text download instead of autosave or rich text. This preserves minimal Home and makes conflicts and data export clear.

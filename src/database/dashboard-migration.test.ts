@@ -59,7 +59,7 @@ it('upgrades v14 without enabling Home bookmark sections or changing saved prefe
   const database = new OasisDatabase(name);
   try {
     await database.open();
-    expect(database.verno).toBe(19);
+    expect(database.verno).toBe(20);
     expect(
       await createLibraryPreferencesRepository('default', database).get(),
     ).toEqual({ view: 'list', sort: 'oldest', trackOpens: false });

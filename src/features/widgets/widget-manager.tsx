@@ -1,3 +1,4 @@
+import { downloadWidgetText } from './download-text';
 import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { WeatherSettingsPanel } from '@/features/weather/weather-settings';
 import { useEffect, useRef, useState } from 'react';
@@ -16,7 +17,8 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
     previous = useRef(document.activeElement);
   const { widgets, error: loadError } = useHomeWidgets();
   const [editing, setEditing] = useState<HomeWidget>();
-  const [kind, setKind] = useState<'clock' | 'countdown'>('clock');
+  const [kind, setKind] = useState<HomeWidget['kind']>('clock');
+  const [text, setText] = useState('');
   const [label, setLabel] = useState('');
   const [zone, setZone] = useState('UTC');
   const [deadline, setDeadline] = useState('');
@@ -51,7 +53,8 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
     setEditing(undefined);
     setLabel('');
     setDeadline('');
-    setVisible(true);
+    setText('');
+    setVisible(kind !== 'note');
   }
   return (
     <dialog
@@ -72,8 +75,9 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
         </Button>
       </div>
       <p className="mt-3 text-sm text-muted-foreground">
-        Add only what you want to see on Home. Clocks and countdowns work
-        offline.
+        Add only what you want to see on Home. Widgets work offline. Notes are
+        hidden until you choose Show on Home. Download a copy to keep outside
+        this browser.
       </p>
       <form
         className="mt-5 flex flex-col gap-4"
@@ -81,10 +85,13 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
           event.preventDefault();
           void run(async () => {
             await personalHomeWidgets.save(
-              kind === 'clock'
-                ? { kind, label, timeZone: zone, visible }
-                : { kind, label, deadline: parseDeadline(deadline), visible },
+              kind === 'note'
+                ? { kind, label, text, visible }
+                : kind === 'clock'
+                  ? { kind, label, timeZone: zone, visible }
+                  : { kind, label, deadline: parseDeadline(deadline), visible },
               editing?.id,
+              editing?.updatedAt,
             );
             reset();
           });
@@ -99,10 +106,15 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
             <select
               disabled={!!editing}
               value={kind}
-              onChange={(event) => setKind(event.target.value as typeof kind)}
+              onChange={(event) => {
+                const value = event.target.value as typeof kind;
+                setKind(value);
+                setVisible(value !== 'note');
+              }}
             >
               <option value="clock">World clock</option>
               <option value="countdown">Countdown</option>
+              <option value="note">Scratchpad note</option>
             </select>
           </label>
           <label className="field">
@@ -113,11 +125,29 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
               required
               maxLength={40}
               placeholder={
-                kind === 'clock' ? 'Tokyo' : 'A day to look forward to'
+                kind === 'note'
+                  ? 'Ideas'
+                  : kind === 'clock'
+                    ? 'Tokyo'
+                    : 'A day to look forward to'
               }
             />
           </label>
-          {kind === 'clock' ? (
+          {kind === 'note' ? (
+            <label className="field">
+              Note text
+              <textarea
+                value={text}
+                onChange={(event) => setText(event.target.value)}
+                maxLength={10000}
+                rows={5}
+              />
+              <span className="text-xs font-normal text-muted-foreground">
+                Plain text. Notes stay in this space and are outside bookmark
+                backups.
+              </span>
+            </label>
+          ) : kind === 'clock' ? (
             <label className="field">
               Time zone
               <select
@@ -179,12 +209,14 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
           >
             <p className="break-words font-medium">{widget.label}</p>
             <p className="mt-1 break-words text-xs text-muted-foreground">
-              {widget.kind === 'clock'
-                ? widget.timeZone
-                : new Date(widget.deadline).toLocaleString()}
+              {widget.kind === 'note'
+                ? 'Scratchpad note'
+                : widget.kind === 'clock'
+                  ? widget.timeZone
+                  : new Date(widget.deadline).toLocaleString()}
               {!widget.visible ? ' · Hidden' : ''}
             </p>
-            <div className="mt-3 flex gap-2">
+            <div className="mt-3 flex flex-wrap gap-2">
               <Button
                 size="sm"
                 variant="outline"
@@ -194,19 +226,43 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
                   setKind(widget.kind);
                   setLabel(widget.label);
                   setVisible(widget.visible);
-                  if (widget.kind === 'clock') setZone(widget.timeZone);
+                  if (widget.kind === 'note') setText(widget.text);
+                  else if (widget.kind === 'clock') setZone(widget.timeZone);
                   else setDeadline(localDateTime(widget.deadline));
                 }}
               >
                 Edit {widget.label}
               </Button>
+              {widget.kind === 'note' && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={busy}
+                  onClick={() =>
+                    downloadWidgetText(widget.text, 'oasis-note.txt')
+                  }
+                  aria-label={`Download note ${widget.label}`}
+                >
+                  Download note
+                </Button>
+              )}
               <Button
                 size="sm"
                 variant="outline"
                 disabled={busy}
                 onClick={() =>
                   void run(async () => {
-                    await personalHomeWidgets.remove(widget.id);
+                    if (
+                      widget.kind === 'note' &&
+                      !window.confirm(
+                        `Remove note “${widget.label}”? Download a copy first if you want to keep it.`,
+                      )
+                    )
+                      return;
+                    await personalHomeWidgets.remove(
+                      widget.id,
+                      widget.updatedAt,
+                    );
                     if (editing?.id === widget.id) reset();
                   })
                 }

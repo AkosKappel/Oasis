@@ -155,3 +155,7 @@ Dexie v19 adds `savedSearches` indexed by space. Named queries reuse the local s
 ### Tag suggestions
 
 The bookmark repository reads an owned bookmark/tag snapshot in a read transaction. `tag-suggestions.ts` counts distinct same-host bookmark assignments, filters active scoped tags and returns up to five candidates with supporting counts. The editor requests suggestions only on demand, preserves other fields and manually selected tags, and applies a candidate only to its draft. Normal bookmark save validation and ownership checks govern the eventual write. No schema, permission, background job or network integration is added.
+
+### Scratchpad widgets
+
+Dexie v20 extends Home widget records with plain-text notes while preserving existing widgets. Notes are limited to three per space and 10,000 characters each. Creation defaults to hidden in the widget manager; Home displays a bounded read-only preview only after explicit enablement. Edits and removals check opening revisions inside owned transactions. Failed/conflicting saves keep the draft. Notes can be downloaded as text and stay outside bookmark archives. Deletion retains a text tombstone.

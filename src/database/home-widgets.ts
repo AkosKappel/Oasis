@@ -2,6 +2,7 @@ import { db, type OasisDatabase } from './schema';
 import { requireOwnedRecord, requireSpace } from './records';
 import type { RecordMetadata } from '@/types/entities';
 export type WidgetInput =
+  | { kind: 'note'; label: string; text: string; visible: boolean }
   | { kind: 'clock'; label: string; timeZone: string; visible: boolean }
   | { kind: 'countdown'; label: string; deadline: number; visible: boolean };
 export type HomeWidget = WidgetInput & RecordMetadata & { spaceId: string };
@@ -23,6 +24,16 @@ export function validateWidget(input: WidgetInput): WidgetInput {
     typeof input.visible !== 'boolean'
   )
     throw new Error('Use a label between 1 and 40 characters.');
+  if (input.kind === 'note') {
+    if (typeof input.text !== 'string' || input.text.length > 10000)
+      throw new Error('Keep a note within 10,000 characters.');
+    return {
+      kind: 'note',
+      label: input.label.trim(),
+      text: input.text,
+      visible: input.visible,
+    };
+  }
   if (input.kind === 'clock' && validTimeZone(input.timeZone))
     return {
       kind: 'clock',
@@ -86,7 +97,7 @@ export function createHomeWidgetRepository(
         },
       );
     },
-    async save(input: WidgetInput, id?: string) {
+    async save(input: WidgetInput, id?: string, expectedUpdatedAt?: number) {
       const value = validateWidget(input);
       return database.transaction(
         'rw',
@@ -104,6 +115,13 @@ export function createHomeWidgetRepository(
             : undefined;
           if (existing && existing.kind !== value.kind)
             throw new Error('Edit the same kind of widget.');
+          if (
+            existing?.kind === 'note' &&
+            existing.updatedAt !== expectedUpdatedAt
+          )
+            throw new Error(
+              'This note changed. Reopen it before saving. Your draft is kept.',
+            );
           const count = await database.homeWidgets
             .where('spaceId')
             .equals(spaceId)
@@ -113,8 +131,8 @@ export function createHomeWidgetRepository(
             )
             .count();
           if (!existing && count >= 3)
-            throw new Error('Keep up to three clocks and three countdowns.');
-          const now = Date.now();
+            throw new Error('Keep up to three widgets of each type.');
+          const now = Math.max(Date.now(), (existing?.updatedAt ?? 0) + 1);
           const widget: HomeWidget = {
             ...value,
             id: existing?.id ?? crypto.randomUUID(),
@@ -127,14 +145,24 @@ export function createHomeWidgetRepository(
         },
       );
     },
-    async remove(id: string) {
+    async remove(id: string, expectedUpdatedAt?: number) {
       await database.transaction(
         'rw',
         database.spaces,
         database.homeWidgets,
         async () => {
           await requireSpace(database, spaceId);
-          await requireOwnedRecord(database.homeWidgets, id, spaceId, 'widget');
+          const existing = await requireOwnedRecord(
+            database.homeWidgets,
+            id,
+            spaceId,
+            'widget',
+          );
+          if (
+            existing.kind === 'note' &&
+            existing.updatedAt !== expectedUpdatedAt
+          )
+            throw new Error('This note changed. Review it before removing.');
           await database.homeWidgets.update(id, {
             deletedAt: Date.now(),
             updatedAt: Date.now(),

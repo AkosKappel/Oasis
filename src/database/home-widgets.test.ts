@@ -101,3 +101,42 @@ it('bounds widgets per kind, preserves IDs on edits and soft deletes only owned 
     ),
   ).rejects.toThrow('same kind');
 });
+it('preserves plain note text, checks revisions and protects foreign/deleted notes', async () => {
+  await database.open();
+  const input = {
+    kind: 'note' as const,
+    label: 'Ideas',
+    text: '  First line\n<script>plain text</script>',
+    visible: false,
+  };
+  const id = await repository.save(input);
+  const original = (await repository.list())[0]!;
+  expect(original).toMatchObject(input);
+  await repository.save({ ...input, text: 'Updated' }, id, original.updatedAt);
+  await expect(
+    repository.save({ ...input, text: 'Stale draft' }, id, original.updatedAt),
+  ).rejects.toThrow('changed');
+  await expect(repository.remove(id, original.updatedAt)).rejects.toThrow(
+    'changed',
+  );
+  await expect(
+    repository.save({ ...input, text: 'x'.repeat(10001) }),
+  ).rejects.toThrow('10,000');
+  await database.spaces.add({
+    id: 'other',
+    name: 'Other',
+    createdAt: 1,
+    updatedAt: 1,
+  });
+  await expect(
+    createHomeWidgetRepository('other', database).save(
+      input,
+      id,
+      original.updatedAt,
+    ),
+  ).rejects.toThrow();
+  const current = (await repository.list())[0]!;
+  await repository.remove(id, current.updatedAt);
+  expect((await database.homeWidgets.get(id))?.deletedAt).toBeTypeOf('number');
+  await expect(repository.save(input, id, current.updatedAt)).rejects.toThrow();
+});

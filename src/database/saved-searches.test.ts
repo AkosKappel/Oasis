@@ -119,7 +119,7 @@ it('upgrades v18 while preserving content feedback and leaving saved searches em
   const upgraded = new OasisDatabase(name);
   try {
     await upgraded.open();
-    expect(upgraded.verno).toBe(19);
+    expect(upgraded.verno).toBe(20);
     expect(await upgraded.contentFeedback.get('vote')).toEqual(vote);
     expect(await upgraded.savedSearches.count()).toBe(0);
   } finally {

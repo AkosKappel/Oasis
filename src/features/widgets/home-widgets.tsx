@@ -25,7 +25,11 @@ export function HomeWidgets({
           <h2 className="break-words text-xs text-muted-foreground">
             {widget.label}
           </h2>
-          {widget.kind === 'clock' ? (
+          {widget.kind === 'note' ? (
+            <p className="mt-2 max-w-sm whitespace-pre-wrap break-words text-left text-sm line-clamp-6">
+              {widget.text.trim() ? widget.text : 'Your note is empty.'}
+            </p>
+          ) : widget.kind === 'clock' ? (
             <>
               <p className="mt-1 text-xl tabular-nums">
                 {now.toLocaleTimeString(undefined, {
