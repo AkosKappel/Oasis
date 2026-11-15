@@ -1,3 +1,5 @@
+import { moveBefore } from './manual-order';
+import { createLibraryPreferencesRepository } from './library-preferences';
 import { db, type OasisDatabase } from './schema';
 import type { Bookmark } from '@/types/entities';
 import { requireOwnedRecord, requireSpace } from './records';
@@ -166,6 +168,34 @@ export function createBookmarkRepository(
             })),
           );
           return bookmarks.length;
+        },
+      );
+    },
+    async reorder(id: string, beforeId: string | null) {
+      await database.transaction(
+        'rw',
+        database.spaces,
+        database.bookmarks,
+        database.libraryPreferences,
+        async () => {
+          await requireSpace(database, spaceId);
+          const records = await database.bookmarks
+            .where('spaceId')
+            .equals(spaceId)
+            .filter((record) => record.deletedAt === undefined)
+            .toArray();
+          const changes = moveBefore(records, id, beforeId);
+          const byId = new Map(records.map((record) => [record.id, record]));
+          await database.bookmarks.bulkPut(
+            changes.map((change) => ({
+              ...byId.get(change.id)!,
+              sortOrder: change.sortOrder,
+              updatedAt: Date.now(),
+            })),
+          );
+          await createLibraryPreferencesRepository(spaceId, database).save({
+            sort: 'manual',
+          });
         },
       );
     },

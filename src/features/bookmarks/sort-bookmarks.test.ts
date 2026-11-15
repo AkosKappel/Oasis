@@ -34,3 +34,9 @@ it('sorts names naturally and dates in both directions without mutating relevanc
   ).toEqual(['a', 'b', 'c']);
   expect(bookmarks.map((record) => record.id)).toEqual(['a', 'b', 'c']);
 });
+
+it('uses stable ID ties in manual order, matching the rank planner', () => {
+  expect(
+    sortBookmarks([...bookmarks].reverse(), 'manual').map((item) => item.id),
+  ).toEqual(['a', 'b', 'c']);
+});

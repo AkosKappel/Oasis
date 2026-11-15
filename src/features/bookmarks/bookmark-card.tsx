@@ -1,9 +1,15 @@
+import type { DragEvent } from 'react';
 import { TrackedBookmarkLink } from '@/features/bookmarks/tracked-bookmark-link';
 import { FileText, Pencil, Star, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
 
 interface BookmarkCardProps {
+  onDragStart?: (event: DragEvent) => void;
+  onDropBefore?: (event: DragEvent) => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  organizingBusy?: boolean;
   compact?: boolean;
   selected?: boolean;
   onSelect?: () => void;
@@ -17,6 +23,11 @@ interface BookmarkCardProps {
 }
 
 export function BookmarkCard({
+  onDragStart,
+  onDropBefore,
+  onMoveUp,
+  onMoveDown,
+  organizingBusy,
   bookmark,
   compact = false,
   selected = false,
@@ -32,6 +43,9 @@ export function BookmarkCard({
   const validDate = Number.isFinite(created.getTime());
   return (
     <li
+      data-bookmark-id={bookmark.id}
+      onDragOver={onDropBefore ? (event) => event.preventDefault() : undefined}
+      onDrop={onDropBefore}
       className={
         compact
           ? 'group flex min-w-0 items-center gap-3 rounded-lg border border-border bg-surface/65 p-3 sm:gap-4'
@@ -45,6 +59,20 @@ export function BookmarkCard({
             : 'mb-5 flex items-center justify-between'
         }
       >
+        {onDragStart && (
+          <Button
+            variant="outline"
+            size="sm"
+            draggable={!organizingBusy}
+            disabled={organizingBusy}
+            onDragStart={onDragStart}
+            onClick={() => onEdit(bookmark)}
+            aria-label={`Drag bookmark ${bookmark.title}`}
+            title="Drag to move. Click to edit its folder."
+          >
+            Drag
+          </Button>
+        )}
         {onSelect && (
           <label className="flex items-center">
             <input
@@ -151,9 +179,31 @@ export function BookmarkCard({
         className={
           compact
             ? 'flex shrink-0 flex-col gap-1 sm:flex-row'
-            : 'mt-auto flex justify-end gap-1 pt-5'
+            : 'mt-auto flex flex-wrap justify-end gap-1 pt-5'
         }
       >
+        {onMoveUp && (
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={organizingBusy}
+            onClick={onMoveUp}
+            aria-label={`Move up: ${bookmark.title}`}
+          >
+            Move up
+          </Button>
+        )}
+        {onMoveDown && (
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={organizingBusy}
+            onClick={onMoveDown}
+            aria-label={`Move down: ${bookmark.title}`}
+          >
+            Move down
+          </Button>
+        )}
         <Button
           variant="outline"
           size="icon"

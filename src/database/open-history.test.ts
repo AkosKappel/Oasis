@@ -112,7 +112,7 @@ it('upgrades v13 preferences with counting disabled and preserves existing bookm
   });
   legacy.close();
   await database.open();
-  expect(database.verno).toBe(16);
+  expect(database.verno).toBe(17);
   expect(
     await createLibraryPreferencesRepository('default', database).get(),
   ).toEqual({ view: 'list', sort: 'oldest', trackOpens: false });

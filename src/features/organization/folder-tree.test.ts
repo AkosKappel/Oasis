@@ -33,3 +33,16 @@ it('terminates defensively for invalid legacy cycles', () => {
   expect(descendantFolderIds(cycle, 'a').size).toBe(2);
   expect(folderPaths(cycle).size).toBe(2);
 });
+
+it('keeps children next to their parent when manually ordering siblings', () => {
+  const folders = [
+    { id: 'a', name: 'A', sortOrder: 2 },
+    { id: 'b', name: 'B', sortOrder: 1 },
+    { id: 'child', name: 'Child', parentId: 'b', sortOrder: 100 },
+  ];
+  expect(folderOptions(folders, true).map((folder) => folder.id)).toEqual([
+    'b',
+    'child',
+    'a',
+  ]);
+});

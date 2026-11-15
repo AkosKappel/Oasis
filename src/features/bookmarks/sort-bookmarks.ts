@@ -9,6 +9,10 @@ export function sortBookmarks(
   sort: LibraryPreferences['sort'],
 ): Bookmark[] {
   if (sort === 'relevance') return bookmarks;
+  if (sort === 'manual')
+    return [...bookmarks].sort(
+      (a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id),
+    );
   return [...bookmarks].sort((a, b) => {
     let difference: number;
     if (sort === 'name-asc' || sort === 'name-desc')

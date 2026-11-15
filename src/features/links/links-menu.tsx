@@ -1,3 +1,4 @@
+import { useLibraryPreferences } from '@/features/bookmarks/use-library-preferences';
 import { TrackedBookmarkLink } from '@/features/bookmarks/tracked-bookmark-link';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -23,6 +24,7 @@ export function LinksMenu({
   tags: Tag[];
   error?: string;
 }) {
+  const { preferences } = useLibraryPreferences();
   const trigger = useRef<HTMLButtonElement>(null);
   const [wide, setWide] = useState(
     () => window.matchMedia('(min-width: 1024px)').matches,
@@ -191,17 +193,19 @@ export function LinksMenu({
                 Folders
               </p>
             )}
-            {folderOptions(folders).map((folder) => (
-              <button
-                type="button"
-                key={folder.id}
-                aria-pressed={filter === `folder:${folder.id}`}
-                onClick={() => setSelection(`folder:${folder.id}`)}
-                className={`block w-full truncate rounded px-2 py-1.5 text-left text-sm ${filter === `folder:${folder.id}` ? 'bg-secondary text-secondary-foreground' : 'hover:bg-secondary hover:text-secondary-foreground'}`}
-              >
-                {folder.path}
-              </button>
-            ))}
+            {folderOptions(folders, preferences.folderOrder === 'manual').map(
+              (folder) => (
+                <button
+                  type="button"
+                  key={folder.id}
+                  aria-pressed={filter === `folder:${folder.id}`}
+                  onClick={() => setSelection(`folder:${folder.id}`)}
+                  className={`block w-full truncate rounded px-2 py-1.5 text-left text-sm ${filter === `folder:${folder.id}` ? 'bg-secondary text-secondary-foreground' : 'hover:bg-secondary hover:text-secondary-foreground'}`}
+                >
+                  {folder.path}
+                </button>
+              ),
+            )}
           </nav>
           {error && (
             <p role="alert" className="mt-4 text-sm text-danger">

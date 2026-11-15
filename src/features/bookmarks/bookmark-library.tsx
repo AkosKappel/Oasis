@@ -1,3 +1,10 @@
+import type { DragEvent } from 'react';
+import { useSpace } from '@/features/spaces/space-context';
+import {
+  DragOrganization,
+  readOrganizationDrag,
+  writeOrganizationDrag,
+} from '@/features/organization/drag-organization';
 import { StatisticsDialog } from '@/features/statistics/statistics-dialog';
 import { smartCollection, type SmartCollection } from './smart-collections';
 import { SpaceSwitcher } from '@/features/spaces/space-switcher';
@@ -37,13 +44,21 @@ export function BookmarkLibrary({
 }: {
   initialQuery?: string;
 }) {
-  const { personalBookmarks, personalLibraryPreferences, openHistory } =
-    useSpaceRepositories();
+  const {
+    personalBookmarks,
+    personalOrganization,
+    personalLibraryPreferences,
+    openHistory,
+  } = useSpaceRepositories();
   const {
     preferences,
     error: preferencesError,
     setPreferences,
   } = useLibraryPreferences();
+  const { spaceId } = useSpace();
+  const [organizing, setOrganizing] = useState(false);
+  const [organizationBusy, setOrganizationBusy] = useState(false);
+  const [organizationMessage, setOrganizationMessage] = useState('');
   const [savingPreferences, setSavingPreferences] = useState(false);
   const { library, error: loadError } = useLibrary();
   const { bookmarks, folders = [], tags = [] } = library ?? {};
@@ -180,6 +195,88 @@ export function BookmarkLibrary({
   );
   const tagMap = new Map(tags.map((tag) => [tag.id, tag]));
 
+  const canReorder =
+    preferences.sort === 'manual' &&
+    !query.trim() &&
+    !folderId &&
+    !tagId &&
+    collection === 'all';
+  async function organize(
+    action: () => Promise<unknown>,
+    message: string,
+    focusBookmark?: string,
+  ) {
+    if (organizationBusy) return;
+    setOrganizationBusy(true);
+    setError(undefined);
+    setOrganizationMessage('');
+    try {
+      await action();
+      storageWriteSucceeded();
+      clearSelection();
+      setOrganizationMessage(message);
+      if (focusBookmark)
+        requestAnimationFrame(() => {
+          const row = [
+            ...document.querySelectorAll<HTMLElement>('[data-bookmark-id]'),
+          ].find((item) => item.dataset.bookmarkId === focusBookmark);
+          row?.querySelector('a')?.focus();
+        });
+    } catch (cause) {
+      reportStorageError(cause);
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'This item could not be organized. Try again.',
+      );
+    } finally {
+      setOrganizationBusy(false);
+    }
+  }
+  function dropInto(event: DragEvent, folder: string | null) {
+    event.preventDefault();
+    event.stopPropagation();
+    try {
+      const item = readOrganizationDrag(event, spaceId);
+      void organize(
+        () =>
+          item.kind === 'bookmark'
+            ? personalBookmarks.bulkUpdate([item.id], {
+                kind: 'move',
+                folderId: folder ?? undefined,
+              })
+            : personalOrganization.moveFolder(item.id, folder),
+        'Item moved.',
+      );
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'Drag an Oasis item from this space.',
+      );
+    }
+  }
+  function dropBefore(event: DragEvent, target: string) {
+    event.preventDefault();
+    event.stopPropagation();
+    try {
+      const item = readOrganizationDrag(event, spaceId);
+      if (item.kind !== 'bookmark' || !canReorder)
+        throw new Error(
+          'Choose Manual bookmark order and clear filters to reorder bookmarks.',
+        );
+      void organize(
+        () => personalBookmarks.reorder(item.id, target),
+        'Bookmark order saved.',
+      );
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'This item could not be reordered.',
+      );
+    }
+  }
   async function remove(bookmark: Bookmark) {
     if (!window.confirm(`Delete “${bookmark.title}” from your library?`))
       return;
@@ -410,6 +507,7 @@ export function BookmarkLibrary({
               }
             >
               <option value="relevance">Best match</option>
+              <option value="manual">Manual order</option>
               <option value="name-asc">Name, A to Z</option>
               <option value="name-desc">Name, Z to A</option>
               <option value="newest">Newest first</option>
@@ -466,6 +564,53 @@ export function BookmarkLibrary({
             {selecting ? 'Cancel selection' : 'Select bookmarks'}
           </Button>
         </div>
+        <div className="mt-3">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!bookmarks || organizationBusy}
+            aria-expanded={organizing}
+            onClick={() => setOrganizing(!organizing)}
+          >
+            {organizing ? 'Done organizing' : 'Organize by dragging'}
+          </Button>
+        </div>
+        {organizing && (
+          <DragOrganization
+            folders={folders}
+            spaceId={spaceId}
+            manual={preferences.folderOrder === 'manual'}
+            busy={organizationBusy}
+            onOrderChange={(manual) =>
+              void savePreferences({ folderOrder: manual ? 'manual' : 'name' })
+            }
+            onFolderMove={(id, parent) =>
+              void organize(
+                () => personalOrganization.moveFolder(id, parent),
+                'Folder moved.',
+              )
+            }
+            onFolderOrder={(id, before) =>
+              void organize(
+                () => personalOrganization.reorderFolder(id, before),
+                'Folder order saved.',
+              )
+            }
+            onDrop={dropInto}
+            onEdit={() => setOrganizationOpen(true)}
+          />
+        )}
+        {organizing && !canReorder && (
+          <p className="mt-3 text-xs text-muted-foreground">
+            Choose Manual bookmark order and clear filters to reorder cards.
+            Folder destinations work with any view.
+          </p>
+        )}
+        {organizationMessage && (
+          <p role="status" className="mt-3 text-sm">
+            {organizationMessage}
+          </p>
+        )}
         {selecting && (
           <section
             aria-label="Bulk actions"
@@ -589,9 +734,51 @@ export function BookmarkLibrary({
                 : 'mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3'
             }
           >
-            {displayed?.map((bookmark) => (
+            {displayed?.map((bookmark, index) => (
               <BookmarkCard
                 key={bookmark.id}
+                onDragStart={
+                  organizing
+                    ? (event) =>
+                        writeOrganizationDrag(event, {
+                          kind: 'bookmark',
+                          id: bookmark.id,
+                          spaceId,
+                        })
+                    : undefined
+                }
+                onDropBefore={
+                  organizing
+                    ? (event) => dropBefore(event, bookmark.id)
+                    : undefined
+                }
+                onMoveUp={
+                  canReorder && index > 0
+                    ? () =>
+                        void organize(
+                          () =>
+                            personalBookmarks.reorder(
+                              bookmark.id,
+                              displayed[index - 1]!.id,
+                            ),
+                          'Bookmark order saved.',
+                        )
+                    : undefined
+                }
+                onMoveDown={
+                  canReorder && index < visible.length - 1
+                    ? () =>
+                        void organize(
+                          () =>
+                            personalBookmarks.reorder(
+                              bookmark.id,
+                              visible[index + 2]?.id ?? null,
+                            ),
+                          'Bookmark order saved.',
+                        )
+                    : undefined
+                }
+                organizingBusy={organizationBusy}
                 selected={selected.has(bookmark.id)}
                 onSelect={
                   selecting ? () => toggleSelection(bookmark.id) : undefined

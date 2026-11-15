@@ -2,6 +2,7 @@ import {
   createDashboardLayoutRepository,
   defaultDashboardItems,
 } from './dashboard-layout';
+import { createLibraryPreferencesRepository } from './library-preferences';
 import Dexie from 'dexie';
 import { expect, it } from 'vitest';
 import { OasisDatabase } from './schema';
@@ -45,11 +46,23 @@ it('upgrades v14 without enabling Home bookmark sections or changing saved prefe
     updatedAt: 1,
   };
   await legacy.table('preferences').add(preference);
+  await legacy.table('libraryPreferences').add({
+    id: 'default:library',
+    spaceId: 'default',
+    view: 'list',
+    sort: 'oldest',
+    trackOpens: false,
+    createdAt: 1,
+    updatedAt: 1,
+  });
   legacy.close();
   const database = new OasisDatabase(name);
   try {
     await database.open();
-    expect(database.verno).toBe(16);
+    expect(database.verno).toBe(17);
+    expect(
+      await createLibraryPreferencesRepository('default', database).get(),
+    ).toEqual({ view: 'list', sort: 'oldest', trackOpens: false });
     expect(await database.dashboardLayouts.count()).toBe(0);
     expect(
       (await createDashboardLayoutRepository('default', database).get()).items,

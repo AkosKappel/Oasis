@@ -2,9 +2,10 @@ import { db, type OasisDatabase } from './schema';
 import { requireSpace } from './records';
 import type { RecordMetadata } from '@/types/entities';
 export interface LibraryPreferences {
+  folderOrder?: 'name' | 'manual';
   view: 'grid' | 'list';
   trackOpens?: boolean;
-  sort: 'relevance' | 'name-asc' | 'name-desc' | 'newest' | 'oldest';
+  sort: 'relevance' | 'name-asc' | 'name-desc' | 'newest' | 'oldest' | 'manual';
 }
 export interface LibraryPreferenceRecord
   extends LibraryPreferences, RecordMetadata {
@@ -20,13 +21,23 @@ export function validateLibraryPreferences(
 ): LibraryPreferences {
   if (
     (input.trackOpens !== undefined && typeof input.trackOpens !== 'boolean') ||
+    (input.folderOrder !== undefined &&
+      !['name', 'manual'].includes(input.folderOrder)) ||
     !['grid', 'list'].includes(input.view) ||
-    !['relevance', 'name-asc', 'name-desc', 'newest', 'oldest'].includes(
-      input.sort,
-    )
+    ![
+      'relevance',
+      'name-asc',
+      'name-desc',
+      'newest',
+      'oldest',
+      'manual',
+    ].includes(input.sort)
   )
     throw new Error('Choose a valid library view and sort order.');
   return {
+    ...(input.folderOrder !== undefined
+      ? { folderOrder: input.folderOrder }
+      : {}),
     view: input.view,
     sort: input.sort,
     trackOpens: input.trackOpens ?? false,

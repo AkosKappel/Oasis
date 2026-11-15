@@ -273,3 +273,9 @@
 - Store an ordered, validated list of section IDs with visibility and normal/wide bounds. Keep the default centered layout and existing opt-ins; layout visibility never grants permissions, enables content or changes its settings.
 - Provide keyboard-operable Move up/Move down controls with announcements, local unsaved drafts and a reset limited to layout. Compare the opening revision on save so another tab cannot silently replace a draft.
 - Dexie v16 adds a space-owned layout table. Earlier preferences/content stay unchanged, and layouts remain outside content backups. Hidden weather is not mounted and does not refresh from Home.
+
+## 2026-11-15: manual order and drag organization
+
+- Use native browser drag-and-drop with a space-scoped Oasis payload. External URL/file drops and foreign-space payloads do not trigger writes. Keep Edit/folder controls and Move up/Move down as keyboard/touch alternatives.
+- Bookmark manual order is per-space and available with cleared filters. Folder ordering applies among siblings; moving into a folder reuses transactional ownership, unique-name and cycle checks. Alphabetical folder order remains the default; manual folder order also drives Home Links and Library filter options.
+- Most rank changes update one record. Rebalance with positive rank gaps only for ties or exhausted numeric precision. Rank and preference writes share a transaction. Dexie v17 records optional folder-order/manual-sort preferences without rewriting existing views or content.

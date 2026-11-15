@@ -1,3 +1,5 @@
+import { moveBefore } from './manual-order';
+import { createLibraryPreferencesRepository } from './library-preferences';
 import { db, type OasisDatabase } from './schema';
 import { requireOwnedRecord, requireSpace, requireUniqueName } from './records';
 
@@ -102,6 +104,61 @@ export function createOrganizationRepository(
             updatedAt: now,
           });
           return folderId;
+        },
+      );
+    },
+    async moveFolder(id: string, parentId: string | null) {
+      return database.transaction(
+        'rw',
+        database.spaces,
+        database.folders,
+        async () => {
+          await requireSpace(database, spaceId);
+          const record = await requireOwnedRecord(
+            database.folders,
+            id,
+            spaceId,
+            'folder',
+          );
+          return this.saveFolder(record.name, id, parentId ?? '');
+        },
+      );
+    },
+    async reorderFolder(id: string, beforeId: string | null) {
+      await database.transaction(
+        'rw',
+        database.spaces,
+        database.folders,
+        database.libraryPreferences,
+        async () => {
+          await requireSpace(database, spaceId);
+          const record = await requireOwnedRecord(
+            database.folders,
+            id,
+            spaceId,
+            'folder',
+          );
+          const siblings = await database.folders
+            .where('spaceId')
+            .equals(spaceId)
+            .filter(
+              (item) =>
+                item.deletedAt === undefined &&
+                item.parentId === record.parentId,
+            )
+            .toArray();
+          const changes = moveBefore(siblings, id, beforeId);
+          const byId = new Map(siblings.map((item) => [item.id, item]));
+          await database.folders.bulkPut(
+            changes.map((change) => ({
+              ...byId.get(change.id)!,
+              sortOrder: change.sortOrder,
+              updatedAt: Date.now(),
+            })),
+          );
+          await createLibraryPreferencesRepository(spaceId, database).save({
+            folderOrder: 'manual',
+          });
         },
       );
     },

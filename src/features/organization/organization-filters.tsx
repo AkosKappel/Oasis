@@ -2,6 +2,7 @@ import { folderOptions } from './folder-tree';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
 
 interface OrganizationFiltersProps {
+  manualOrder?: boolean;
   bookmarks: Bookmark[];
   folders: Folder[];
   tags: Tag[];
@@ -12,6 +13,7 @@ interface OrganizationFiltersProps {
 }
 
 export function OrganizationFilters({
+  manualOrder = false,
   bookmarks,
   folders,
   tags,
@@ -49,7 +51,7 @@ export function OrganizationFilters({
         >
           <option value="">All folders</option>
           <option value="unorganized">Unorganized ({unorganized})</option>
-          {folderOptions(folders).map((folder) => (
+          {folderOptions(folders, manualOrder).map((folder) => (
             <option key={folder.id} value={folder.id}>
               {folder.path} ({folderCounts.get(folder.id) ?? 0})
             </option>
