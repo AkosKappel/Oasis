@@ -247,3 +247,7 @@
 - Read consent and update the bookmark in one transaction so concurrent opens do not lose increments. Same-tab navigation waits for the local write attempt; failures still allow navigation. New-tab links keep native modifier/middle-click behavior.
 - Turning counting off preserves earlier counts. Offer explicit clearing and derive recent/frequent collections from saved data. Existing bookmark JSON includes these fields; settings remain outside content backups.
 - Dexie v14 adds the optional Library preference with counting disabled for existing records. Existing open metadata is preserved during migration.
+
+## 2026-11-15: weather access shared across spaces
+
+- Disabling weather changes the selected space. Revoke browser-wide optional host access only when no other active space uses weather; otherwise keep the grant and explain why. Deleted spaces do not retain access. Browser extension settings can still revoke access globally.

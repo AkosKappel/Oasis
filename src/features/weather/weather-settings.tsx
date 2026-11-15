@@ -210,11 +210,20 @@ export function WeatherSettingsPanel() {
           disabled={busy}
           onClick={() =>
             void run(async () => {
-              await personalWeather.disable();
-              await browser.permissions.remove({ origins: WEATHER_ORIGINS });
-              setAllowed(false);
+              const removeAccess = await personalWeather.disable();
+              if (removeAccess)
+                await browser.permissions.remove({ origins: WEATHER_ORIGINS });
+              setAllowed(
+                await browser.permissions.contains({
+                  origins: WEATHER_ORIGINS,
+                }),
+              );
               setCities([]);
-              setMessage('Weather is off and network access was removed.');
+              setMessage(
+                removeAccess
+                  ? 'Weather is off and network access was removed.'
+                  : 'Weather is off in this space. Other spaces retain weather access.',
+              );
             })
           }
         >

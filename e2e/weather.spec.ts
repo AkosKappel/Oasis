@@ -161,3 +161,95 @@ test('shows an unavailable state when the provider fails and keeps controls usab
     dialog.getByRole('button', { name: 'Turn weather off', exact: true }),
   ).toBeEnabled();
 });
+
+test('turning weather off in one space preserves another space’s browser access', async ({
+  page,
+  context,
+}) => {
+  await context.addInitScript(() => {
+    let allowed = true;
+    const permissions = (
+      globalThis as unknown as {
+        chrome: {
+          permissions: {
+            contains: () => Promise<boolean>;
+            remove: () => Promise<boolean>;
+          };
+        };
+      }
+    ).chrome.permissions;
+    permissions.contains = async () => allowed;
+    permissions.remove = async () => {
+      allowed = false;
+      return true;
+    };
+  });
+  await context.route('https://geocoding-api.open-meteo.com/**', (route) =>
+    route.fulfill({
+      json: {
+        results: [
+          {
+            name: 'Oslo',
+            country: 'Norway',
+            latitude: 59.91,
+            longitude: 10.75,
+          },
+        ],
+      },
+    }),
+  );
+  await context.route('https://api.open-meteo.com/**', (route) =>
+    route.fulfill({ json: response }),
+  );
+  await page.goto('chrome://newtab/');
+  async function enable() {
+    await page.getByRole('button', { name: 'Widgets', exact: true }).click();
+    await page
+      .getByRole('searchbox', { name: 'Weather city', exact: true })
+      .fill('Oslo');
+    await page.getByRole('button', { name: 'Find city', exact: true }).click();
+    await page
+      .getByRole('button', { name: 'Use Oslo, Norway', exact: true })
+      .click();
+    await expect(page.getByRole('dialog').getByRole('status')).toContainText(
+      'Weather is enabled',
+    );
+    await page.getByRole('button', { name: 'Done', exact: true }).click();
+  }
+  await enable();
+  await page
+    .getByRole('button', { name: 'Manage spaces', exact: true })
+    .click();
+  await page
+    .getByRole('textbox', { name: 'New space name', exact: true })
+    .fill('Work');
+  await page.getByRole('button', { name: 'Create space', exact: true }).click();
+  const selector = page.getByRole('combobox', {
+    name: 'Active space',
+    exact: true,
+  });
+  await expect(
+    selector.getByRole('option', { name: 'Work', exact: true }),
+  ).toHaveCount(1);
+  await selector.selectOption({ label: 'Work' });
+  await enable();
+  await page.getByRole('button', { name: 'Widgets', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Turn weather off', exact: true })
+    .click();
+  await expect(page.getByRole('dialog').getByRole('status')).toContainText(
+    'Other spaces retain weather access',
+  );
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
+  await selector.selectOption('default');
+  await expect(
+    page.getByRole('region', { name: 'Weather', exact: true }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Widgets', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Turn weather off', exact: true })
+    .click();
+  await expect(page.getByRole('dialog').getByRole('status')).toContainText(
+    'network access was removed',
+  );
+});

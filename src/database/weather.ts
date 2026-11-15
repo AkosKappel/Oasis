@@ -155,7 +155,7 @@ export function createWeatherRepository(
       );
     },
     async disable() {
-      await database.transaction(
+      return database.transaction(
         'rw',
         database.spaces,
         database.weatherSettings,
@@ -168,6 +168,23 @@ export function createWeatherRepository(
               leaseUntil: undefined,
               updatedAt: Date.now(),
             });
+          const activeSpaces = new Set(
+            (
+              await database.spaces
+                .filter((space) => space.deletedAt === undefined)
+                .toArray()
+            ).map((space) => space.id),
+          );
+          const other = await database.weatherSettings
+            .filter(
+              (settings) =>
+                settings.spaceId !== spaceId &&
+                settings.enabled &&
+                settings.deletedAt === undefined &&
+                activeSpaces.has(settings.spaceId),
+            )
+            .first();
+          return !other;
         },
       );
     },

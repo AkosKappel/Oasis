@@ -1,3 +1,4 @@
+import { createSpaceRepository } from './spaces';
 import { afterEach, expect, it, vi } from 'vitest';
 import { OasisDatabase } from './schema';
 import {
@@ -82,4 +83,18 @@ it('rejects incomplete, impossible and non-finite forecast values', () => {
       days: forecast.days.map((day) => ({ ...day, high: day.low - 1 })),
     }),
   ).toThrow('incomplete');
+});
+
+it('retains shared access until weather is disabled in every active space', async () => {
+  await database.open();
+  const work = await createSpaceRepository(database).save('Work');
+  const other = createWeatherRepository(work, database);
+  await repository.configure(city, 'celsius');
+  await other.configure(city, 'fahrenheit');
+  expect(await repository.disable()).toBe(false);
+  expect((await other.get())?.enabled).toBe(true);
+  expect(await other.disable()).toBe(true);
+  await other.configure(city, 'celsius');
+  await createSpaceRepository(database).remove(work);
+  expect(await repository.disable()).toBe(true);
 });
