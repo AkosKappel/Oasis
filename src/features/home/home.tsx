@@ -1,3 +1,5 @@
+import { TaskListDialog } from '@/features/widgets/task-list';
+import type { HomeWidget } from '@/database/home-widgets';
 import { ContentPreferences } from '@/features/content/content-preferences';
 import { defaultDashboardItems } from '@/database/dashboard-layout';
 import { useDashboardLayout } from './use-dashboard-layout';
@@ -60,6 +62,7 @@ export function Home({
   onPinLinks: (pinned: boolean) => Promise<void>;
 }) {
   const { layout, error: layoutError } = useDashboardLayout();
+  const [taskList, setTaskList] = useState<HomeWidget>();
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const preferenceTrigger = useRef<HTMLButtonElement>(null);
   const pendingFocus = useRef<HTMLElement | null>(null);
@@ -273,7 +276,11 @@ export function Home({
     ),
     widgets: (
       <>
-        <HomeWidgets now={now} clock={appearance.clock} />
+        <HomeWidgets
+          now={now}
+          clock={appearance.clock}
+          onManageTasks={setTaskList}
+        />
       </>
     ),
     weather: (
@@ -497,6 +504,12 @@ export function Home({
             </button>
           </footer>
         </>
+      )}
+      {taskList && (
+        <TaskListDialog
+          widget={taskList}
+          onClose={() => setTaskList(undefined)}
+        />
       )}
       {preferencesOpen && (
         <ContentPreferences onClose={() => setPreferencesOpen(false)} />

@@ -45,8 +45,38 @@ it('upgrades v19 without changing existing widgets or enabling notes', async () 
   const database = new OasisDatabase(name);
   try {
     await database.open();
-    expect(database.verno).toBe(20);
+    expect(database.verno).toBe(21);
     expect(await database.homeWidgets.toArray()).toEqual([clock]);
+  } finally {
+    await database.delete();
+  }
+});
+it('upgrades v20 preserving note text and visibility with an empty task table', async () => {
+  const name = 'task-widget-migration';
+  const old = new Dexie(name);
+  old.version(20).stores(oldStores);
+  await old.open();
+  await old
+    .table('spaces')
+    .add({ id: 'default', name: 'Personal', createdAt: 1, updatedAt: 1 });
+  const note = {
+    id: 'note',
+    spaceId: 'default',
+    kind: 'note',
+    label: 'Ideas',
+    text: 'Keep this text.\nSecond line.',
+    visible: false,
+    createdAt: 1,
+    updatedAt: 1,
+  };
+  await old.table('homeWidgets').add(note);
+  old.close();
+  const database = new OasisDatabase(name);
+  try {
+    await database.open();
+    expect(database.verno).toBe(21);
+    expect(await database.homeWidgets.toArray()).toEqual([note]);
+    expect(await database.widgetTasks.count()).toBe(0);
   } finally {
     await database.delete();
   }

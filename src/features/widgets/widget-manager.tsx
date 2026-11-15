@@ -1,3 +1,4 @@
+import { TaskListDialog } from './task-list';
 import { downloadWidgetText } from './download-text';
 import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { WeatherSettingsPanel } from '@/features/weather/weather-settings';
@@ -16,6 +17,7 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null),
     previous = useRef(document.activeElement);
   const { widgets, error: loadError } = useHomeWidgets();
+  const [taskList, setTaskList] = useState<HomeWidget>();
   const [editing, setEditing] = useState<HomeWidget>();
   const [kind, setKind] = useState<HomeWidget['kind']>('clock');
   const [text, setText] = useState('');
@@ -54,7 +56,7 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
     setLabel('');
     setDeadline('');
     setText('');
-    setVisible(kind !== 'note');
+    setVisible(kind !== 'note' && kind !== 'tasks');
   }
   return (
     <dialog
@@ -85,11 +87,18 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
           event.preventDefault();
           void run(async () => {
             await personalHomeWidgets.save(
-              kind === 'note'
-                ? { kind, label, text, visible }
-                : kind === 'clock'
-                  ? { kind, label, timeZone: zone, visible }
-                  : { kind, label, deadline: parseDeadline(deadline), visible },
+              kind === 'tasks'
+                ? { kind, label, visible }
+                : kind === 'note'
+                  ? { kind, label, text, visible }
+                  : kind === 'clock'
+                    ? { kind, label, timeZone: zone, visible }
+                    : {
+                        kind,
+                        label,
+                        deadline: parseDeadline(deadline),
+                        visible,
+                      },
               editing?.id,
               editing?.updatedAt,
             );
@@ -109,12 +118,13 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
               onChange={(event) => {
                 const value = event.target.value as typeof kind;
                 setKind(value);
-                setVisible(value !== 'note');
+                setVisible(value !== 'note' && value !== 'tasks');
               }}
             >
               <option value="clock">World clock</option>
               <option value="countdown">Countdown</option>
               <option value="note">Scratchpad note</option>
+              <option value="tasks">Task list</option>
             </select>
           </label>
           <label className="field">
@@ -133,7 +143,12 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
               }
             />
           </label>
-          {kind === 'note' ? (
+          {kind === 'tasks' ? (
+            <p className="text-sm text-muted-foreground">
+              Create a list, then choose Manage tasks. Task lists start hidden
+              and stay outside bookmark backups.
+            </p>
+          ) : kind === 'note' ? (
             <label className="field">
               Note text
               <textarea
@@ -209,11 +224,13 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
           >
             <p className="break-words font-medium">{widget.label}</p>
             <p className="mt-1 break-words text-xs text-muted-foreground">
-              {widget.kind === 'note'
-                ? 'Scratchpad note'
-                : widget.kind === 'clock'
-                  ? widget.timeZone
-                  : new Date(widget.deadline).toLocaleString()}
+              {widget.kind === 'tasks'
+                ? 'Task list'
+                : widget.kind === 'note'
+                  ? 'Scratchpad note'
+                  : widget.kind === 'clock'
+                    ? widget.timeZone
+                    : new Date(widget.deadline).toLocaleString()}
               {!widget.visible ? ' · Hidden' : ''}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -228,11 +245,23 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
                   setVisible(widget.visible);
                   if (widget.kind === 'note') setText(widget.text);
                   else if (widget.kind === 'clock') setZone(widget.timeZone);
-                  else setDeadline(localDateTime(widget.deadline));
+                  else if (widget.kind === 'countdown')
+                    setDeadline(localDateTime(widget.deadline));
                 }}
               >
                 Edit {widget.label}
               </Button>
+              {widget.kind === 'tasks' && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={busy}
+                  onClick={() => setTaskList(widget)}
+                  aria-label={`Manage tasks ${widget.label}`}
+                >
+                  Manage tasks
+                </Button>
+              )}
               {widget.kind === 'note' && (
                 <Button
                   size="sm"
@@ -253,9 +282,9 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
                 onClick={() =>
                   void run(async () => {
                     if (
-                      widget.kind === 'note' &&
+                      (widget.kind === 'note' || widget.kind === 'tasks') &&
                       !window.confirm(
-                        `Remove note “${widget.label}”? Download a copy first if you want to keep it.`,
+                        `Remove “${widget.label}” and its content? Download a copy first if you want to keep it.`,
                       )
                     )
                       return;
@@ -278,6 +307,12 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
         <p role="alert" className="mt-3 text-sm text-danger">
           {error || loadError}
         </p>
+      )}
+      {taskList && (
+        <TaskListDialog
+          widget={taskList}
+          onClose={() => setTaskList(undefined)}
+        />
       )}
     </dialog>
   );

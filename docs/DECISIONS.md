@@ -309,3 +309,7 @@ Suggest existing tags from other active bookmarks with the exact same hostname i
 ## 2026-11-15: Optional scratchpad previews with explicit saves
 
 Keep scratchpads inside the existing Widgets manager, hidden by default, rather than adding a permanent Home editor. Use plain text, explicit saves, revision checks and a text download instead of autosave or rich text. This preserves minimal Home and makes conflicts and data export clear.
+
+## 2026-11-15: Bounded local task lists
+
+Use separate task records under optional widgets rather than arrays inside widget settings, so completing a task cannot overwrite another task or the list’s settings. Keep the initial scope to add/edit/complete/remove and text export. Hide new lists by default, cap active tasks and Home previews, and leave reminders, recurrence and due dates for separate decisions.

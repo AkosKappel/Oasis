@@ -9,3 +9,5 @@ Before public release, evaluate with NVDA on Windows in Chrome and Edge: heading
 Feedback uses compact thumb icons revealed by quote/footer hover or keyboard focus. Touch pointers keep them visible, buttons retain accessible names and pressed states, and success announcements use a visually hidden status. Reduced-motion preferences disable their fade.
 
 Saved-search and tag-suggestion flows scan their dialogs with sample data and verify names, review-before-save controls and saved-search dismissal focus. Desktop and narrow previews cover the new Library UI.
+
+Scratchpad and task-list browser flows scan the new controls and verify nested-dialog Escape/focus return, checkbox rollback/retry after an injected storage failure, and draft preservation when another tab starts focus mode. Widgets remain absent from Home until explicitly enabled.

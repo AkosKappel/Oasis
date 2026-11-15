@@ -52,7 +52,7 @@ it('upgrades a v1 library without changing its bookmarks', async () => {
   );
   legacy.close();
   await database.open();
-  expect(database.verno).toBe(20);
+  expect(database.verno).toBe(21);
   expect(await database.bookmarks.get('saved')).toEqual(bookmark);
   expect(await database.preferences.count()).toBe(0);
 });

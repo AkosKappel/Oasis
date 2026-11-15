@@ -159,3 +159,11 @@ The bookmark repository reads an owned bookmark/tag snapshot in a read transacti
 ### Scratchpad widgets
 
 Dexie v20 extends Home widget records with plain-text notes while preserving existing widgets. Notes are limited to three per space and 10,000 characters each. Creation defaults to hidden in the widget manager; Home displays a bounded read-only preview only after explicit enablement. Edits and removals check opening revisions inside owned transactions. Failed/conflicting saves keep the draft. Notes can be downloaded as text and stay outside bookmark archives. Deletion retains a text tombstone.
+
+### Task-list widgets
+
+Dexie v21 adds `widgetTasks` indexed by space and `(spaceId, widgetId)`. Task lists use existing widget records and start hidden. Up to 50 active tasks per list have bounded single-line text, completion state and deletion tombstones. Every mutation validates the active owned parent and task membership. Text edits/removal check revisions; completion explicitly sets a boolean while preserving current text. Removing a list atomically tombstones its children, and deleting a space includes both tables.
+
+The Widgets manager and enabled Home previews open a native task dialog. Home shows at most five tasks per list; completion syncs through live queries. Export writes a plain-text checklist. Tasks stay outside bookmark backups. No reminders, background schedule, service or permission is added.
+
+Task dialogs opened from Home are owned by Home rather than the preview card, so a focus-session or layout change cannot discard their drafts. Completion updates optimistically until the live query observes the committed revision and rolls back on a failed write. Clearing completed tasks preserves unrelated draft text. Nested dialogs isolate their close events and restore focus to their own trigger.

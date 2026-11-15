@@ -82,7 +82,7 @@ test('keeps scratchpads optional, preserves drafts across tab conflicts and down
   await manager
     .getByRole('button', { name: 'Save widget', exact: true })
     .click();
-  await expect(manager.getByRole('alert')).toContainText('note changed');
+  await expect(manager.getByRole('alert')).toContainText('widget changed');
   await expect(manager.getByRole('textbox', { name: /Note text/ })).toHaveValue(
     'My unsaved draft.',
   );

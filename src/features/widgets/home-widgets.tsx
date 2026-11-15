@@ -1,12 +1,15 @@
-import { countdownText } from '@/database/home-widgets';
+import { TaskListPreview } from './task-list';
+import { countdownText, type HomeWidget } from '@/database/home-widgets';
 import { useHomeWidgets } from './use-home-widgets';
 import type { Appearance } from '@/database/appearance';
 export function HomeWidgets({
   now,
   clock,
+  onManageTasks,
 }: {
   now: Date;
   clock: Appearance['clock'];
+  onManageTasks: (widget: HomeWidget) => void;
 }) {
   const { widgets, error } = useHomeWidgets();
   const visible = widgets.filter((item) => item.visible);
@@ -25,7 +28,9 @@ export function HomeWidgets({
           <h2 className="break-words text-xs text-muted-foreground">
             {widget.label}
           </h2>
-          {widget.kind === 'note' ? (
+          {widget.kind === 'tasks' ? (
+            <TaskListPreview widget={widget} onManage={onManageTasks} />
+          ) : widget.kind === 'note' ? (
             <p className="mt-2 max-w-sm whitespace-pre-wrap break-words text-left text-sm line-clamp-6">
               {widget.text.trim() ? widget.text : 'Your note is empty.'}
             </p>

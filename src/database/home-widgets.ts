@@ -2,6 +2,7 @@ import { db, type OasisDatabase } from './schema';
 import { requireOwnedRecord, requireSpace } from './records';
 import type { RecordMetadata } from '@/types/entities';
 export type WidgetInput =
+  | { kind: 'tasks'; label: string; visible: boolean }
   | { kind: 'note'; label: string; text: string; visible: boolean }
   | { kind: 'clock'; label: string; timeZone: string; visible: boolean }
   | { kind: 'countdown'; label: string; deadline: number; visible: boolean };
@@ -24,6 +25,8 @@ export function validateWidget(input: WidgetInput): WidgetInput {
     typeof input.visible !== 'boolean'
   )
     throw new Error('Use a label between 1 and 40 characters.');
+  if (input.kind === 'tasks')
+    return { kind: 'tasks', label: input.label.trim(), visible: input.visible };
   if (input.kind === 'note') {
     if (typeof input.text !== 'string' || input.text.length > 10000)
       throw new Error('Keep a note within 10,000 characters.');
@@ -116,11 +119,11 @@ export function createHomeWidgetRepository(
           if (existing && existing.kind !== value.kind)
             throw new Error('Edit the same kind of widget.');
           if (
-            existing?.kind === 'note' &&
+            (existing?.kind === 'note' || existing?.kind === 'tasks') &&
             existing.updatedAt !== expectedUpdatedAt
           )
             throw new Error(
-              'This note changed. Reopen it before saving. Your draft is kept.',
+              'This widget changed. Reopen it before saving. Your draft is kept.',
             );
           const count = await database.homeWidgets
             .where('spaceId')
@@ -150,6 +153,7 @@ export function createHomeWidgetRepository(
         'rw',
         database.spaces,
         database.homeWidgets,
+        database.widgetTasks,
         async () => {
           await requireSpace(database, spaceId);
           const existing = await requireOwnedRecord(
@@ -159,10 +163,20 @@ export function createHomeWidgetRepository(
             'widget',
           );
           if (
-            existing.kind === 'note' &&
+            (existing.kind === 'note' || existing.kind === 'tasks') &&
             existing.updatedAt !== expectedUpdatedAt
           )
-            throw new Error('This note changed. Review it before removing.');
+            throw new Error('This widget changed. Review it before removing.');
+          if (existing.kind === 'tasks')
+            await database.widgetTasks
+              .where('[spaceId+widgetId]')
+              .equals([spaceId, id])
+              .filter((task) => task.deletedAt === undefined)
+              .modify((task) => {
+                const now = Math.max(Date.now(), task.updatedAt + 1);
+                task.deletedAt = now;
+                task.updatedAt = now;
+              });
           await database.homeWidgets.update(id, {
             deletedAt: Date.now(),
             updatedAt: Date.now(),

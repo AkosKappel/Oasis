@@ -1,3 +1,4 @@
+import type { WidgetTask } from './widget-tasks';
 import type { SavedSearch } from './saved-searches';
 import type { ContentFeedback } from './content-feedback';
 import type { DashboardLayout } from './dashboard-layout';
@@ -22,6 +23,7 @@ import type {
   QuoteSettings,
 } from '@/types/entities';
 export class OasisDatabase extends Dexie {
+  widgetTasks!: EntityTable<WidgetTask, 'id'>;
   savedSearches!: EntityTable<SavedSearch, 'id'>;
   contentFeedback!: EntityTable<ContentFeedback, 'id'>;
   dashboardLayouts!: EntityTable<DashboardLayout, 'id'>;
@@ -102,6 +104,7 @@ export class OasisDatabase extends Dexie {
     this.version(18).stores({ contentFeedback: 'id, spaceId, [spaceId+kind]' });
     this.version(19).stores({ savedSearches: 'id, spaceId' });
     this.version(20).stores({ homeWidgets: 'id, spaceId' });
+    this.version(21).stores({ widgetTasks: 'id, spaceId, [spaceId+widgetId]' });
     this.on('blocked', () => reportStorageIssue('blocked'));
     this.on('versionchange', () => {
       this.close();

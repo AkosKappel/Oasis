@@ -1,3 +1,4 @@
+import { createWidgetTaskRepository } from '@/database/widget-tasks';
 import { createSavedSearchRepository } from '@/database/saved-searches';
 import { createContentFeedbackRepository } from '@/database/content-feedback';
 import { createSpaceTransferRepository } from '@/database/space-transfer';
@@ -106,6 +107,7 @@ export function useSpaceRepositories() {
   const { spaceId } = useSpace();
   return useMemo(
     () => ({
+      widgetTasks: createWidgetTaskRepository(spaceId),
       savedSearches: createSavedSearchRepository(spaceId),
       contentFeedback: createContentFeedbackRepository(spaceId),
       spaceTransfers: createSpaceTransferRepository(spaceId),
