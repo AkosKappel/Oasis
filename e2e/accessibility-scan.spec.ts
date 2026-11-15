@@ -33,6 +33,7 @@ test('core pages and dialogs have no detected WCAG A/AA violations', async ({
     .getByRole('button', { name: 'Manage spaces', exact: true })
     .click();
   for (const name of [
+    'Layout',
     'Appearance',
     'Widgets',
     'Image albums',
@@ -72,6 +73,7 @@ test('core pages and dialogs have no detected WCAG A/AA violations', async ({
   await page.emulateMedia({ colorScheme: 'light' });
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   for (const name of [
+    'Statistics',
     'Notes for Accessibility reference',
     'Folders and tags',
     'Backup and restore',

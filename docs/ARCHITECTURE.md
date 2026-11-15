@@ -38,7 +38,7 @@ Oasis is a Chromium Manifest V3 extension built with WXT and React. WXT generate
 
 ## Permissions
 
-The manifest declares `activeTab` so the toolbar popup can read the current page title and URL after a user opens it. An event-driven background worker registers context menus and a capture command. No content script or network integration is used. Record any additional permission in [DECISIONS.md](DECISIONS.md).
+The manifest declares `activeTab` so the toolbar popup can read the current page title and URL after a user opens it. An event-driven background worker registers context menus and a capture command. No persistent content script is registered. Optional weather and explicit toolbar page details are the network features described below. Record any additional permission in [DECISIONS.md](DECISIONS.md).
 
 ## Appearance
 
@@ -72,7 +72,7 @@ Home's Links control opens a native nonmodal auto popover, rendered through a bo
 
 Custom appearance colors are optional in Dexie v7. `colors.ts` handles normalization and contrast, while `apply-appearance.ts` resolves presets/custom fills and readable semantic tokens. The app owns a temporary preview; the appearance hook applies it locally and only persists explicit saves.
 
-Context-menu and keyboard actions open `capture.html`; its request fragment is parsed once and removed before React mounts. The shared capture form validates the page/link and explicitly saves through the bookmark repository. `contextMenus` is the only additional permission.
+Context-menu and keyboard actions open `capture.html`; its request fragment is parsed once and removed before React mounts. The shared capture form validates the page/link and explicitly saves through the bookmark repository. `contextMenus` provides these menu actions; optional `scripting` is separately used for explicit toolbar page details.
 
 ## Storage recovery
 
@@ -133,3 +133,9 @@ Dexie v16 adds `dashboardLayouts` (`id`, `spaceId`). The layout repository valid
 Dexie v17 supports manual Library sorting and optional manual folder ordering in `libraryPreferences`. The shared rank planner uses stable ID ties and sparse numeric ranks, with bounded rebalance logic for exhausted gaps. Repositories update ranks and ordering preferences transactionally; folder reparenting reuses ownership/cycle validation. Native drag payloads carry kind/ID/space, while keyboard controls and existing editors remain available. The destination panel is searchable and rendered in batches.
 
 `space-transfer.ts` previews and commits selected bookmark transfers between active spaces. It maps only referenced folder ancestors/tags, preserves source content in new target records, and optionally tombstones originals atomically. Reviews carry an opaque request seed and a snapshot fingerprint, not trusted write payloads. Apply rebuilds the graph, checks the snapshot and performs all writes in one transaction. Preferences and activity history are not copied.
+
+### Explicit page details
+
+Toolbar capture can request optional `scripting` access alongside the existing temporary `activeTab` grant. Its self-contained isolated-world function reads a description and same-origin declared icon/preview only after a button press. It omits credentials/referrer, rejects redirects, streams at most 2 MiB per asset, bounds raster dimensions before decode and normalizes to local PNG/JPEG data URLs (64 px icon, 640 px preview). Unsupported or off-origin images are skipped. Library renders only bounded local rasters, never legacy remote image references. No automatic lookup or background crawl runs.
+
+Existing bookmark fields hold caches without a schema change. Writes, backup merge and cross-space transfer enforce a 4 MiB character budget per active space; each icon/preview is capped at 32,000/400,000 characters. Deletion releases caches while retaining text tombstones. JSON backups carry cached images. Context-menu/full-page capture and arbitrary Library bookmarks do not request page details, since they lack the toolbar’s current-page grant.

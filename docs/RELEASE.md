@@ -29,7 +29,7 @@ Distribution archives are under `.output/`. To smoke-test the Edge-target build 
 
 ## Verification snapshot
 
-2026-11-15, Node 24.21.0: `pnpm check` passes TypeScript, ESLint, formatting and all unit tests. Focused browser checks pass for the package, axe scans, Home keyboard/contrast/narrow layouts, storage recovery and 10,000-record Library workloads. The storage pass includes an injected space-list refresh failure while a bookmark draft is open; the draft is preserved. Feature-specific notes, spaces, smart collections, open history, backup, dashboard and weather flows also pass.
+2026-11-15, Node 24.21.0: `pnpm check` passes TypeScript, ESLint, formatting and all unit tests. Focused browser checks pass for the package, axe scans, Home keyboard/contrast/narrow layouts, storage recovery and 10,000-record Library workloads. The storage pass includes an injected space-list refresh failure while a bookmark draft is open; the draft is preserved. Feature-specific notes, spaces, smart collections, open history, backup, dashboard and weather flows also pass. The continuation batch verifies statistics, optional Home bookmark sections, saved layout controls, native drag/manual ordering, reviewed space transfers and explicit cached page details. The page-details flow executes the built serialized reader against a controlled page, checks denial/revocation, preserves entered text, skips off-origin declarations and renders saved images offline. Native toolbar grants remain in the manual matrix.
 
 Chrome and Edge target archives were built sequentially and verified against their current build directories: CRC, root manifest, required/optional permissions, PNG dimensions, license notices and exclusion of development/private files. Both target packages have identical extension file contents and are smoke-tested in headless Chromium. This verifies the packaged code, not the separate Chrome and Edge product browsers. Full E2E remains for CI after the owner configures a remote and pushes.
 
@@ -42,6 +42,7 @@ Headless Chromium covers the actual built Manifest V3 extension. Chrome and Edge
 | Load the unpacked package and open a new tab                | Pending | Pending |
 | Capture a real website through the toolbar and context menu | Pending | Pending |
 | Invoke/customize the global capture shortcut                | Pending | Pending |
+| Read page details, deny/accept/revoke optional scripting    | Pending | Pending |
 | Accept, deny and revoke optional weather access             | Pending | Pending |
 | Preserve an existing profile during an extension update     | Pending | Pending |
 | Reload, offline use, export/import and separate spaces      | Pending | Pending |

@@ -89,6 +89,8 @@ export function createDuplicateRepository(
             records.map((record) => ({
               ...record,
               deletedAt: now,
+              favicon: undefined,
+              image: undefined,
               updatedAt: now,
             })),
           );

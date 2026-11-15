@@ -1,3 +1,7 @@
+import {
+  assertBookmarkMediaBudget,
+  validateBookmarkMedia,
+} from './bookmark-media';
 import { moveBefore } from './manual-order';
 import { createLibraryPreferencesRepository } from './library-preferences';
 import { db, type OasisDatabase } from './schema';
@@ -5,6 +9,8 @@ import type { Bookmark } from '@/types/entities';
 import { requireOwnedRecord, requireSpace } from './records';
 
 export interface BookmarkInput {
+  favicon?: string;
+  image?: string;
   title: string;
   url: string;
   description: string;
@@ -34,6 +40,12 @@ export function validateBookmark(input: BookmarkInput): BookmarkInput {
     throw new Error('Remove the username and password from the URL.');
   }
   return {
+    ...('favicon' in input
+      ? { favicon: validateBookmarkMedia(input.favicon, 'icon') }
+      : {}),
+    ...('image' in input
+      ? { image: validateBookmarkMedia(input.image, 'preview') }
+      : {}),
     title,
     url: url.href,
     description: input.description.trim(),
@@ -79,6 +91,28 @@ export function createBookmarkRepository(
           if (values.tags) {
             for (const tagId of values.tags)
               await requireOwnedRecord(database.tags, tagId, spaceId, 'tag');
+          }
+          if ('favicon' in values || 'image' in values) {
+            const records = await database.bookmarks
+              .where('spaceId')
+              .equals(spaceId)
+              .filter((record) => record.deletedAt === undefined)
+              .toArray();
+            const existing = id
+              ? await requireOwnedRecord(
+                  database.bookmarks,
+                  id,
+                  spaceId,
+                  'bookmark',
+                )
+              : undefined;
+            assertBookmarkMediaBudget(
+              [
+                ...records.filter((record) => record.id !== id),
+                { ...existing, ...values },
+              ],
+              records,
+            );
           }
           const now = Date.now();
           if (id) {
@@ -154,7 +188,7 @@ export function createBookmarkRepository(
               ...bookmark,
               updatedAt: now,
               ...(action.kind === 'delete'
-                ? { deletedAt: now }
+                ? { deletedAt: now, favicon: undefined, image: undefined }
                 : action.kind === 'move'
                   ? { folderId: action.folderId || undefined }
                   : {
@@ -210,6 +244,8 @@ export function createBookmarkRepository(
           const now = Date.now();
           await database.bookmarks.update(id, {
             deletedAt: now,
+            favicon: undefined,
+            image: undefined,
             updatedAt: now,
           });
         },

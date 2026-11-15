@@ -285,3 +285,9 @@
 - Transfer selected bookmarks using new destination IDs. Reuse case-insensitive sibling folder paths and tag names without changing destination names/colors; create only the missing organization graph. Never deduplicate destination bookmarks silently.
 - Copy preserves content, notes and favorites while keeping originals. Move writes the destination and source tombstones in one transaction. Destination creation dates start at transfer time, and open counts restart at zero so activity is not carried into another space.
 - Preview without writes, then rebuild inside the write transaction and compare complete source/dependency and destination-organization fingerprints. Changed or unavailable data requires a fresh review. Per-review IDs prevent retries from adding duplicate copies.
+
+## 2026-11-15: Explicit current-page metadata with optional scripting
+
+Use optional `scripting` plus temporary `activeTab` access, requested by “Read page details” in toolbar capture. Broad host access and third-party favicon/preview services would expose destinations unnecessarily. Read descriptions as text, preserve user-entered fields and cache bounded same-origin raster copies locally. Limit cached image text to 4 MiB per space, leaving room within the existing 10 MiB backup limit for ordinary bookmark text. Skip CDN/off-origin assets and unsupported images rather than widening access. Native permission grants still need interactive Chrome/Edge verification.
+
+Sources: [optional permissions](https://developer.chrome.com/docs/extensions/reference/api/permissions), [activeTab](https://developer.chrome.com/docs/extensions/develop/concepts/activeTab), [content-script network restrictions](https://developer.chrome.com/docs/extensions/develop/concepts/network-requests).

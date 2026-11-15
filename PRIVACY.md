@@ -12,7 +12,7 @@ Backup files are written only when you choose to export them. They may contain p
 
 ## Requests you choose
 
-Core bookmark and dashboard features work offline. Oasis does not fetch bookmark metadata or favicons from third parties.
+Core bookmark and dashboard features work offline. Page details are off by default. Choosing “Read page details” in toolbar capture requests optional scripting access and reads the current page’s description. It may fetch a declared icon and preview from the same website, without cookies or referrer and without following redirects. Third-party image URLs are skipped, and no lookup service is used. Small PNG/JPEG copies are stored locally and displayed offline. Merely opening Library does not fetch website images.
 
 If you enable weather and grant optional host access, city searches go to `geocoding-api.open-meteo.com` and forecasts for the coordinates of your selected city go to `api.open-meteo.com`. Requests also expose ordinary connection information such as your IP address to the provider. Oasis does not request device geolocation. Weather is cached locally and refreshed while used, not through a background crawl. Disabling weather stops its forecast requests in that space; you can also revoke host access in browser extension settings. See [Open-Meteo’s terms and privacy information](https://open-meteo.com/en/terms).
 
@@ -22,13 +22,14 @@ Home search defaults to your local bookmarks. If you choose Google, DuckDuckGo, 
 
 - `activeTab`: read a page’s title and URL when you explicitly capture it through the extension toolbar or shortcut.
 - `contextMenus`: offer Save to Oasis actions for pages and links. Capture opens an editable confirmation page before saving.
+- Optional `scripting`: read page details only after an explicit toolbar-capture action, using temporary `activeTab` access. Remove access in capture or browser extension settings; saved local images remain until removed.
 - Optional Open-Meteo host access: city lookup and forecasts after you explicitly enable weather.
 
 Oasis replaces the new-tab page. It does not request browsing-history, geolocation or blanket website access, and it does not load remotely hosted executable code.
 
 ## Removing data
 
-You can delete individual content or a non-default space in Oasis. Deletion hides records using local tombstones; deleted personal image payloads are released. Some text and identifiers can remain locally for consistency. Clear Oasis extension storage through your browser or remove the extension to erase its local database. Exported backup files and data held by destination websites are outside that deletion and must be removed separately.
+You can delete individual content or a non-default space in Oasis. Deletion hides records using local tombstones; deleted personal and bookmark image payloads are released. Some text and identifiers can remain locally for consistency. Clear Oasis extension storage through your browser or remove the extension to erase its local database. Exported backup files and data held by destination websites are outside that deletion and must be removed separately.
 
 ## Questions
 

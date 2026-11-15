@@ -1,4 +1,5 @@
-import type { DragEvent } from 'react';
+import { useMemo, type DragEvent } from 'react';
+import { safeBookmarkMedia } from '@/database/bookmark-media';
 import { TrackedBookmarkLink } from '@/features/bookmarks/tracked-bookmark-link';
 import { FileText, Pencil, Star, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -39,6 +40,14 @@ export function BookmarkCard({
   onNotes,
   onDelete,
 }: BookmarkCardProps) {
+  const favicon = useMemo(
+    () => safeBookmarkMedia(bookmark.favicon, 'icon'),
+    [bookmark.favicon],
+  );
+  const preview = useMemo(
+    () => safeBookmarkMedia(bookmark.image, 'preview'),
+    [bookmark.image],
+  );
   const created = new Date(bookmark.createdAt);
   const validDate = Number.isFinite(created.getTime());
   return (
@@ -85,10 +94,21 @@ export function BookmarkCard({
           </label>
         )}
         <span
-          className={`${compact ? 'hidden sm:flex' : 'flex'} size-10 items-center justify-center rounded-lg bg-secondary font-semibold text-secondary-foreground`}
+          className={`${compact ? 'hidden sm:flex' : 'flex'} relative size-10 items-center justify-center rounded-lg bg-secondary font-semibold text-secondary-foreground`}
           aria-hidden="true"
         >
           {bookmark.title.slice(0, 1).toUpperCase()}
+          {favicon && (
+            <img
+              key={favicon}
+              src={favicon}
+              alt=""
+              className="absolute inset-0 size-10 rounded-lg object-contain"
+              onError={(event) => {
+                event.currentTarget.hidden = true;
+              }}
+            />
+          )}
         </span>
         {bookmark.isFavorite && (
           <Star
@@ -112,6 +132,19 @@ export function BookmarkCard({
           </span>
           <span className="sr-only"> (opens in a new tab)</span>
         </TrackedBookmarkLink>
+        {!compact && preview && (
+          <img
+            key={preview}
+            src={preview}
+            alt={`Saved preview for ${bookmark.title}`}
+            loading="lazy"
+            decoding="async"
+            className="mt-3 max-h-40 w-full rounded-lg object-cover"
+            onError={(event) => {
+              event.currentTarget.hidden = true;
+            }}
+          />
+        )}
         {!compact && bookmark.description && (
           <p className="mt-3 line-clamp-3 break-words text-sm leading-relaxed text-muted-foreground">
             {bookmark.description}

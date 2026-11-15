@@ -1,15 +1,18 @@
+import { safeBookmarkMedia } from '@/database/bookmark-media';
+import type { PageDetails } from '@/features/capture/read-page-details';
 import { useSpaceRepositories } from '@/features/spaces/space-context';
 import {
   reportStorageError,
   storageWriteSucceeded,
 } from '@/database/storage-health';
-import { useEffect, useRef, useState, type SubmitEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type SubmitEvent } from 'react';
 import { type BookmarkInput } from '@/database/bookmarks';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
 import { folderOptions } from '@/features/organization/folder-tree';
 import { Button } from '@/components/ui/button';
 
 interface BookmarkEditorProps {
+  onReadDetails?: (url: string) => Promise<PageDetails>;
   embedded?: boolean;
   initialValues?: BookmarkInput;
   onSaved?: () => void;
@@ -22,6 +25,7 @@ interface BookmarkEditorProps {
 
 export function BookmarkEditor({
   bookmark,
+  onReadDetails,
   embedded = false,
   initialValues,
   onSaved,
@@ -33,6 +37,54 @@ export function BookmarkEditor({
   const { personalBookmarks } = useSpaceRepositories();
   const dialog = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState<string>();
+  const formRef = useRef<HTMLFormElement>(null);
+  const [reading, setReading] = useState(false);
+  const [detailsMessage, setDetailsMessage] = useState<string>();
+  const [description, setDescription] = useState(
+    bookmark?.description ?? initialValues?.description ?? '',
+  );
+  const [media, setMedia] = useState({
+    favicon: bookmark?.favicon,
+    image: bookmark?.image,
+  });
+  const localIcon = useMemo(
+    () => safeBookmarkMedia(media.favicon, 'icon'),
+    [media.favicon],
+  );
+  const localPreview = useMemo(
+    () => safeBookmarkMedia(media.image, 'preview'),
+    [media.image],
+  );
+  const [mediaChanged, setMediaChanged] = useState(false);
+  async function readDetails() {
+    if (!onReadDetails || !formRef.current || reading || saving) return;
+    const url = String(new FormData(formRef.current).get('url') ?? '');
+    setReading(true);
+    setError(undefined);
+    setDetailsMessage(undefined);
+    try {
+      const result = await onReadDetails(url);
+      setDescription((value) => (value.trim() ? value : result.description));
+      setMedia((value) => ({
+        favicon: result.favicon ?? value.favicon,
+        image: result.image ?? value.image,
+      }));
+      setMediaChanged(true);
+      setDetailsMessage(
+        result.description || result.favicon || result.image
+          ? 'Page details read. Review before saving.'
+          : 'No supported page details were found. You can enter a description yourself.',
+      );
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'Page details could not be read. Try again.',
+      );
+    } finally {
+      setReading(false);
+    }
+  }
   const [saving, setSaving] = useState(false);
   const previousFocus = useRef(document.activeElement);
   useEffect(() => {
@@ -46,13 +98,23 @@ export function BookmarkEditor({
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (saving) return;
+    if (saving || reading) return;
     const data = new FormData(event.currentTarget);
     setSaving(true);
     setError(undefined);
     try {
       await personalBookmarks.save(
         {
+          ...(mediaChanged
+            ? {
+                ...(media.favicon !== bookmark?.favicon
+                  ? { favicon: media.favicon }
+                  : {}),
+                ...(media.image !== bookmark?.image
+                  ? { image: media.image }
+                  : {}),
+              }
+            : {}),
           title: String(data.get('title') ?? ''),
           url: String(data.get('url') ?? ''),
           description: String(data.get('description') ?? ''),
@@ -77,14 +139,17 @@ export function BookmarkEditor({
   }
 
   const form = (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-5">
       <div>
         <p className="eyebrow">Bookmark library</p>
         <h2 id="editor-title" className="mt-2 text-2xl font-semibold">
           {bookmark ? 'Edit bookmark' : 'Save a bookmark'}
         </h2>
       </div>
-      <fieldset disabled={saving} className="flex min-w-0 flex-col gap-4">
+      <fieldset
+        disabled={saving || reading}
+        className="flex min-w-0 flex-col gap-4"
+      >
         <label className="field">
           Title
           <input
@@ -113,7 +178,7 @@ export function BookmarkEditor({
             Use a complete http:// or https:// address.
           </span>
         </div>
-        {!embedded && (
+        {(!embedded || onReadDetails) && (
           <label className="field">
             Description{' '}
             <span className="text-xs font-normal text-muted-foreground">
@@ -122,10 +187,72 @@ export function BookmarkEditor({
             <textarea
               name="description"
               rows={3}
-              defaultValue={bookmark?.description ?? initialValues?.description}
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
               placeholder="What makes this worth saving?"
             />
           </label>
+        )}
+        {onReadDetails && (
+          <div className="space-y-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void readDetails()}
+            >
+              {reading ? 'Reading page details…' : 'Read page details'}
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Optional access reads this page’s description and caches small
+              images from the same website. No third-party lookup.
+            </p>
+          </div>
+        )}
+        {(localIcon || localPreview) && (
+          <div className="flex flex-wrap items-start gap-3">
+            {localIcon && (
+              <img
+                src={localIcon}
+                alt="Page icon to save"
+                className="size-10 rounded object-contain"
+              />
+            )}
+            {localPreview && (
+              <img
+                src={localPreview}
+                alt="Page preview to save"
+                className="max-h-32 max-w-full rounded object-contain"
+              />
+            )}
+          </div>
+        )}
+        {(media.favicon || media.image) && (
+          <div className="flex flex-wrap gap-2">
+            {media.favicon && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setMedia((value) => ({ ...value, favicon: undefined }));
+                  setMediaChanged(true);
+                }}
+              >
+                Remove saved icon
+              </Button>
+            )}
+            {media.image && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setMedia((value) => ({ ...value, image: undefined }));
+                  setMediaChanged(true);
+                }}
+              >
+                Remove saved preview
+              </Button>
+            )}
+          </div>
         )}
         <label className="field">
           Folder
@@ -182,6 +309,11 @@ export function BookmarkEditor({
           Add to favorites
         </label>
       </fieldset>
+      {detailsMessage && (
+        <p role="status" className="text-sm text-muted-foreground">
+          {detailsMessage}
+        </p>
+      )}
       {error && (
         <p role="alert" className="text-sm text-danger">
           {error}
@@ -192,11 +324,11 @@ export function BookmarkEditor({
           type="button"
           variant="outline"
           onClick={onClose}
-          disabled={saving}
+          disabled={saving || reading}
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={saving}>
+        <Button type="submit" disabled={saving || reading}>
           {saving ? 'Saving…' : 'Save bookmark'}
         </Button>
       </div>
@@ -208,7 +340,7 @@ export function BookmarkEditor({
     <dialog
       ref={dialog}
       onCancel={(event) => {
-        if (saving) event.preventDefault();
+        if (saving || reading) event.preventDefault();
       }}
       onClose={onClose}
       aria-labelledby="editor-title"

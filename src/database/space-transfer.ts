@@ -1,3 +1,4 @@
+import { assertBookmarkMediaBudget } from './bookmark-media';
 import { db, type OasisDatabase } from './schema';
 import { requireOwnedRecord, requireSpace } from './records';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
@@ -231,6 +232,12 @@ export function createSpaceTransferRepository(
           throw new Error(
             'The library changed. Review the transfer again before saving.',
           );
+        const current = await database.bookmarks
+          .where('spaceId')
+          .equals(review.request.target)
+          .filter((record) => record.deletedAt === undefined)
+          .toArray();
+        assertBookmarkMediaBudget([...current, ...plan.bookmarks], current);
         await database.folders.bulkAdd(plan.newFolders);
         await database.tags.bulkAdd(plan.newTags);
         await database.bookmarks.bulkAdd(plan.bookmarks);
@@ -240,6 +247,8 @@ export function createSpaceTransferRepository(
             plan.source.map((record) => ({
               ...record,
               deletedAt: now,
+              favicon: undefined,
+              image: undefined,
               updatedAt: now,
             })),
           );

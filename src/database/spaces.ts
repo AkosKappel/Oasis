@@ -58,9 +58,15 @@ export function createSpaceRepository(database: OasisDatabase = db) {
                 deletedAt?: number;
                 updatedAt: number;
                 dataUrl?: string;
+                favicon?: string;
+                image?: string;
               }) => {
                 record.deletedAt ??= now;
                 record.updatedAt = now;
+                if (table.name === 'bookmarks') {
+                  record.favicon = undefined;
+                  record.image = undefined;
+                }
                 if (table.name === 'albumImages') record.dataUrl = '';
               },
             );

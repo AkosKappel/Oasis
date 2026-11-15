@@ -1,3 +1,4 @@
+import { assertBookmarkMediaBudget } from './bookmark-media';
 import { db, type OasisDatabase } from './schema';
 import { requireSpace } from './records';
 import { validateBookmark } from './bookmarks';
@@ -283,6 +284,10 @@ export function createBackupRepository(
             tags: [...current.tags, ...additions.tags],
             bookmarks: [...current.bookmarks, ...additions.bookmarks],
           });
+          assertBookmarkMediaBudget(
+            [...current.bookmarks, ...additions.bookmarks],
+            current.bookmarks,
+          );
           await database.folders.bulkAdd(
             additions.folders.map((record) => ({ ...record, spaceId })),
           );

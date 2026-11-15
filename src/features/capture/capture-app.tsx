@@ -1,3 +1,5 @@
+import { readPageDetails, type PageDetails } from './read-page-details';
+import { Button } from '@/components/ui/button';
 import { SpaceProvider, useSpace } from '@/features/spaces/space-context';
 import { SpaceSwitcher } from '@/features/spaces/space-switcher';
 import { StorageRecovery } from '@/features/storage/storage-recovery';
@@ -39,6 +41,56 @@ function CaptureContent({
     request.values,
   );
   const [error, setError] = useState<string | undefined>(request.error);
+  const [sourceTabId, setSourceTabId] = useState<number>();
+  const [scriptAllowed, setScriptAllowed] = useState(false);
+  useEffect(() => {
+    void browser.permissions
+      .contains({ permissions: ['scripting'] })
+      .then(setScriptAllowed)
+      .catch(() => {});
+  }, []);
+  async function readDetails(url: string): Promise<PageDetails> {
+    if (
+      sourceTabId === undefined ||
+      !initialValues ||
+      url !== initialValues.url
+    )
+      throw new Error(
+        'Reopen the toolbar on the page you want to save before reading details.',
+      );
+    // Keep the optional permission request in the button gesture, before any tab reads.
+    if (!(await browser.permissions.request({ permissions: ['scripting'] })))
+      throw new Error(
+        'Page details stay off. You can save the bookmark without them.',
+      );
+    setScriptAllowed(true);
+    try {
+      const tab = await browser.tabs.get(sourceTabId);
+      if (tab.url !== initialValues.url) throw new Error();
+      const results = await browser.scripting.executeScript({
+        target: { tabId: sourceTabId },
+        func: readPageDetails,
+        world: 'ISOLATED',
+      });
+      const details = results[0]?.result;
+      if (!details || details.url !== initialValues.url) throw new Error();
+      return details;
+    } catch {
+      throw new Error(
+        'Page details could not be read. Reopen the toolbar on the page and try again.',
+      );
+    }
+  }
+  async function revokeDetails() {
+    try {
+      if (await browser.permissions.remove({ permissions: ['scripting'] }))
+        setScriptAllowed(false);
+    } catch {
+      setError(
+        'Page-detail access could not be removed. Use browser extension settings.',
+      );
+    }
+  }
   const [saved, setSaved] = useState(false);
   useEffect(() => {
     if (initialTab || initialError) return;
@@ -46,7 +98,10 @@ function CaptureContent({
     void browser.tabs
       .query({ active: true, currentWindow: true })
       .then((tabs) => {
-        if (active) setInitialValues(captureTab(tabs[0]));
+        if (active) {
+          setInitialValues(captureTab(tabs[0]));
+          setSourceTabId(tabs[0]?.id);
+        }
       })
       .catch((cause: unknown) => {
         if (active)
@@ -93,6 +148,9 @@ function CaptureContent({
       ) : initialValues && library ? (
         <BookmarkEditor
           embedded
+          onReadDetails={
+            !fullPage && sourceTabId !== undefined ? readDetails : undefined
+          }
           initialValues={initialValues}
           folders={library.folders}
           tags={library.tags}
@@ -103,6 +161,16 @@ function CaptureContent({
         <p role="status" className="text-sm text-muted-foreground">
           Loading current page…
         </p>
+      )}
+      {scriptAllowed && (
+        <div className="mt-4">
+          <Button variant="outline" onClick={() => void revokeDetails()}>
+            Remove page-detail access
+          </Button>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Saved local images stay in your Library.
+          </p>
+        </div>
       )}
       {fullPage && saved && (
         <button
