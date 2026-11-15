@@ -32,8 +32,14 @@ export function BookmarkEditor({
   const dialog = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState<string>();
   const [saving, setSaving] = useState(false);
+  const previousFocus = useRef(document.activeElement);
   useEffect(() => {
+    const previous = previousFocus.current;
     dialog.current?.showModal();
+    return () => {
+      if (previous instanceof HTMLElement && previous.isConnected)
+        previous.focus();
+    };
   }, []);
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {

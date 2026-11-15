@@ -156,6 +156,13 @@ export function BookmarkLibrary({
 
   return (
     <div className="min-h-screen">
+      <button
+        type="button"
+        onClick={() => document.getElementById('library-main')?.focus()}
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-background focus:p-3"
+      >
+        Skip to library
+      </button>
       {backupOpen && <BackupManager onClose={() => setBackupOpen(false)} />}
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 sm:px-10">
@@ -175,7 +182,11 @@ export function BookmarkLibrary({
           </span>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-6 py-12 sm:px-10 sm:py-16">
+      <main
+        id="library-main"
+        tabIndex={-1}
+        className="mx-auto max-w-6xl px-6 py-12 sm:px-10 sm:py-16"
+      >
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
             <p className="eyebrow">
@@ -216,7 +227,11 @@ export function BookmarkLibrary({
           </div>
         </div>
         <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
-          <div className="flex gap-2" aria-label="Library filters">
+          <div
+            className="flex flex-wrap gap-2"
+            role="group"
+            aria-label="Library filters"
+          >
             <Button
               variant={favoritesOnly ? 'outline' : 'default'}
               onClick={() => {

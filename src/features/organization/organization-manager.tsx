@@ -17,8 +17,14 @@ export function OrganizationManager({
 }: OrganizationManagerProps) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [busy, setBusy] = useState(false);
+  const previousFocus = useRef(document.activeElement);
   useEffect(() => {
+    const previous = previousFocus.current;
     dialog.current?.showModal();
+    return () => {
+      if (previous instanceof HTMLElement && previous.isConnected)
+        previous.focus();
+    };
   }, []);
   return (
     <dialog
