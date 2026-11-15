@@ -72,7 +72,7 @@ export function SpaceProvider({ children }: { children: ReactNode }) {
     }
     setSelected(id);
   }
-  if (!list || error)
+  if (!list)
     return (
       <>
         <StorageRecovery />
@@ -85,6 +85,12 @@ export function SpaceProvider({ children }: { children: ReactNode }) {
     );
   return (
     <SpaceContext value={{ spaceId, list, select }}>
+      {error && (
+        <p role="alert" className="p-4 text-sm text-danger">
+          Spaces could not be refreshed. Your current view is kept. Use Retry
+          storage.
+        </p>
+      )}
       <div key={spaceId}>{children}</div>
     </SpaceContext>
   );
