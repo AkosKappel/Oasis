@@ -13,7 +13,13 @@ import { HomeWidgets } from '@/features/widgets/home-widgets';
 import { DailyFocus } from '@/features/focus/daily-focus';
 import { localDay } from '@/database/daily-focus';
 import { useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, Library, Search, SlidersHorizontal } from 'lucide-react';
+import {
+  ArrowUpRight,
+  Library,
+  Search,
+  SlidersHorizontal,
+  Settings2,
+} from 'lucide-react';
 import { LinksMenu } from '@/features/links/links-menu';
 import { preferredDailyItem } from '@/lib/preferred-daily-item';
 import { useContentFeedback } from '@/features/content/use-content-feedback';
@@ -280,7 +286,7 @@ export function Home({
         {dailyQuote && (
           <figure
             aria-label="Daily quote"
-            className="mt-10 w-full min-w-0 text-center"
+            className="content-feedback-target relative mt-10 w-full min-w-0 text-center"
           >
             <blockquote className="whitespace-pre-line break-words text-base leading-relaxed">
               {dailyQuote.text}
@@ -382,7 +388,7 @@ export function Home({
                 ),
             )}
             {ratingMessage && (
-              <p role="status" className="text-sm">
+              <p role="status" className="sr-only">
                 {ratingMessage}
               </p>
             )}
@@ -407,25 +413,6 @@ export function Home({
               </p>
             )}
           </section>
-          {backgroundImage && (
-            <div className="mb-4 self-center text-center">
-              <span className="text-xs">{backgroundImage.name}</span>
-              <ContentRating
-                kind="image"
-                rating={
-                  feedback.find(
-                    (record) =>
-                      record.kind === 'image' &&
-                      record.itemId === backgroundImage.id,
-                  )?.rating
-                }
-                disabled={ratingBusy || !!feedbackError}
-                onRate={(value) =>
-                  void rate('image', backgroundImage.id, value)
-                }
-              />
-            </div>
-          )}
           {storedFeedback &&
             albums?.background?.rotateDaily &&
             albumImages.length > 0 &&
@@ -435,14 +422,35 @@ export function Home({
                 Content preferences to show images again.
               </p>
             )}
-          <footer className="flex flex-wrap justify-end gap-3">
+          <footer className="content-feedback-target flex flex-wrap items-center justify-end gap-3">
+            {backgroundImage && (
+              <div className="mr-auto flex items-center">
+                <ContentRating
+                  kind="image"
+                  rating={
+                    feedback.find(
+                      (record) =>
+                        record.kind === 'image' &&
+                        record.itemId === backgroundImage.id,
+                    )?.rating
+                  }
+                  disabled={ratingBusy || !!feedbackError}
+                  onRate={(value) =>
+                    void rate('image', backgroundImage.id, value)
+                  }
+                />
+              </div>
+            )}
+
             <button
               ref={preferenceTrigger}
+              aria-label="Content preferences"
+              title="Content preferences"
               type="button"
               className="rounded-md px-2 text-sm text-muted-foreground hover:text-foreground"
               onClick={() => setPreferencesOpen(true)}
             >
-              Content preferences
+              <Settings2 className="size-4" aria-hidden="true" />
             </button>
             <button
               type="button"

@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { ThumbsDown, ThumbsUp } from 'lucide-react';
 import type {
   ContentKind,
   ContentRating as Rating,
@@ -19,26 +19,29 @@ export function ContentRating({
     <div
       role="group"
       aria-label={`${name} preference`}
-      className="mt-3 flex flex-wrap justify-center gap-2"
+      className={`content-rating ${kind === 'quote' ? 'absolute top-full right-0' : ''}`}
     >
-      <Button
-        variant={rating === 'like' ? 'default' : 'outline'}
-        size="sm"
-        disabled={disabled}
-        aria-pressed={rating === 'like'}
-        onClick={() => onRate(rating === 'like' ? null : 'like')}
-      >
-        Like this {name}
-      </Button>
-      <Button
-        variant={rating === 'dislike' ? 'default' : 'outline'}
-        size="sm"
-        disabled={disabled}
-        aria-pressed={rating === 'dislike'}
-        onClick={() => onRate(rating === 'dislike' ? null : 'dislike')}
-      >
-        Dislike this {name}
-      </Button>
+      {(['like', 'dislike'] as const).map((value) => {
+        const Icon = value === 'like' ? ThumbsUp : ThumbsDown;
+        const label = `${value === 'like' ? 'Like' : 'Dislike'} this ${name}`;
+        return (
+          <button
+            key={value}
+            type="button"
+            title={label}
+            aria-label={label}
+            aria-pressed={rating === value}
+            disabled={disabled}
+            onClick={() => onRate(rating === value ? null : value)}
+            className={`inline-flex ${kind === 'quote' ? 'size-8' : 'size-9'} items-center justify-center rounded-full text-muted-foreground hover:bg-foreground/10 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-40`}
+          >
+            <Icon
+              className={`size-4 ${rating === value ? 'fill-current text-foreground' : ''}`}
+              aria-hidden="true"
+            />
+          </button>
+        );
+      })}
     </div>
   );
 }

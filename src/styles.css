@@ -270,3 +270,27 @@ select option {
     box-shadow: none;
   }
 }
+
+.content-rating {
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+.content-feedback-target:hover .content-rating,
+.content-feedback-target:focus-within .content-rating {
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (hover: none), (pointer: coarse) {
+  .content-rating {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .content-rating {
+    transition: none;
+  }
+}

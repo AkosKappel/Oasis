@@ -26,10 +26,25 @@ test('rates local images and quotes, persists across tabs and skips disliked dai
     .click();
   await expect(albums.getByRole('status')).toContainText('saved');
   await albums.getByRole('button', { name: 'Done', exact: true }).click();
+  await page.locator('main').hover({ position: { x: 10, y: 10 } });
+  await page.evaluate(() => {
+    if (document.activeElement instanceof HTMLElement)
+      document.activeElement.blur();
+  });
+  const backgroundRating = page.getByRole('group', {
+    name: 'background preference',
+    exact: true,
+  });
+  await expect(backgroundRating).toHaveCSS('opacity', '0');
+  await page.locator('footer').hover();
+  await expect(backgroundRating).toHaveCSS('opacity', '1');
   const initial = await page
     .locator('main')
     .getAttribute('data-background-image');
   expect(initial).toBeTruthy();
+  await page
+    .getByRole('button', { name: 'Like this background', exact: true })
+    .focus();
   await page
     .getByRole('button', { name: 'Like this background', exact: true })
     .click();
@@ -49,6 +64,9 @@ test('rates local images and quotes, persists across tabs and skips disliked dai
   await expect(
     other.getByRole('button', { name: 'Like this background', exact: true }),
   ).toHaveAttribute('aria-pressed', 'true');
+  await page
+    .getByRole('button', { name: 'Dislike this background', exact: true })
+    .focus();
   await page
     .getByRole('button', { name: 'Dislike this background', exact: true })
     .click();
@@ -90,6 +108,9 @@ test('rates local images and quotes, persists across tabs and skips disliked dai
   await quotes.getByRole('button', { name: 'Done', exact: true }).click();
   await page
     .getByRole('button', { name: 'Like this quote', exact: true })
+    .focus();
+  await page
+    .getByRole('button', { name: 'Like this quote', exact: true })
     .click();
   await expect(
     page.getByRole('button', { name: 'Like this quote', exact: true }),
@@ -102,15 +123,62 @@ test('rates local images and quotes, persists across tabs and skips disliked dai
     ).violations,
   ).toEqual([]);
   await page.setViewportSize({ width: 1280, height: 800 });
+  await page.locator('main').hover({ position: { x: 10, y: 10 } });
+  await page.evaluate(() => {
+    if (document.activeElement instanceof HTMLElement)
+      document.activeElement.blur();
+  });
+  const quoteRating = page.getByRole('group', {
+    name: 'quote preference',
+    exact: true,
+  });
+  await expect(quoteRating).toHaveCSS('opacity', '0');
+  await expect(backgroundRating).toHaveCSS('opacity', '0');
+  const quoteBox = await page
+    .getByRole('figure', { name: 'Daily quote' })
+    .boundingBox();
   await page.screenshot({
     path: testInfo.outputPath('feedback-desktop.png'),
     fullPage: true,
   });
+  await page.getByRole('figure', { name: 'Daily quote' }).hover();
+  await expect(quoteRating).toHaveCSS('opacity', '1');
+  expect(
+    (await page.getByRole('figure', { name: 'Daily quote' }).boundingBox())
+      ?.height,
+  ).toBe(quoteBox?.height);
+  await page.screenshot({
+    path: testInfo.outputPath('feedback-hover.png'),
+    fullPage: true,
+  });
+  await page.locator('main').hover({ position: { x: 10, y: 10 } });
+  await page
+    .getByRole('button', { name: 'Like this quote', exact: true })
+    .focus();
+  await expect(quoteRating).toHaveCSS('opacity', '1');
+  const touch = await context.newCDPSession(page);
+  await touch.send('Emulation.setTouchEmulationEnabled', {
+    enabled: true,
+    maxTouchPoints: 1,
+  });
+  expect(
+    await page.evaluate(() => matchMedia('(pointer: coarse)').matches),
+  ).toBe(true);
+  await page.locator('main').hover({ position: { x: 10, y: 10 } });
+  await page.evaluate(() => {
+    if (document.activeElement instanceof HTMLElement)
+      document.activeElement.blur();
+  });
+  await expect(backgroundRating).toHaveCSS('opacity', '1');
+  await expect(quoteRating).toHaveCSS('opacity', '1');
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({
     path: testInfo.outputPath('feedback-mobile.png'),
     fullPage: true,
   });
+  await page
+    .getByRole('button', { name: 'Dislike this quote', exact: true })
+    .focus();
   await page
     .getByRole('button', { name: 'Dislike this quote', exact: true })
     .click();
@@ -221,6 +289,9 @@ test('rates local images and quotes, persists across tabs and skips disliked dai
     'data-background-image',
     'oasis:builtin:jade-ridges',
   );
+  await page
+    .getByRole('button', { name: 'Dislike this background', exact: true })
+    .focus();
   await page
     .getByRole('button', { name: 'Dislike this background', exact: true })
     .click();
