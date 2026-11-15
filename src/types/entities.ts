@@ -58,6 +58,7 @@ export interface BackgroundSettings extends RecordMetadata {
   albumId?: string;
   imageId?: string;
   rotateDaily: boolean;
+  mixAllAlbums?: boolean;
   dimming: number;
 }
 

@@ -261,6 +261,7 @@ export function AlbumManager({ onClose }: { onClose: () => void }) {
                     : undefined,
                   {
                     rotateDaily: values.has('daily'),
+                    mixAllAlbums: values.has('mix'),
                     dimming: Number(values.get('dimming')) / 100,
                   },
                 );
@@ -281,6 +282,19 @@ export function AlbumManager({ onClose }: { onClose: () => void }) {
               />{' '}
               Rotate this album daily
             </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                name="mix"
+                type="checkbox"
+                defaultChecked={data?.background?.mixAllAlbums ?? false}
+                disabled={busy}
+              />{' '}
+              Mix all albums during daily rotation
+            </label>
+            <p className="text-xs text-muted-foreground">
+              Likes favor an image and others in its album. Dislikes skip images
+              during rotation. Fixed images stay fixed.
+            </p>
             <label className="field">
               Background dimming
               <select

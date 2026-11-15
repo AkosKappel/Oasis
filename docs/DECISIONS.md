@@ -291,3 +291,9 @@
 Use optional `scripting` plus temporary `activeTab` access, requested by “Read page details” in toolbar capture. Broad host access and third-party favicon/preview services would expose destinations unnecessarily. Read descriptions as text, preserve user-entered fields and cache bounded same-origin raster copies locally. Limit cached image text to 4 MiB per space, leaving room within the existing 10 MiB backup limit for ordinary bookmark text. Skip CDN/off-origin assets and unsupported images rather than widening access. Native permission grants still need interactive Chrome/Edge verification.
 
 Sources: [optional permissions](https://developer.chrome.com/docs/extensions/reference/api/permissions), [activeTab](https://developer.chrome.com/docs/extensions/develop/concepts/activeTab), [content-script network restrictions](https://developer.chrome.com/docs/extensions/develop/concepts/network-requests).
+
+## 2026-11-15: Local feedback for daily content
+
+Store one current like/dislike per image or quote in each space, without impression logs, network requests or new permissions. Daily rotation uses a deterministic weighted exponential race: liked items have weight 8, neutral items related to a liked item have weight 2, others weight 1; disliked items are excluded. Related means the same image album or normalized non-empty quote author within the selected collection. This uses catalog metadata, not visual or semantic analysis. Daily choices may repeat, and selection agrees across tabs on the same local calendar day.
+
+Mixed-album rotation is explicit and off by default; otherwise the selected album remains the pool. Fixed backgrounds remain fixed despite ratings. If every eligible item is disliked, show a plain background or no quote rather than overriding the choice. Preferences are device-local and outside content archives. Schema v18 adds the feedback table without rewriting existing settings or creating votes.

@@ -14,7 +14,18 @@ import { localDay } from '@/database/daily-focus';
 import { useEffect, useState } from 'react';
 import { ArrowUpRight, Library, Search, SlidersHorizontal } from 'lucide-react';
 import { LinksMenu } from '@/features/links/links-menu';
-import { dailyItem } from '@/lib/daily-item';
+import { preferredDailyItem } from '@/lib/preferred-daily-item';
+import { useContentFeedback } from '@/features/content/use-content-feedback';
+import { ContentRating } from '@/features/content/content-rating';
+import { useSpaceRepositories } from '@/features/spaces/space-context';
+import type {
+  ContentKind,
+  ContentRating as Rating,
+} from '@/database/content-feedback';
+import {
+  reportStorageError,
+  storageWriteSucceeded,
+} from '@/database/storage-health';
 import type { Appearance } from '@/database/appearance';
 import { useQuotes } from '@/features/quotes/use-quotes';
 import { useAlbums } from '@/features/albums/use-albums';
@@ -42,6 +53,38 @@ export function Home({
   onPinLinks: (pinned: boolean) => Promise<void>;
 }) {
   const { layout, error: layoutError } = useDashboardLayout();
+  const { contentFeedback } = useSpaceRepositories();
+  const { feedback: storedFeedback, error: feedbackError } =
+    useContentFeedback();
+  const feedback = storedFeedback ?? [];
+  const [ratingBusy, setRatingBusy] = useState(false);
+  const [ratingMessage, setRatingMessage] = useState<string>();
+  const [ratingError, setRatingError] = useState<string>();
+  async function rate(kind: ContentKind, id: string, value: Rating | null) {
+    if (ratingBusy) return;
+    setRatingBusy(true);
+    setRatingError(undefined);
+    try {
+      await contentFeedback.rate(kind, id, value);
+      storageWriteSucceeded();
+      setRatingMessage(
+        value === 'like'
+          ? 'Liked. This item and related content get more weight in daily rotation.'
+          : value === 'dislike'
+            ? 'Disliked. This item is skipped during daily rotation.'
+            : 'Preference cleared.',
+      );
+    } catch (cause) {
+      reportStorageError(cause);
+      setRatingError(
+        cause instanceof Error
+          ? cause.message
+          : 'Preference could not be saved. Try again.',
+      );
+    } finally {
+      setRatingBusy(false);
+    }
+  }
   const source = searchEngine(appearance.searchEngine);
   const { session, error: focusError } = useFocusSession();
   const { data: quotes } = useQuotes();
@@ -53,20 +96,38 @@ export function Home({
     focusRemaining(session, now.getTime()) > 0;
   const albumImages =
     albums?.images.filter(
-      (image) => image.albumId === albums.background?.albumId,
+      (image) =>
+        albums.background?.mixAllAlbums ||
+        image.albumId === albums.background?.albumId,
     ) ?? [];
-  const backgroundImage = albums?.background?.rotateDaily
-    ? dailyItem(albumImages, albums.background.albumId ?? '', now)
-    : albumImages.find((image) => image.id === albums?.background?.imageId);
-  const dailyQuote = quotes?.settings?.visible
-    ? dailyItem(
-        quotes.quotes.filter(
-          (quote) => quote.collectionId === quotes.settings?.collectionId,
-        ),
-        quotes.settings.collectionId ?? '',
-        now,
-      )
-    : undefined;
+  const backgroundImage = !storedFeedback
+    ? undefined
+    : albums?.background?.rotateDaily
+      ? preferredDailyItem(
+          albumImages.map((image) => ({ ...image, group: image.albumId })),
+          feedback.filter((record) => record.kind === 'image'),
+          albums.background.mixAllAlbums
+            ? 'all-albums'
+            : (albums.background.albumId ?? ''),
+          now,
+        )
+      : albumImages.find((image) => image.id === albums?.background?.imageId);
+  const dailyQuote =
+    storedFeedback && quotes?.settings?.visible
+      ? preferredDailyItem(
+          quotes.quotes
+            .filter(
+              (quote) => quote.collectionId === quotes.settings?.collectionId,
+            )
+            .map((quote) => ({
+              ...quote,
+              group: quote.author.trim().toLowerCase(),
+            })),
+          feedback.filter((record) => record.kind === 'quote'),
+          quotes.settings.collectionId ?? '',
+          now,
+        )
+      : undefined;
   const { library, error } = useLibrary();
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
@@ -211,6 +272,17 @@ export function Home({
                 {dailyQuote.author}
               </figcaption>
             )}
+            <ContentRating
+              kind="quote"
+              rating={
+                feedback.find(
+                  (record) =>
+                    record.kind === 'quote' && record.itemId === dailyQuote.id,
+                )?.rating
+              }
+              disabled={ratingBusy || !!feedbackError}
+              onRate={(value) => void rate('quote', dailyQuote.id, value)}
+            />
           </figure>
         )}
       </>
@@ -280,6 +352,16 @@ export function Home({
                   </div>
                 ),
             )}
+            {ratingMessage && (
+              <p role="status" className="text-sm">
+                {ratingMessage}
+              </p>
+            )}
+            {(feedbackError || ratingError) && (
+              <p role="alert" className="text-sm">
+                {feedbackError || ratingError}
+              </p>
+            )}
             {focusError && (
               <p role="alert" className="mt-4 text-sm">
                 {focusError}
@@ -296,6 +378,25 @@ export function Home({
               </p>
             )}
           </section>
+          {backgroundImage && (
+            <div className="mb-4 self-center text-center">
+              <span className="text-xs">{backgroundImage.name}</span>
+              <ContentRating
+                kind="image"
+                rating={
+                  feedback.find(
+                    (record) =>
+                      record.kind === 'image' &&
+                      record.itemId === backgroundImage.id,
+                  )?.rating
+                }
+                disabled={ratingBusy || !!feedbackError}
+                onRate={(value) =>
+                  void rate('image', backgroundImage.id, value)
+                }
+              />
+            </div>
+          )}
           <footer className="flex flex-wrap justify-end gap-3">
             <button
               type="button"

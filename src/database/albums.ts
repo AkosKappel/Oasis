@@ -236,11 +236,17 @@ export function createAlbumRepository(
     async setBackground(
       albumId?: string,
       imageId?: string,
-      options?: { rotateDaily: boolean; dimming: number },
+      options?: {
+        rotateDaily: boolean;
+        dimming: number;
+        mixAllAlbums?: boolean;
+      },
     ) {
       if (
         options &&
         (typeof options.rotateDaily !== 'boolean' ||
+          (options.mixAllAlbums !== undefined &&
+            typeof options.mixAllAlbums !== 'boolean') ||
           !Number.isFinite(options.dimming) ||
           options.dimming < 0.6 ||
           options.dimming > 0.85)
@@ -284,6 +290,7 @@ export function createAlbumRepository(
             albumId,
             imageId,
             rotateDaily: options?.rotateDaily ?? existing?.rotateDaily ?? false,
+            mixAllAlbums: options?.mixAllAlbums ?? false,
             dimming: options?.dimming ?? existing?.dimming ?? 0.6,
             createdAt: existing?.createdAt ?? now,
             updatedAt: now,

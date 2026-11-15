@@ -1,3 +1,4 @@
+import type { ContentFeedback } from './content-feedback';
 import type { DashboardLayout } from './dashboard-layout';
 import type { WeatherSettings } from './weather';
 import type { FocusSession } from './focus-session';
@@ -20,6 +21,7 @@ import type {
   QuoteSettings,
 } from '@/types/entities';
 export class OasisDatabase extends Dexie {
+  contentFeedback!: EntityTable<ContentFeedback, 'id'>;
   dashboardLayouts!: EntityTable<DashboardLayout, 'id'>;
   weatherSettings!: EntityTable<WeatherSettings, 'id'>;
   focusSessions!: EntityTable<FocusSession, 'id'>;
@@ -95,6 +97,7 @@ export class OasisDatabase extends Dexie {
     this.version(15).stores({ preferences: 'id, spaceId' });
     this.version(16).stores({ dashboardLayouts: 'id, spaceId' });
     this.version(17).stores({ libraryPreferences: 'id, spaceId' });
+    this.version(18).stores({ contentFeedback: 'id, spaceId, [spaceId+kind]' });
     this.on('blocked', () => reportStorageIssue('blocked'));
     this.on('versionchange', () => {
       this.close();
