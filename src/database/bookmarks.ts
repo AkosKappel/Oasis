@@ -1,3 +1,4 @@
+import { suggestBookmarkTags } from './tag-suggestions';
 import {
   assertBookmarkMediaBudget,
   validateBookmarkMedia,
@@ -70,6 +71,37 @@ export function createBookmarkRepository(
         .filter((bookmark) => bookmark.deletedAt === undefined)
         .reverse()
         .sortBy('createdAt');
+    },
+    async suggestTags(url: string, excludeId?: string) {
+      return database.transaction(
+        'r',
+        database.spaces,
+        database.bookmarks,
+        database.tags,
+        async () => {
+          await requireSpace(database, spaceId);
+          if (excludeId)
+            await requireOwnedRecord(
+              database.bookmarks,
+              excludeId,
+              spaceId,
+              'bookmark',
+            );
+          const [bookmarks, tags] = await Promise.all([
+            database.bookmarks
+              .where('spaceId')
+              .equals(spaceId)
+              .filter((record) => record.deletedAt === undefined)
+              .toArray(),
+            database.tags
+              .where('spaceId')
+              .equals(spaceId)
+              .filter((record) => record.deletedAt === undefined)
+              .toArray(),
+          ]);
+          return suggestBookmarkTags(bookmarks, tags, url, spaceId, excludeId);
+        },
+      );
     },
     async save(input: BookmarkInput, id?: string) {
       const values = validateBookmark(input);

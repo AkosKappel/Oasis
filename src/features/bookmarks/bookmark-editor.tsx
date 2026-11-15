@@ -1,3 +1,4 @@
+import type { TagSuggestion } from '@/database/tag-suggestions';
 import { safeBookmarkMedia } from '@/database/bookmark-media';
 import type { PageDetails } from '@/features/capture/read-page-details';
 import { useSpaceRepositories } from '@/features/spaces/space-context';
@@ -38,6 +39,38 @@ export function BookmarkEditor({
   const dialog = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState<string>();
   const formRef = useRef<HTMLFormElement>(null);
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestions, setSuggestions] = useState<TagSuggestion[]>();
+  const [suggestionMessage, setSuggestionMessage] = useState<string>();
+  const [selectedTags, setSelectedTags] = useState(
+    bookmark?.tags ?? initialValues?.tags ?? [],
+  );
+  async function suggestTags() {
+    if (!formRef.current || saving || reading || suggesting) return;
+    setSuggesting(true);
+    setError(undefined);
+    setSuggestionMessage(undefined);
+    setSuggestions(undefined);
+    try {
+      const url = String(new FormData(formRef.current).get('url') ?? '');
+      const result = await personalBookmarks.suggestTags(url, bookmark?.id);
+      setSuggestions(result);
+      setSuggestionMessage(
+        result.length
+          ? 'Choose suggestions before saving.'
+          : 'No tags were found on other saved bookmarks from this website.',
+      );
+    } catch (cause) {
+      reportStorageError(cause, true);
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'Tags could not be suggested. Try again.',
+      );
+    } finally {
+      setSuggesting(false);
+    }
+  }
   const [reading, setReading] = useState(false);
   const [detailsMessage, setDetailsMessage] = useState<string>();
   const [description, setDescription] = useState(
@@ -98,7 +131,7 @@ export function BookmarkEditor({
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (saving || reading) return;
+    if (saving || reading || suggesting) return;
     const data = new FormData(event.currentTarget);
     setSaving(true);
     setError(undefined);
@@ -147,7 +180,7 @@ export function BookmarkEditor({
         </h2>
       </div>
       <fieldset
-        disabled={saving || reading}
+        disabled={saving || reading || suggesting}
         className="flex min-w-0 flex-col gap-4"
       >
         <label className="field">
@@ -164,6 +197,10 @@ export function BookmarkEditor({
           <label htmlFor="bookmark-url">URL</label>
           <input
             id="bookmark-url"
+            onChange={() => {
+              setSuggestions(undefined);
+              setSuggestionMessage(undefined);
+            }}
             name="url"
             type="url"
             required
@@ -281,7 +318,14 @@ export function BookmarkEditor({
                     type="checkbox"
                     name="tags"
                     value={tag.id}
-                    defaultChecked={bookmark?.tags.includes(tag.id)}
+                    checked={selectedTags.includes(tag.id)}
+                    onChange={(event) =>
+                      setSelectedTags((value) =>
+                        event.target.checked
+                          ? [...new Set([...value, tag.id])]
+                          : value.filter((id) => id !== tag.id),
+                      )
+                    }
                     className="size-4 shrink-0 accent-primary"
                   />
                   <span
@@ -297,6 +341,67 @@ export function BookmarkEditor({
             <p className="text-sm text-muted-foreground">
               Create tags in “Folders and tags” to organize your bookmarks.
             </p>
+          )}
+          {tags.length > 0 && (
+            <div className="mt-4 space-y-3">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => void suggestTags()}
+              >
+                {suggesting ? 'Finding suggestions…' : 'Suggest tags'}
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Based on tags you’ve used on this website.
+              </p>
+              {suggestionMessage && (
+                <p role="status" className="text-sm text-muted-foreground">
+                  {suggestionMessage}
+                </p>
+              )}
+              {!!suggestions?.length && (
+                <ul aria-label="Suggested tags" className="flex flex-col gap-2">
+                  {suggestions
+                    .filter((item) =>
+                      tags.some(
+                        (tag) =>
+                          tag.id === item.tag.id && tag.name === item.tag.name,
+                      ),
+                    )
+                    .map((item) => (
+                      <li
+                        key={item.tag.id}
+                        className="flex flex-wrap items-center justify-between gap-2"
+                      >
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-auto min-h-9 max-w-full text-left"
+                          disabled={selectedTags.includes(item.tag.id)}
+                          onClick={() =>
+                            setSelectedTags((value) => [
+                              ...new Set([...value, item.tag.id]),
+                            ])
+                          }
+                        >
+                          <span className="min-w-0 break-words">
+                            {selectedTags.includes(item.tag.id)
+                              ? 'Added'
+                              : 'Add'}{' '}
+                            {item.tag.name}
+                          </span>
+                        </Button>
+                        <p className="text-xs text-muted-foreground">
+                          {item.uses} of {item.bookmarks}{' '}
+                          {item.bookmarks === 1 ? 'bookmark' : 'bookmarks'}
+                        </p>
+                      </li>
+                    ))}
+                </ul>
+              )}
+            </div>
           )}
         </fieldset>
         <label className="flex items-center gap-2 text-sm">
@@ -324,11 +429,11 @@ export function BookmarkEditor({
           type="button"
           variant="outline"
           onClick={onClose}
-          disabled={saving || reading}
+          disabled={saving || reading || suggesting}
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={saving || reading}>
+        <Button type="submit" disabled={saving || reading || suggesting}>
           {saving ? 'Saving…' : 'Save bookmark'}
         </Button>
       </div>
@@ -340,7 +445,7 @@ export function BookmarkEditor({
     <dialog
       ref={dialog}
       onCancel={(event) => {
-        if (saving || reading) event.preventDefault();
+        if (saving || reading || suggesting) event.preventDefault();
       }}
       onClose={onClose}
       aria-labelledby="editor-title"

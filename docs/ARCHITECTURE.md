@@ -151,3 +151,7 @@ The Content preferences dialog is rendered into the document body so photo-speci
 ### Saved searches
 
 Dexie v19 adds `savedSearches` indexed by space. Named queries reuse the local search engine, including phrase and tag/folder/domain/favorite operators, so membership changes with Library data. Loading a query resets other filters. The repository caps active queries at 50 per space, validates unique names and bounded text, and checks revisions for edits/deletions in space-owned transactions. Deletion keeps a tombstone; deleting a space includes saved searches. They are local settings and excluded from bookmark archives. The manager retains drafts on failed writes.
+
+### Tag suggestions
+
+The bookmark repository reads an owned bookmark/tag snapshot in a read transaction. `tag-suggestions.ts` counts distinct same-host bookmark assignments, filters active scoped tags and returns up to five candidates with supporting counts. The editor requests suggestions only on demand, preserves other fields and manually selected tags, and applies a candidate only to its draft. Normal bookmark save validation and ownership checks govern the eventual write. No schema, permission, background job or network integration is added.

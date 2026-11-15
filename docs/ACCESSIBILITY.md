@@ -7,3 +7,5 @@
 Before public release, evaluate with NVDA on Windows in Chrome and Edge: heading/landmark navigation, form labels and error announcements, dialog entry/exit, search result announcements, selection/bulk actions and widget timers. Verify 200%/400% zoom, high contrast and OS text scaling. Record browser/assistive-technology versions and findings. These interactions cannot be established by headless Chromium checks.
 
 Feedback uses compact thumb icons revealed by quote/footer hover or keyboard focus. Touch pointers keep them visible, buttons retain accessible names and pressed states, and success announcements use a visually hidden status. Reduced-motion preferences disable their fade.
+
+Saved-search and tag-suggestion flows scan their dialogs with sample data and verify names, review-before-save controls and saved-search dismissal focus. Desktop and narrow previews cover the new Library UI.
