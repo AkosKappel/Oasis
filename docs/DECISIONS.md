@@ -223,3 +223,9 @@
 - Expose existing plain-text bookmark notes through a dedicated Library card action, keeping quick capture short. Use the existing notes field and JSON format, with no schema change or Markdown/HTML renderer.
 - Update only notes inside a space-scoped transaction. Compare the previously read note before writing, so concurrent note edits keep the draft and report a conflict while unrelated metadata edits remain intact.
 - Bound new notes to 20,000 characters, normalize line endings and allow explicit clearing. Preserve longer imported notes when unchanged and never truncate them in the editor or backup. Notes already participate in local search and JSON backup/restore.
+
+## 2026-11-15: bounded Library rendering
+
+- Render Library results in batches of 60 with an explicit Show more action. Keep all matches available to search and sorting, announce the visible/total count, and reset the batch when filters change.
+- Memoize filtering and sorting so selection and dialog state changes do not rerun a large query. Select visible applies to displayed results, capped at 1,000.
+- Prefer batching over virtualized cards initially: it preserves native list semantics, keyboard access and variable card heights without another dependency. Revisit indexing or a worker if measured search latency becomes a problem; batching bounds initial DOM work, not total search cost.

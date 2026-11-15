@@ -252,8 +252,12 @@ export function createBackupRepository(database: OasisDatabase = db) {
           };
           let kept = 0;
           for (const key of ['folders', 'tags', 'bookmarks'] as const) {
-            for (const record of backup[key]) {
-              const existing = await database[key].get(record.id);
+            const records = backup[key];
+            const existingRecords = await database[key].bulkGet(
+              records.map((record) => record.id),
+            );
+            for (const [index, record] of records.entries()) {
+              const existing = existingRecords[index];
               if (existing) {
                 if (
                   existing.spaceId !== 'default' ||

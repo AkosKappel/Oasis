@@ -15,7 +15,7 @@ import {
 import { folderPaths } from '@/features/organization/folder-tree';
 import { BackupManager } from '@/features/backup/backup-manager';
 import { BookmarkCard } from './bookmark-card';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Bookmark as BookmarkIcon,
   Leaf,
@@ -40,6 +40,7 @@ export function BookmarkLibrary({
   const { preferences, error: preferencesError } = useLibraryPreferences();
   const { library, error: loadError } = useLibrary();
   const { bookmarks, folders = [], tags = [] } = library ?? {};
+  const [resultLimit, setResultLimit] = useState(60);
   const [selecting, setSelecting] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [bulkEditor, setBulkEditor] = useState<'move' | 'tags'>();
@@ -64,17 +65,23 @@ export function BookmarkLibrary({
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [error, setError] = useState<string>();
   const [deleting, setDeleting] = useState<string>();
-  const filtered = bookmarks
-    ? filterBookmarks(bookmarks, folders, tags, {
-        query,
-        favoritesOnly,
-        folderId,
-        tagId,
-      })
-    : undefined;
-  const visible = filtered
-    ? sortBookmarks(filtered, preferences.sort)
-    : undefined;
+  const filtered = useMemo(
+    () =>
+      bookmarks
+        ? filterBookmarks(bookmarks, folders, tags, {
+            query,
+            favoritesOnly,
+            folderId,
+            tagId,
+          })
+        : undefined,
+    [bookmarks, folders, tags, query, favoritesOnly, folderId, tagId],
+  );
+  const visible = useMemo(
+    () => (filtered ? sortBookmarks(filtered, preferences.sort) : undefined),
+    [filtered, preferences.sort],
+  );
+  const displayed = visible?.slice(0, resultLimit);
   async function savePreferences(patch: Partial<LibraryPreferences>) {
     setError(undefined);
     try {
@@ -90,6 +97,7 @@ export function BookmarkLibrary({
       .map((bookmark) => bookmark.id) ?? [];
   function clearSelection() {
     setSelected(new Set());
+    setResultLimit(60);
   }
   function toggleSelection(id: string) {
     const next = new Set(selected);
@@ -368,7 +376,7 @@ export function BookmarkLibrary({
               onClick={() =>
                 setSelected(
                   new Set(
-                    visible?.slice(0, 1000).map((bookmark) => bookmark.id),
+                    displayed?.slice(0, 1000).map((bookmark) => bookmark.id),
                   ),
                 )
               }
@@ -407,7 +415,7 @@ export function BookmarkLibrary({
             </Button>
             {(visible?.length ?? 0) > 1000 && (
               <p className="w-full text-xs text-muted-foreground">
-                Select visible selects the first 1,000 results.
+                Select visible selects up to 1,000 displayed results.
               </p>
             )}
           </section>
@@ -476,7 +484,7 @@ export function BookmarkLibrary({
                 : 'mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3'
             }
           >
-            {visible.map((bookmark) => (
+            {displayed?.map((bookmark) => (
               <BookmarkCard
                 key={bookmark.id}
                 selected={selected.has(bookmark.id)}
@@ -497,6 +505,21 @@ export function BookmarkLibrary({
               />
             ))}
           </ul>
+        )}
+        {!!visible?.length && (
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <p role="status" className="text-sm text-muted-foreground">
+              Showing {displayed?.length} of {visible.length} bookmarks
+            </p>
+            {resultLimit < visible.length && (
+              <Button
+                variant="outline"
+                onClick={() => setResultLimit((limit) => limit + 60)}
+              >
+                Show more bookmarks
+              </Button>
+            )}
+          </div>
         )}
         <p className="mt-10 text-xs text-muted-foreground">
           Saved on this device. Always your space.
