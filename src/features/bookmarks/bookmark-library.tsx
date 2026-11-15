@@ -2,6 +2,7 @@ import {
   reportStorageError,
   storageWriteSucceeded,
 } from '@/database/storage-health';
+import { BookmarkNotesEditor } from './bookmark-notes-editor';
 import { BulkEditor } from './bulk-editor';
 import type { BulkBookmarkAction } from '@/database/bookmarks';
 import { DuplicateReview } from '@/features/duplicates/duplicate-review';
@@ -43,6 +44,7 @@ export function BookmarkLibrary({
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [bulkEditor, setBulkEditor] = useState<'move' | 'tags'>();
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [notesFor, setNotesFor] = useState<Bookmark>();
   const [backupOpen, setBackupOpen] = useState(false);
   const [duplicatesOpen, setDuplicatesOpen] = useState(false);
   const [organizationOpen, setOrganizationOpen] = useState(false);
@@ -474,6 +476,7 @@ export function BookmarkLibrary({
                   return tag ? [tag] : [];
                 })}
                 deleting={!!deleting}
+                onNotes={setNotesFor}
                 onEdit={(bookmark) => setEditor({ bookmark })}
                 onDelete={(bookmark) => void remove(bookmark)}
               />
@@ -496,6 +499,12 @@ export function BookmarkLibrary({
           folders={folders}
           tags={tags}
           onClose={() => setOrganizationOpen(false)}
+        />
+      )}
+      {notesFor && (
+        <BookmarkNotesEditor
+          bookmark={notesFor}
+          onClose={() => setNotesFor(undefined)}
         />
       )}
       {editor && (

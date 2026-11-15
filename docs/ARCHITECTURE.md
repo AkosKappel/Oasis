@@ -105,3 +105,7 @@ Dexie v12 adds `weatherSettings` for opt-in city/units, cached current condition
 ## Search destinations
 
 Dexie v13 supports an optional preferred Home search source in appearance preferences. `search-engines.ts` defines fixed HTTPS provider destinations and encodes queries. Home navigates only on explicit submit; the command palette keeps local matching and exposes a separate web action. No suggestion requests, provider API or host permission is involved. The preference is device-local and excluded from bookmark backups.
+
+## Bookmark notes
+
+The Library notes editor uses the existing optional `Bookmark.notes` field. Its repository updates only notes after checking space ownership and the reviewed note value in one transaction. Conflicts keep the draft instead of replacing a newer note. The field remains plain text, participates in existing local search and JSON backup/restore, and needs no database version change. New content is bounded; unchanged longer imported content remains valid.

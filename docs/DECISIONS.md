@@ -217,3 +217,9 @@
 - Keep local Bookmarks as Home's default. Offer Google, DuckDuckGo, Bing and Brave in Appearance, with explicit destination labels on Home. Ctrl/Cmd+K continues local search and adds an explicit preferred-provider action for a non-empty query.
 - Build only allowlisted HTTPS navigation URLs with encoded queries. Do not request suggestions, add tracking parameters or send queries while typing. No provider API or new permission is needed.
 - Dexie v13 records the optional appearance field without rewriting older preferences. Missing values resolve to local search; appearance preview/cancel/save and cross-tab behavior remain shared with existing settings.
+
+## 2026-11-14: bookmark notes editor
+
+- Expose existing plain-text bookmark notes through a dedicated Library card action, keeping quick capture short. Use the existing notes field and JSON format, with no schema change or Markdown/HTML renderer.
+- Update only notes inside a space-scoped transaction. Compare the previously read note before writing, so concurrent note edits keep the draft and report a conflict while unrelated metadata edits remain intact.
+- Bound new notes to 20,000 characters, normalize line endings and allow explicit clearing. Preserve longer imported notes when unchanged and never truncate them in the editor or backup. Notes already participate in local search and JSON backup/restore.

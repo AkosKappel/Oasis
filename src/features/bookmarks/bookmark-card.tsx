@@ -1,4 +1,4 @@
-import { Pencil, Star, Trash2 } from 'lucide-react';
+import { FileText, Pencil, Star, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
 
@@ -11,6 +11,7 @@ interface BookmarkCardProps {
   folder?: Folder;
   tags: Tag[];
   onEdit: (bookmark: Bookmark) => void;
+  onNotes: (bookmark: Bookmark) => void;
   onDelete: (bookmark: Bookmark) => void;
 }
 
@@ -23,6 +24,7 @@ export function BookmarkCard({
   folder,
   tags,
   onEdit,
+  onNotes,
   onDelete,
 }: BookmarkCardProps) {
   const created = new Date(bookmark.createdAt);
@@ -136,6 +138,16 @@ export function BookmarkCard({
             : 'mt-auto flex justify-end gap-1 pt-5'
         }
       >
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => onNotes(bookmark)}
+          aria-label={`Notes for ${bookmark.title}`}
+          title={bookmark.notes ? 'Edit notes' : 'Add notes'}
+          className={bookmark.notes ? 'text-primary-content' : undefined}
+        >
+          <FileText className="size-4" aria-hidden="true" />
+        </Button>
         <Button
           variant="outline"
           size="icon"
