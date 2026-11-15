@@ -250,7 +250,7 @@
 
 ## 2026-11-15: weather access shared across spaces
 
-- Disabling weather changes the selected space. Revoke browser-wide optional host access only when no other active space uses weather; otherwise keep the grant and explain why. Deleted spaces do not retain access. Browser extension settings can still revoke access globally.
+- Disabling weather changes the selected space. Revoke browser-wide optional host access only when no other active space uses weather; otherwise keep the grant and explain why. Ignore deleted spaces when checking whether another space still needs the grant. Browser extension settings can still revoke access globally.
 
 ## 2026-11-15: public MIT distribution
 

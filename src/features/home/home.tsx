@@ -96,10 +96,9 @@ export function Home({
         </section>
       ) : (
         <>
-          <SpaceSwitcher />
           <nav
             aria-label="Main navigation"
-            className={`flex items-center justify-between text-sm ${appearance.linksSide === 'right' ? 'flex-row-reverse' : ''}`}
+            className={`flex flex-wrap items-center justify-between gap-3 text-sm ${appearance.linksSide === 'right' ? 'flex-row-reverse' : ''}`}
           >
             <LinksMenu
               side={appearance.linksSide}
@@ -110,6 +109,7 @@ export function Home({
               tags={library?.tags ?? []}
               error={error}
             />
+            <SpaceSwitcher />
             <a
               href="#library"
               className="flex items-center gap-2 rounded-md px-3 py-2 text-muted-foreground hover:text-foreground"

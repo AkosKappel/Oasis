@@ -3,7 +3,9 @@ import { resolve } from 'node:path';
 
 export const test = base.extend({
   context: async ({ playwright }, provideContext) => {
-    const extensionPath = resolve('.output/chrome-mv3');
+    const extensionPath = resolve(
+      process.env.OASIS_EXTENSION_PATH ?? '.output/chrome-mv3',
+    );
     const context = await playwright.chromium.launchPersistentContext('', {
       channel: 'chromium',
       headless: true,

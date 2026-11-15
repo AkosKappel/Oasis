@@ -14,7 +14,9 @@
     "test": "vitest run",
     "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test",
     "postinstall": "wxt prepare",
-    "test:e2e": "pnpm build && playwright test"
+    "test:e2e": "pnpm build && playwright test",
+    "assets:icons": "node scripts/export-icons.mjs",
+    "assets:notices": "node scripts/third-party-notices.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.5.0",

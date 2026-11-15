@@ -41,5 +41,7 @@ Saved data stays on the device in IndexedDB; there is no backend, account or ana
 - [Architecture](docs/ARCHITECTURE.md)
 - [Decisions](docs/DECISIONS.md)
 - [Album artwork and prompts](docs/ALBUM-ARTWORK.md)
+- [Privacy policy](PRIVACY.md)
+- [Release preparation and remaining owner checks](docs/RELEASE.md)
 
 Licensed under [MIT](LICENSE). Public repository and extension-store publication are prepared separately; no release is published by the development workflow.

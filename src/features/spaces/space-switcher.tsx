@@ -36,11 +36,11 @@ export function SpaceSwitcher() {
     <div
       role="group"
       aria-label="Spaces"
-      className="relative mb-3 max-w-full rounded-lg border border-border bg-background p-2 text-sm"
+      className="relative order-3 w-fit max-w-full basis-full sm:order-none sm:basis-auto rounded-lg border border-border bg-background p-2 text-sm"
     >
       <div className="flex flex-wrap items-center gap-2">
         <label className="field min-w-0">
-          Space
+          <span className="sr-only">Space</span>
           <select
             aria-label="Active space"
             className="max-w-48"

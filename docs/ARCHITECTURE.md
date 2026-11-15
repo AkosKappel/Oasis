@@ -119,3 +119,7 @@ Space deletion tombstones all owned records transactionally and releases persona
 ## Optional open history
 
 Dexie v14 adds `trackOpens` to per-space Library preferences, defaulting to false. The open-history repository checks current consent and space ownership inside each transaction, then updates existing bookmark `openCount`/`lastOpenedAt` fields. Tracked bookmark anchors cover Library cards, Home favorites and Links; command-palette navigation awaits the same write attempt. Native context-menu opens are not counted. Disabling retains metadata; explicit clearing resets active records in the selected space. Recent/frequent collections derive up to 50 records from saved metadata. No browsing-history permission is used.
+
+## Distribution assets
+
+The manifest uses packaged PNG icons exported from the original SVG in `public/icon/`. Export uses the existing Playwright dependency. `assets:notices` copies the project MIT license and assembles runtime dependency notices, including WXT/browser, Tailwind CSS and shadcn component patterns, into public files for the extension bundle. The release smoke flow verifies packaged icon dimensions and captures offline sample-data screenshots. `OASIS_EXTENSION_PATH` lets focused tests load a browser-target build; the default remains Chrome MV3.
