@@ -375,3 +375,7 @@ An optional builder inside Saved searches composes text phrases, domains, folder
 ## 2026-11-16: Focus cycles advance explicitly
 
 Focus mode can opt into repeating focus and break phases. Each elapsed phase waits for an explicit Start break or Start next focus action. Time away never silently consumes later phases. Keep absolute deadlines, pause/resume, cross-tab persistence and a transactional stale-phase guard; add no background alarms, permissions or Home controls. Dexie v24 adds optional cycle metadata, leaving existing timers as single sessions. Complete-space backups validate the cycle and restore active timers paused. Long breaks and automatic starts remain outside this modest first version.
+
+## 2026-11-16: Use system outlines in forced-colors mode
+
+Shared buttons use a shadow focus ring in regular themes. Forced-colors mode removes that shadow, leaving no visible keyboard focus. Add a system-color outline, button borders and an inset pressed-state marker only within the forced-colors media query. Restore native select appearance so browsers without the custom picker keep their arrow when gradients disappear. Extend the shared engine suite with preference and enlarged-text/reflow checks; keep native Windows high contrast, browser zoom and assistive-technology verification as release gates.
