@@ -1,3 +1,4 @@
+import type { SavedSearch } from '@/database/saved-searches';
 import { SavedSearches } from '@/features/saved-searches/saved-searches';
 import { SpaceTransferDialog } from '@/features/spaces/space-transfer-dialog';
 import type { DragEvent } from 'react';
@@ -25,8 +26,9 @@ import { type LibraryPreferences } from '@/database/library-preferences';
 import { folderPaths } from '@/features/organization/folder-tree';
 import { BackupManager } from '@/features/backup/backup-manager';
 import { BookmarkCard } from './bookmark-card';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
+  MoreHorizontal,
   Bookmark as BookmarkIcon,
   Leaf,
   Plus,
@@ -58,6 +60,18 @@ export function BookmarkLibrary({
     setPreferences,
   } = useLibraryPreferences();
   const { spaceId } = useSpace();
+  const [savedRecords, setSavedRecords] = useState<SavedSearch[]>([]);
+  const [activeSaved, setActiveSaved] = useState('');
+  const [filtersOpen, setFiltersOpen] = useState(
+    () => matchMedia('(min-width: 768px)').matches,
+  );
+  const [toolsPosition, setToolsPosition] = useState({ top: 0, left: 0 });
+  useEffect(() => {
+    const media = matchMedia('(min-width: 768px)');
+    const changed = () => setFiltersOpen(media.matches);
+    media.addEventListener('change', changed);
+    return () => media.removeEventListener('change', changed);
+  }, []);
   const [organizing, setOrganizing] = useState(false);
   const [organizationBusy, setOrganizationBusy] = useState(false);
   const [organizationMessage, setOrganizationMessage] = useState('');
@@ -306,7 +320,7 @@ export function BookmarkLibrary({
       </button>
       {backupOpen && <BackupManager onClose={() => setBackupOpen(false)} />}
       <header className="border-b border-border">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-6 sm:px-10">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-4 sm:px-8">
           <div className="flex items-center gap-3">
             <a
               href="#"
@@ -319,9 +333,6 @@ export function BookmarkLibrary({
               />
               oasis
             </a>
-            <span className="hidden text-xs font-normal text-muted-foreground sm:inline">
-              Your personal space on the web
-            </span>
           </div>
           <SpaceSwitcher />
         </div>
@@ -329,45 +340,74 @@ export function BookmarkLibrary({
       <main
         id="library-main"
         tabIndex={-1}
-        className="mx-auto max-w-6xl px-6 py-12 sm:px-10 sm:py-16"
+        className="mx-auto max-w-7xl px-6 py-6 sm:px-8"
       >
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className="eyebrow">
-              A little less searching. A little more finding.
-            </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">
-              Your library
-            </h1>
-            <p className="mt-4 text-muted-foreground">
-              Good places on the web, all in one place.
-            </p>
+            <h1 className="text-2xl font-semibold tracking-tight">Library</h1>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button
+              id="library-more-trigger"
+              aria-label="More Library tools"
+              title="Library tools"
+              size="icon"
               variant="outline"
-              disabled={!library || !!loadError}
-              onClick={() => setStatisticsOpen(true)}
+              popoverTarget="library-tools"
+              onClick={(event) => {
+                const rect = event.currentTarget.getBoundingClientRect();
+                setToolsPosition({
+                  top: rect.bottom + 8,
+                  left: Math.max(8, Math.min(rect.left, innerWidth - 272)),
+                });
+              }}
             >
-              Statistics
+              <MoreHorizontal className="size-4" aria-hidden="true" />
             </Button>
-            <Button variant="outline" onClick={() => setBackupOpen(true)}>
-              Backup and restore
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setOrganizationOpen(true)}
-              disabled={!bookmarks || !!loadError}
+            <div
+              id="library-tools"
+              popover="auto"
+              style={{
+                top: toolsPosition.top,
+                left: toolsPosition.left,
+                bottom: 'auto',
+                right: 'auto',
+              }}
+              className="m-0 w-64 rounded-lg border border-border bg-background p-2 shadow-lg"
+              onClick={(event) => {
+                if ((event.target as HTMLElement).closest('button')) {
+                  event.currentTarget.hidePopover();
+                  document.getElementById('library-more-trigger')?.focus();
+                }
+              }}
             >
-              Folders and tags
-            </Button>
-            <Button
-              variant="outline"
-              disabled={!bookmarks || !!loadError}
-              onClick={() => setDuplicatesOpen(true)}
-            >
-              Find duplicates
-            </Button>
+              <div className="flex flex-col gap-2">
+                <Button
+                  variant="outline"
+                  disabled={!library || !!loadError}
+                  onClick={() => setStatisticsOpen(true)}
+                >
+                  Statistics
+                </Button>
+                <Button variant="outline" onClick={() => setBackupOpen(true)}>
+                  Backup and restore
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setOrganizationOpen(true)}
+                  disabled={!bookmarks || !!loadError}
+                >
+                  Folders and tags
+                </Button>
+                <Button
+                  variant="outline"
+                  disabled={!bookmarks || !!loadError}
+                  onClick={() => setDuplicatesOpen(true)}
+                >
+                  Find duplicates
+                </Button>
+              </div>
+            </div>
             <Button
               onClick={() => setEditor({})}
               disabled={!bookmarks || !!loadError}
@@ -377,7 +417,7 @@ export function BookmarkLibrary({
             </Button>
           </div>
         </div>
-        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
           <div
             className="flex flex-wrap gap-2"
             role="group"
@@ -387,6 +427,7 @@ export function BookmarkLibrary({
               variant={collection === 'all' ? 'default' : 'outline'}
               onClick={() => {
                 setCollection('all');
+                setActiveSaved('');
                 clearSelection();
               }}
               aria-pressed={collection === 'all'}
@@ -400,6 +441,7 @@ export function BookmarkLibrary({
               variant={favoritesOnly ? 'default' : 'outline'}
               onClick={() => {
                 setCollection('favorites');
+                setActiveSaved('');
                 clearSelection();
               }}
               aria-pressed={favoritesOnly}
@@ -419,6 +461,7 @@ export function BookmarkLibrary({
               value={query}
               onChange={(event) => {
                 setQuery(event.target.value);
+                setActiveSaved('');
                 clearSelection();
               }}
               placeholder="Search or use tag:, folder:, domain:"
@@ -427,413 +470,506 @@ export function BookmarkLibrary({
             />
           </label>
         </div>
-        <p
-          id="library-search-help"
-          className="mt-3 text-xs text-muted-foreground"
-        >
-          Folder filters include subfolders. Search titles, URLs, notes, folders
-          and tags. Use quotes for phrases or names with spaces, such as
-          tag:"Read later". Best match uses recent additions when search is
-          empty.
-        </p>
-        <label className="field mt-4 max-w-sm">
-          Smart collection
-          <select
-            aria-label="Smart collection"
-            value={collection}
-            onChange={(event) => {
-              setCollection(event.target.value as SmartCollection);
-              clearSelection();
-            }}
-          >
-            <option value="all">All bookmarks</option>
-            <option value="recent">Recently added</option>
-            <option value="favorites">Favorites</option>
-            <option value="untagged">Untagged</option>
-            <option value="unorganized">Unorganized</option>
-            <option value="recently-opened">Recently opened</option>
-            <option value="frequently-opened">Frequently opened</option>
-          </select>
-          <span className="text-xs font-normal text-muted-foreground">
-            Recent and frequent collections include up to 50 bookmarks. Opened
-            collections use saved counts; enable counting below to populate
-            them. Folder, tag and search filters also apply.
-          </span>
-        </label>
-        <SavedSearches
-          query={query}
-          onApply={(value) => {
-            setQuery(value);
-            setCollection('all');
-            setFolderFilter('');
-            setTagFilter('');
-            clearSelection();
-          }}
-        />
-        {bookmarks && (
-          <OrganizationFilters
-            bookmarks={bookmarks}
-            folders={folders}
-            tags={tags}
-            folderId={folderId}
-            tagId={tagId}
-            onFolderChange={(value) => {
-              setFolderFilter(value);
-              clearSelection();
-            }}
-            onTagChange={(value) => {
-              setTagFilter(value);
-              clearSelection();
-            }}
-          />
-        )}
-        <div className="mt-5 flex flex-wrap items-end justify-between gap-3">
-          <div className="flex gap-2" role="group" aria-label="Library view">
-            <Button
-              variant={preferences.view === 'grid' ? 'default' : 'outline'}
-              size="sm"
-              disabled={savingPreferences}
-              aria-pressed={preferences.view === 'grid'}
-              onClick={() => void savePreferences({ view: 'grid' })}
+        <div className="mt-5 grid items-start gap-6 md:grid-cols-[14rem_minmax(0,1fr)]">
+          <aside aria-label="Library navigation">
+            <details
+              open={filtersOpen}
+              onToggle={(event) => setFiltersOpen(event.currentTarget.open)}
+              className="rounded-lg border border-border p-3 md:border-0 md:p-0"
             >
-              Grid view
-            </Button>
-            <Button
-              variant={preferences.view === 'list' ? 'default' : 'outline'}
-              size="sm"
-              disabled={savingPreferences}
-              aria-pressed={preferences.view === 'list'}
-              onClick={() => void savePreferences({ view: 'list' })}
-            >
-              List view
-            </Button>
-          </div>
-          <label className="field">
-            Sort by
-            <select
-              disabled={savingPreferences}
-              value={preferences.sort}
-              onChange={(event) =>
-                void savePreferences({
-                  sort: event.target.value as LibraryPreferences['sort'],
-                })
-              }
-            >
-              <option value="relevance">Best match</option>
-              <option value="manual">Manual order</option>
-              <option value="name-asc">Name, A to Z</option>
-              <option value="name-desc">Name, Z to A</option>
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
-            </select>
-          </label>
-        </div>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              disabled={savingPreferences}
-              checked={preferences.trackOpens ?? false}
-              onChange={(event) =>
-                void savePreferences({ trackOpens: event.target.checked })
-              }
-            />
-            Count bookmark opens in Oasis
-          </label>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              if (
-                confirm(
-                  'Clear open counts and last-opened times in this space?',
-                )
-              )
-                void openHistory.clear().catch((cause: unknown) => {
-                  reportStorageError(cause);
-                  setError('Open history could not be cleared. Try again.');
-                });
-            }}
-          >
-            Clear open history
-          </Button>
-          <p className="w-full text-xs text-muted-foreground">
-            Off by default. Counts only opens made from Oasis; other browsing
-            activity is never tracked. Turning it off keeps existing counts
-            until you clear them.
-          </p>
-        </div>
-        <div className="mt-4">
-          <Button
-            id="bookmark-selection-toggle"
-            variant="outline"
-            size="sm"
-            disabled={!bookmarks?.length || bulkBusy}
-            onClick={() => {
-              setSelecting(!selecting);
-              clearSelection();
-            }}
-          >
-            {selecting ? 'Cancel selection' : 'Select bookmarks'}
-          </Button>
-        </div>
-        <div className="mt-3">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!bookmarks || organizationBusy}
-            aria-expanded={organizing}
-            onClick={() => setOrganizing(!organizing)}
-          >
-            {organizing ? 'Done organizing' : 'Organize by dragging'}
-          </Button>
-        </div>
-        {organizing && (
-          <DragOrganization
-            folders={folders}
-            spaceId={spaceId}
-            manual={preferences.folderOrder === 'manual'}
-            busy={organizationBusy}
-            onOrderChange={(manual) =>
-              void savePreferences({ folderOrder: manual ? 'manual' : 'name' })
-            }
-            onFolderMove={(id, parent) =>
-              void organize(
-                () => personalOrganization.moveFolder(id, parent),
-                'Folder moved.',
-              )
-            }
-            onFolderOrder={(id, before) =>
-              void organize(
-                () => personalOrganization.reorderFolder(id, before),
-                'Folder order saved.',
-              )
-            }
-            onDrop={dropInto}
-            onEdit={() => setOrganizationOpen(true)}
-          />
-        )}
-        {organizing && !canReorder && (
-          <p className="mt-3 text-xs text-muted-foreground">
-            Choose Manual bookmark order and clear filters to reorder cards.
-            Folder destinations work with any view.
-          </p>
-        )}
-        {organizationMessage && (
-          <p role="status" className="mt-3 text-sm">
-            {organizationMessage}
-          </p>
-        )}
-        {selecting && (
-          <section
-            aria-label="Bulk actions"
-            className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface p-3"
-          >
-            <p role="status" className="mr-2 text-sm">
-              Selected: {activeSelected.length}
-            </p>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={bulkBusy}
-              onClick={() =>
-                setSelected(
-                  new Set(
-                    displayed?.slice(0, 1000).map((bookmark) => bookmark.id),
-                  ),
-                )
-              }
-            >
-              Select visible
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={bulkBusy}
-              onClick={clearSelection}
-            >
-              Clear selection
-            </Button>
-            <Button
-              size="sm"
-              disabled={!activeSelected.length || bulkBusy}
-              onClick={() => setBulkEditor('move')}
-            >
-              Move selected
-            </Button>
-            <Button
-              size="sm"
-              disabled={!activeSelected.length || bulkBusy}
-              onClick={() => setBulkEditor('tags')}
-            >
-              Tag selected
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={!activeSelected.length || bulkBusy}
-              onClick={() => setTransferIds([...activeSelected])}
-            >
-              Transfer to space
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={!activeSelected.length || bulkBusy}
-              onClick={() => void deleteSelected()}
-            >
-              Delete selected
-            </Button>
-            {(visible?.length ?? 0) > 1000 && (
-              <p className="w-full text-xs text-muted-foreground">
-                Select visible selects up to 1,000 displayed results.
-              </p>
-            )}
-          </section>
-        )}
-        {bulkEditor && (
-          <BulkEditor
-            kind={bulkEditor}
-            count={activeSelected.length}
-            folders={folders}
-            tags={tags}
-            onApply={applyBulk}
-            onClose={() => setBulkEditor(undefined)}
-          />
-        )}
-        {(loadError || error || preferencesError) && (
-          <p
-            role="alert"
-            className="mt-6 rounded-lg border border-danger/30 bg-danger/10 p-4 text-sm text-danger"
-          >
-            {loadError || error || preferencesError}
-          </p>
-        )}
-        {!bookmarks && !loadError && (
-          <p role="status" className="py-16 text-center text-muted-foreground">
-            Opening your library…
-          </p>
-        )}
-        {visible?.length === 0 && (
-          <section className="flex flex-col items-center py-20 text-center">
-            <BookmarkIcon
-              className="mb-5 size-10 text-primary-content"
-              strokeWidth={1.25}
-              aria-hidden="true"
-            />
-            <h2 className="text-xl font-medium">
-              {query
-                ? 'No matching bookmarks'
-                : organizationFiltered
-                  ? 'No bookmarks in this selection'
-                  : favoritesOnly
-                    ? 'Your favorites belong here'
-                    : 'Make room for your next discovery'}
-            </h2>
-            <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              {query
-                ? 'Try another title, URL, description, folder, or tag.'
-                : organizationFiltered
-                  ? 'Choose another folder or tag, or clear your filters.'
-                  : favoritesOnly
-                    ? 'Choose “Add to favorites” when saving or editing a bookmark.'
-                    : 'Save a useful tool, a favorite read, or somewhere you want to return to.'}
-            </p>
-            {!query && !favoritesOnly && !organizationFiltered && (
-              <Button className="mt-6" onClick={() => setEditor({})}>
-                Save your first bookmark
+              <summary className="cursor-pointer text-sm font-medium md:hidden">
+                Filters and collections
+              </summary>
+              <div className="mt-4 md:mt-0">
+                <details className="mb-4">
+                  <summary className="cursor-pointer text-sm">
+                    Search help
+                  </summary>
+                  <p
+                    id="library-search-help"
+                    className="mt-3 text-xs text-muted-foreground"
+                  >
+                    Folder filters include subfolders. Search titles, URLs,
+                    notes, folders and tags. Use quotes for phrases or names
+                    with spaces, such as tag:"Read later". Best match uses
+                    recent additions when search is empty.
+                  </p>
+                </details>
+                <label className="field">
+                  Collections
+                  <select
+                    aria-label="Collections"
+                    value={
+                      activeSaved &&
+                      savedRecords.some((record) => record.id === activeSaved)
+                        ? `saved:${activeSaved}`
+                        : collection
+                    }
+                    onChange={(event) => {
+                      const value = event.target.value;
+                      if (value.startsWith('saved:')) {
+                        const record = savedRecords.find(
+                          (record) => record.id === value.slice(6),
+                        );
+                        if (record) {
+                          setQuery(record.query);
+                          setCollection('all');
+                          setFolderFilter('');
+                          setTagFilter('');
+                          setActiveSaved(record.id);
+                        }
+                      } else {
+                        setActiveSaved('');
+                        setCollection(value as SmartCollection);
+                      }
+                      clearSelection();
+                    }}
+                  >
+                    <optgroup label="Built-in collections">
+                      <option value="all">All bookmarks</option>
+                      <option value="recent">Recently added</option>
+                      <option value="favorites">Favorites</option>
+                      <option value="untagged">Untagged</option>
+                      <option value="unorganized">Unorganized</option>
+                      <option value="recently-opened">Recently opened</option>
+                      <option value="frequently-opened">
+                        Frequently opened
+                      </option>
+                    </optgroup>
+                    {!!savedRecords.length && (
+                      <optgroup label="Saved searches">
+                        {savedRecords.map((record) => (
+                          <option key={record.id} value={`saved:${record.id}`}>
+                            {record.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
+                  </select>
+                </label>
+                <SavedSearches
+                  hideSelect
+                  onRecords={setSavedRecords}
+                  query={query}
+                  onApply={(value) => {
+                    setQuery(value);
+                    setActiveSaved(
+                      savedRecords.find((record) => record.query === value)
+                        ?.id ?? '',
+                    );
+                    setCollection('all');
+                    setFolderFilter('');
+                    setTagFilter('');
+                    clearSelection();
+                  }}
+                />
+                {bookmarks && (
+                  <OrganizationFilters
+                    manualOrder={preferences.folderOrder === 'manual'}
+                    bookmarks={bookmarks}
+                    folders={folders}
+                    tags={tags}
+                    folderId={folderId}
+                    tagId={tagId}
+                    onFolderChange={(value) => {
+                      setFolderFilter(value);
+                      clearSelection();
+                    }}
+                    onTagChange={(value) => {
+                      setTagFilter(value);
+                      clearSelection();
+                    }}
+                  />
+                )}
+                {(query || collection !== 'all' || folderId || tagId) && (
+                  <Button
+                    className="mt-4"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setQuery('');
+                      setCollection('all');
+                      setFolderFilter('');
+                      setTagFilter('');
+                      setActiveSaved('');
+                      clearSelection();
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                )}
+                <details className="mt-4">
+                  <summary className="cursor-pointer text-sm">
+                    Open counting
+                  </summary>
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        disabled={savingPreferences}
+                        checked={preferences.trackOpens ?? false}
+                        onChange={(event) =>
+                          void savePreferences({
+                            trackOpens: event.target.checked,
+                          })
+                        }
+                      />
+                      Count bookmark opens in Oasis
+                    </label>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        if (
+                          confirm(
+                            'Clear open counts and last-opened times in this space?',
+                          )
+                        )
+                          void openHistory.clear().catch((cause: unknown) => {
+                            reportStorageError(cause);
+                            setError(
+                              'Open history could not be cleared. Try again.',
+                            );
+                          });
+                      }}
+                    >
+                      Clear open history
+                    </Button>
+                    <p className="w-full text-xs text-muted-foreground">
+                      Off by default. Counts only opens made from Oasis; other
+                      browsing activity is never tracked. Turning it off keeps
+                      existing counts until you clear them.
+                    </p>
+                  </div>
+                </details>
+              </div>
+            </details>
+          </aside>
+          <section aria-label="Library results" className="min-w-0">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div
+                className="flex gap-2"
+                role="group"
+                aria-label="Library view"
+              >
+                <Button
+                  variant={preferences.view === 'grid' ? 'default' : 'outline'}
+                  size="sm"
+                  disabled={savingPreferences}
+                  aria-pressed={preferences.view === 'grid'}
+                  onClick={() => void savePreferences({ view: 'grid' })}
+                >
+                  Grid view
+                </Button>
+                <Button
+                  variant={preferences.view === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  disabled={savingPreferences}
+                  aria-pressed={preferences.view === 'list'}
+                  onClick={() => void savePreferences({ view: 'list' })}
+                >
+                  List view
+                </Button>
+              </div>
+              <label className="field">
+                Sort by
+                <select
+                  disabled={savingPreferences}
+                  value={preferences.sort}
+                  onChange={(event) =>
+                    void savePreferences({
+                      sort: event.target.value as LibraryPreferences['sort'],
+                    })
+                  }
+                >
+                  <option value="relevance">Best match</option>
+                  <option value="manual">Manual order</option>
+                  <option value="name-asc">Name, A to Z</option>
+                  <option value="name-desc">Name, Z to A</option>
+                  <option value="newest">Newest first</option>
+                  <option value="oldest">Oldest first</option>
+                </select>
+              </label>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button
+                id="bookmark-selection-toggle"
+                variant="outline"
+                size="sm"
+                disabled={!bookmarks?.length || bulkBusy}
+                onClick={() => {
+                  setSelecting(!selecting);
+                  clearSelection();
+                }}
+              >
+                {selecting ? 'Cancel selection' : 'Select bookmarks'}
               </Button>
-            )}
-          </section>
-        )}
-        {!!visible?.length && (
-          <ul
-            aria-label="Bookmarks"
-            className={
-              preferences.view === 'list'
-                ? 'mt-7 flex flex-col gap-3'
-                : 'mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3'
-            }
-          >
-            {displayed?.map((bookmark, index) => (
-              <BookmarkCard
-                key={bookmark.id}
-                onDragStart={
-                  organizing
-                    ? (event) =>
-                        writeOrganizationDrag(event, {
-                          kind: 'bookmark',
-                          id: bookmark.id,
-                          spaceId,
-                        })
-                    : undefined
-                }
-                onDropBefore={
-                  organizing
-                    ? (event) => dropBefore(event, bookmark.id)
-                    : undefined
-                }
-                onMoveUp={
-                  canReorder && index > 0
-                    ? () =>
-                        void organize(
-                          () =>
-                            personalBookmarks.reorder(
-                              bookmark.id,
-                              displayed[index - 1]!.id,
-                            ),
-                          'Bookmark order saved.',
-                        )
-                    : undefined
-                }
-                onMoveDown={
-                  canReorder && index < visible.length - 1
-                    ? () =>
-                        void organize(
-                          () =>
-                            personalBookmarks.reorder(
-                              bookmark.id,
-                              visible[index + 2]?.id ?? null,
-                            ),
-                          'Bookmark order saved.',
-                        )
-                    : undefined
-                }
-                organizingBusy={organizationBusy}
-                selected={selected.has(bookmark.id)}
-                onSelect={
-                  selecting ? () => toggleSelection(bookmark.id) : undefined
-                }
-                compact={preferences.view === 'list'}
-                bookmark={bookmark}
-                folder={folderMap.get(bookmark.folderId ?? '')}
-                tags={bookmark.tags.flatMap((id) => {
-                  const tag = tagMap.get(id);
-                  return tag ? [tag] : [];
-                })}
-                deleting={!!deleting}
-                onNotes={setNotesFor}
-                onEdit={(bookmark) => setEditor({ bookmark })}
-                onDelete={(bookmark) => void remove(bookmark)}
-              />
-            ))}
-          </ul>
-        )}
-        {!!visible?.length && (
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <p role="status" className="text-sm text-muted-foreground">
-              Showing {displayed?.length} of {visible.length} bookmarks
-            </p>
-            {resultLimit < visible.length && (
+
               <Button
                 variant="outline"
-                onClick={() => setResultLimit((limit) => limit + 60)}
+                size="sm"
+                disabled={!bookmarks || organizationBusy}
+                aria-expanded={organizing}
+                onClick={() => setOrganizing(!organizing)}
               >
-                Show more bookmarks
+                {organizing ? 'Done organizing' : 'Organize by dragging'}
               </Button>
+            </div>
+            {organizing && (
+              <DragOrganization
+                folders={folders}
+                spaceId={spaceId}
+                manual={preferences.folderOrder === 'manual'}
+                busy={organizationBusy}
+                onOrderChange={(manual) =>
+                  void savePreferences({
+                    folderOrder: manual ? 'manual' : 'name',
+                  })
+                }
+                onFolderMove={(id, parent) =>
+                  void organize(
+                    () => personalOrganization.moveFolder(id, parent),
+                    'Folder moved.',
+                  )
+                }
+                onFolderOrder={(id, before) =>
+                  void organize(
+                    () => personalOrganization.reorderFolder(id, before),
+                    'Folder order saved.',
+                  )
+                }
+                onDrop={dropInto}
+                onEdit={() => setOrganizationOpen(true)}
+              />
             )}
-          </div>
-        )}
+            {organizing && !canReorder && (
+              <p className="mt-3 text-xs text-muted-foreground">
+                Choose Manual bookmark order and clear filters to reorder cards.
+                Folder destinations work with any view.
+              </p>
+            )}
+            {organizationMessage && (
+              <p role="status" className="mt-3 text-sm">
+                {organizationMessage}
+              </p>
+            )}
+            {selecting && (
+              <section
+                aria-label="Bulk actions"
+                className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface p-3"
+              >
+                <p role="status" className="mr-2 text-sm">
+                  Selected: {activeSelected.length}
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={bulkBusy}
+                  onClick={() =>
+                    setSelected(
+                      new Set(
+                        displayed
+                          ?.slice(0, 1000)
+                          .map((bookmark) => bookmark.id),
+                      ),
+                    )
+                  }
+                >
+                  Select visible
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={bulkBusy}
+                  onClick={clearSelection}
+                >
+                  Clear selection
+                </Button>
+                <Button
+                  size="sm"
+                  disabled={!activeSelected.length || bulkBusy}
+                  onClick={() => setBulkEditor('move')}
+                >
+                  Move selected
+                </Button>
+                <Button
+                  size="sm"
+                  disabled={!activeSelected.length || bulkBusy}
+                  onClick={() => setBulkEditor('tags')}
+                >
+                  Tag selected
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!activeSelected.length || bulkBusy}
+                  onClick={() => setTransferIds([...activeSelected])}
+                >
+                  Transfer to space
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!activeSelected.length || bulkBusy}
+                  onClick={() => void deleteSelected()}
+                >
+                  Delete selected
+                </Button>
+                {(visible?.length ?? 0) > 1000 && (
+                  <p className="w-full text-xs text-muted-foreground">
+                    Select visible selects up to 1,000 displayed results.
+                  </p>
+                )}
+              </section>
+            )}
+            {bulkEditor && (
+              <BulkEditor
+                kind={bulkEditor}
+                count={activeSelected.length}
+                folders={folders}
+                tags={tags}
+                onApply={applyBulk}
+                onClose={() => setBulkEditor(undefined)}
+              />
+            )}
+            {(loadError || error || preferencesError) && (
+              <p
+                role="alert"
+                className="mt-6 rounded-lg border border-danger/30 bg-danger/10 p-4 text-sm text-danger"
+              >
+                {loadError || error || preferencesError}
+              </p>
+            )}
+            {!bookmarks && !loadError && (
+              <p
+                role="status"
+                className="py-16 text-center text-muted-foreground"
+              >
+                Opening your library…
+              </p>
+            )}
+            {visible?.length === 0 && (
+              <section className="flex flex-col items-center py-20 text-center">
+                <BookmarkIcon
+                  className="mb-5 size-10 text-primary-content"
+                  strokeWidth={1.25}
+                  aria-hidden="true"
+                />
+                <h2 className="text-xl font-medium">
+                  {query
+                    ? 'No matching bookmarks'
+                    : organizationFiltered
+                      ? 'No bookmarks in this selection'
+                      : favoritesOnly
+                        ? 'Your favorites belong here'
+                        : 'Make room for your next discovery'}
+                </h2>
+                <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
+                  {query
+                    ? 'Try another title, URL, description, folder, or tag.'
+                    : organizationFiltered
+                      ? 'Choose another folder or tag, or clear your filters.'
+                      : favoritesOnly
+                        ? 'Choose “Add to favorites” when saving or editing a bookmark.'
+                        : 'Save a useful tool, a favorite read, or somewhere you want to return to.'}
+                </p>
+                {!query && !favoritesOnly && !organizationFiltered && (
+                  <Button className="mt-6" onClick={() => setEditor({})}>
+                    Save your first bookmark
+                  </Button>
+                )}
+              </section>
+            )}
+            {!!visible?.length && (
+              <ul
+                aria-label="Bookmarks"
+                className={
+                  preferences.view === 'list'
+                    ? 'mt-5 flex flex-col gap-3'
+                    : 'mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3'
+                }
+              >
+                {displayed?.map((bookmark, index) => (
+                  <BookmarkCard
+                    key={bookmark.id}
+                    onDragStart={
+                      organizing
+                        ? (event) =>
+                            writeOrganizationDrag(event, {
+                              kind: 'bookmark',
+                              id: bookmark.id,
+                              spaceId,
+                            })
+                        : undefined
+                    }
+                    onDropBefore={
+                      organizing
+                        ? (event) => dropBefore(event, bookmark.id)
+                        : undefined
+                    }
+                    onMoveUp={
+                      canReorder && index > 0
+                        ? () =>
+                            void organize(
+                              () =>
+                                personalBookmarks.reorder(
+                                  bookmark.id,
+                                  displayed[index - 1]!.id,
+                                ),
+                              'Bookmark order saved.',
+                            )
+                        : undefined
+                    }
+                    onMoveDown={
+                      canReorder && index < visible.length - 1
+                        ? () =>
+                            void organize(
+                              () =>
+                                personalBookmarks.reorder(
+                                  bookmark.id,
+                                  visible[index + 2]?.id ?? null,
+                                ),
+                              'Bookmark order saved.',
+                            )
+                        : undefined
+                    }
+                    organizingBusy={organizationBusy}
+                    selected={selected.has(bookmark.id)}
+                    onSelect={
+                      selecting ? () => toggleSelection(bookmark.id) : undefined
+                    }
+                    compact={preferences.view === 'list'}
+                    bookmark={bookmark}
+                    folder={folderMap.get(bookmark.folderId ?? '')}
+                    tags={bookmark.tags.flatMap((id) => {
+                      const tag = tagMap.get(id);
+                      return tag ? [tag] : [];
+                    })}
+                    deleting={!!deleting}
+                    onNotes={setNotesFor}
+                    onEdit={(bookmark) => setEditor({ bookmark })}
+                    onDelete={(bookmark) => void remove(bookmark)}
+                  />
+                ))}
+              </ul>
+            )}
+            {!!visible?.length && (
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <p role="status" className="text-sm text-muted-foreground">
+                  Showing {displayed?.length} of {visible.length} bookmarks
+                </p>
+                {resultLimit < visible.length && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setResultLimit((limit) => limit + 60)}
+                  >
+                    Show more bookmarks
+                  </Button>
+                )}
+              </div>
+            )}
+          </section>
+        </div>
         <p className="mt-10 text-xs text-muted-foreground">
           Saved on this device. Always your space.
         </p>

@@ -1,3 +1,4 @@
+import { openLibraryTool } from './fixtures';
 import { resolve } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { test, expect } from './fixtures';
@@ -46,9 +47,7 @@ test('verifies packaged assets and captures store previews with sample data', as
   expect(notices).toContain('Oasis third-party notices');
   expect(notices).toContain('dexie');
   await page.getByRole('link', { name: 'Library', exact: true }).click();
-  await page
-    .getByRole('button', { name: 'Backup and restore', exact: true })
-    .click();
+  await openLibraryTool(page, 'Backup and restore');
   const metadata = {
     spaceId: 'default',
     createdAt: Date.parse('2026-11-12T10:00:00Z'),

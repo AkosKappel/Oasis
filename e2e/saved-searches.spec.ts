@@ -65,7 +65,7 @@ test('saves, edits and loads dynamic searches with reload and cross-tab persiste
   ).toBeFocused();
   await search.fill('');
   await page
-    .getByRole('combobox', { name: 'Load saved search', exact: true })
+    .getByRole('combobox', { name: 'Collections', exact: true })
     .selectOption({ label: 'Reading resources' });
   await expect(search).toHaveValue('domain:reading.example');
   await expect(page.getByRole('link', { name: /Reading guide/ })).toBeVisible();
@@ -75,7 +75,7 @@ test('saves, edits and loads dynamic searches with reload and cross-tab persiste
   await search.fill('');
   await add('New reading guide', 'https://reading.example/new');
   await page
-    .getByRole('combobox', { name: 'Load saved search', exact: true })
+    .getByRole('combobox', { name: 'Collections', exact: true })
     .selectOption({ label: 'Reading resources' });
   await expect(
     page.getByRole('link', { name: /New reading guide/ }),
@@ -84,7 +84,7 @@ test('saves, edits and loads dynamic searches with reload and cross-tab persiste
   await other.goto(page.url());
   await expect(
     other
-      .getByRole('combobox', { name: 'Load saved search', exact: true })
+      .getByRole('combobox', { name: 'Collections', exact: true })
       .getByRole('option', { name: 'Reading resources' }),
   ).toHaveCount(1);
   await page
@@ -108,14 +108,15 @@ test('saves, edits and loads dynamic searches with reload and cross-tab persiste
   await manager.getByRole('button', { name: 'Done', exact: true }).click();
   await expect(
     other
-      .getByRole('combobox', { name: 'Load saved search', exact: true })
+      .getByRole('combobox', { name: 'Collections', exact: true })
       .getByRole('option', { name: 'Updated reading' }),
   ).toHaveCount(1);
   await other.close();
   await page.reload();
+  await page.getByText('Filters and collections', { exact: true }).click();
   await expect(
     page
-      .getByRole('combobox', { name: 'Load saved search', exact: true })
+      .getByRole('combobox', { name: 'Collections', exact: true })
       .getByRole('option', { name: 'Updated reading' }),
   ).toHaveCount(1);
   await page

@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { useEffect, useRef, useState } from 'react';
 import { liveQuery } from 'dexie';
 import { Button } from '@/components/ui/button';
@@ -11,8 +12,12 @@ import type { SavedSearch } from '@/database/saved-searches';
 export function SavedSearches({
   query,
   onApply,
+  hideSelect = false,
+  onRecords,
 }: {
   query: string;
+  hideSelect?: boolean;
+  onRecords?: (records: SavedSearch[]) => void;
   onApply: (query: string) => void;
 }) {
   const { savedSearches } = useSpaceRepositories();
@@ -24,6 +29,7 @@ export function SavedSearches({
     const sub = liveQuery(() => savedSearches.list()).subscribe({
       next: (value) => {
         setItems(value);
+        onRecords?.(value);
         setLoadError(undefined);
       },
       error: (cause) => {
@@ -32,10 +38,10 @@ export function SavedSearches({
       },
     });
     return () => sub.unsubscribe();
-  }, [savedSearches, retryVersion]);
+  }, [savedSearches, retryVersion, onRecords]);
   return (
     <div className="mt-4 flex flex-wrap items-end gap-3">
-      {!!items?.length && (
+      {!hideSelect && !!items?.length && (
         <label className="field w-full max-w-sm">
           Load saved search
           <select
@@ -109,8 +115,11 @@ function SavedSearchManager({
   useEffect(() => {
     dialog.current?.showModal();
     return () => {
-      if (previous instanceof HTMLElement && previous.isConnected)
+      if (previous instanceof HTMLElement && previous.isConnected) {
+        const panel = previous.closest('details');
+        if (panel) panel.open = true;
         previous.focus();
+      }
     };
   }, [previous]);
   async function run(action: () => Promise<void>) {
@@ -131,7 +140,7 @@ function SavedSearchManager({
       setBusy(false);
     }
   }
-  return (
+  return createPortal(
     <dialog
       ref={dialog}
       className="editor"
@@ -292,6 +301,7 @@ function SavedSearchManager({
           {message}
         </p>
       )}
-    </dialog>
+    </dialog>,
+    document.body,
   );
 }

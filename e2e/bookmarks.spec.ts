@@ -8,9 +8,7 @@ test('manages bookmarks in the new-tab extension', async ({
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('chrome://newtab/');
   await page.getByRole('link', { name: 'Library', exact: true }).click();
-  await expect(
-    page.getByRole('heading', { name: 'Your library' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Library' })).toBeVisible();
   await page.getByRole('button', { name: 'Add bookmark', exact: true }).click();
   await page
     .getByRole('textbox', { name: 'Title', exact: true })

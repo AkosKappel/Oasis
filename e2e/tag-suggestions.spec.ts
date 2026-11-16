@@ -1,3 +1,4 @@
+import { openLibraryTool } from './fixtures';
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from './fixtures';
 test('reviews local tag suggestions without fetching pages or saving unchosen tags', async ({
@@ -8,9 +9,7 @@ test('reviews local tag suggestions without fetching pages or saving unchosen ta
   await context.setOffline(true);
   await page.goto('chrome://newtab/');
   await page.getByRole('link', { name: 'Library', exact: true }).click();
-  await page
-    .getByRole('button', { name: 'Folders and tags', exact: true })
-    .click();
+  await openLibraryTool(page, 'Folders and tags');
   const org = page.getByRole('dialog', {
     name: 'Folders and tags',
     exact: true,

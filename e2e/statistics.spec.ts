@@ -1,3 +1,4 @@
+import { openLibraryTool } from './fixtures';
 import { test, expect } from './fixtures';
 test('shows local statistics, empty states and returns focus after dismissal', async ({
   page,
@@ -14,8 +15,11 @@ test('shows local statistics, empty states and returns focus after dismissal', a
   await page
     .getByRole('button', { name: 'Save bookmark', exact: true })
     .click();
-  const trigger = page.getByRole('button', { name: 'Statistics', exact: true });
-  await trigger.click();
+  const trigger = page.getByRole('button', {
+    name: 'More Library tools',
+    exact: true,
+  });
+  await openLibraryTool(page, 'Statistics');
   const dialog = page.getByRole('dialog', {
     name: 'Library statistics',
     exact: true,

@@ -1,3 +1,4 @@
+import { openLibraryTool } from './fixtures';
 import { test, expect } from './fixtures';
 
 test('shows links on demand with folder search, keyboard access and focus return', async ({
@@ -5,9 +6,7 @@ test('shows links on demand with folder search, keyboard access and focus return
 }) => {
   await page.goto('chrome://newtab/');
   await page.getByRole('link', { name: 'Library', exact: true }).click();
-  await page
-    .getByRole('button', { name: 'Backup and restore', exact: true })
-    .click();
+  await openLibraryTool(page, 'Backup and restore');
   const meta = { spaceId: 'default', createdAt: 1, updatedAt: 1 };
   const backup = {
     format: 'oasis',

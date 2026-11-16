@@ -1,3 +1,4 @@
+import { openLibraryTool } from './fixtures';
 import { readFile } from 'node:fs/promises';
 import { test, expect } from './fixtures';
 
@@ -6,7 +7,7 @@ test('validates, restores and downloads a portable library backup', async ({
 }) => {
   await page.goto('chrome://newtab/');
   await page.getByRole('link', { name: 'Library', exact: true }).click();
-  await page.getByRole('button', { name: 'Backup and restore' }).click();
+  await openLibraryTool(page, 'Backup and restore');
   const file = page.getByLabel('Choose a backup');
   await file.setInputFiles({
     name: 'invalid.json',

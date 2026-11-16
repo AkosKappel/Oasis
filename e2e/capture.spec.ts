@@ -1,3 +1,4 @@
+import { openLibraryTool } from './fixtures';
 import { test, expect } from './fixtures';
 
 test('captures a page into the shared library with folders and tags', async ({
@@ -6,9 +7,7 @@ test('captures a page into the shared library with folders and tags', async ({
 }, testInfo) => {
   await page.goto('chrome://newtab/');
   await page.getByRole('link', { name: 'Library', exact: true }).click();
-  await page
-    .getByRole('button', { name: 'Folders and tags', exact: true })
-    .click();
+  await openLibraryTool(page, 'Folders and tags');
   const manager = page.getByRole('dialog', { name: 'Folders and tags' });
   await manager
     .getByRole('textbox', { name: 'New folder name', exact: true })

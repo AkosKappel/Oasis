@@ -1,3 +1,4 @@
+import { openLibraryTool } from './fixtures';
 import type { Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from './fixtures';
@@ -40,7 +41,16 @@ test('core pages and dialogs have no detected WCAG A/AA violations', async ({
     'Quotes',
     'Focus mode',
   ]) {
-    await page.getByRole('button', { name, exact: true }).click();
+    if (
+      [
+        'Statistics',
+        'Folders and tags',
+        'Backup and restore',
+        'Find duplicates',
+      ].includes(name)
+    )
+      await openLibraryTool(page, name);
+    else await page.getByRole('button', { name, exact: true }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
     await scan(name);
     if (name === 'Widgets') {
@@ -79,7 +89,16 @@ test('core pages and dialogs have no detected WCAG A/AA violations', async ({
     'Backup and restore',
     'Find duplicates',
   ]) {
-    await page.getByRole('button', { name, exact: true }).click();
+    if (
+      [
+        'Statistics',
+        'Folders and tags',
+        'Backup and restore',
+        'Find duplicates',
+      ].includes(name)
+    )
+      await openLibraryTool(page, name);
+    else await page.getByRole('button', { name, exact: true }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
     await scan(name);
     await page.keyboard.press('Escape');

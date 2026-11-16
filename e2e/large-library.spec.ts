@@ -1,3 +1,4 @@
+import { openLibraryTool } from './fixtures';
 import { test, expect } from './fixtures';
 
 test('large collections render in bounded batches and remain searchable', async ({
@@ -6,9 +7,7 @@ test('large collections render in bounded batches and remain searchable', async 
   test.setTimeout(90_000);
   await page.goto('chrome://newtab/');
   await page.getByRole('link', { name: 'Library', exact: true }).click();
-  await page
-    .getByRole('button', { name: 'Backup and restore', exact: true })
-    .click();
+  await openLibraryTool(page, 'Backup and restore');
   const meta = { spaceId: 'default', createdAt: 1, updatedAt: 1 };
   const backup = {
     format: 'oasis',

@@ -1,3 +1,4 @@
+import { openLibraryTool } from './fixtures';
 import { test, expect } from './fixtures';
 test('reviews matching URLs, changes the keeper and confirms selected deletions', async ({
   page,
@@ -21,9 +22,7 @@ test('reviews matching URLs, changes the keeper and confirms selected deletions'
       .click();
     await expect(page.getByRole('dialog')).toHaveCount(0);
   }
-  await page
-    .getByRole('button', { name: 'Find duplicates', exact: true })
-    .click();
+  await openLibraryTool(page, 'Find duplicates');
   const dialog = page.getByRole('dialog', {
     name: 'Review duplicates',
     exact: true,

@@ -16,7 +16,7 @@ test('smart collections update after editing and combine with text filters', asy
     .click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   const collection = page.getByRole('combobox', {
-    name: 'Smart collection',
+    name: 'Collections',
     exact: true,
   });
   const cards = page

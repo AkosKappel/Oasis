@@ -25,9 +25,7 @@ test('navigates search results with the keyboard and restores focus', async ({
     page.getByRole('option', { name: 'Go to Library Navigation' }),
   ).toHaveAttribute('aria-selected', 'true');
   await search.press('Enter');
-  await expect(
-    page.getByRole('heading', { name: 'Your library' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Library' })).toBeVisible();
   await page.getByRole('searchbox').focus();
   await page.keyboard.press('Meta+k');
   await expect(search).toBeFocused();

@@ -1,12 +1,11 @@
+import { openLibraryTool } from './fixtures';
 import { test, expect } from './fixtures';
 test('drags bookmarks to folders and manual positions, with keyboard ordering alternatives', async ({
   page,
 }, testInfo) => {
   await page.goto('chrome://newtab/');
   await page.getByRole('link', { name: 'Library', exact: true }).click();
-  await page
-    .getByRole('button', { name: 'Folders and tags', exact: true })
-    .click();
+  await openLibraryTool(page, 'Folders and tags');
   for (const name of ['Reading', 'Archive']) {
     await page
       .getByRole('textbox', { name: 'New folder name', exact: true })

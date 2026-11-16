@@ -1,3 +1,4 @@
+import { openLibraryTool } from './fixtures';
 import { readFile } from 'node:fs/promises';
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from './fixtures';
@@ -38,9 +39,7 @@ test('exports and reviews a complete space, restoring safely into a new space', 
     .getByRole('button', { name: 'Save bookmark', exact: true })
     .click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await page
-    .getByRole('button', { name: 'Backup and restore', exact: true })
-    .click();
+  await openLibraryTool(page, 'Backup and restore');
   const backup = page.getByRole('dialog', {
     name: 'Backup and restore',
     exact: true,

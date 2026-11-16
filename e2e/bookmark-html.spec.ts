@@ -1,3 +1,4 @@
+import { openLibraryTool } from './fixtures';
 import { readFile } from 'node:fs/promises';
 import { test, expect } from './fixtures';
 
@@ -36,9 +37,7 @@ test('imports inert browser HTML, preserves paths and round trips an escaped exp
   });
   await page.goto('chrome://newtab/');
   await page.getByRole('link', { name: 'Library', exact: true }).click();
-  await page
-    .getByRole('button', { name: 'Backup and restore', exact: true })
-    .click();
+  await openLibraryTool(page, 'Backup and restore');
   const file = page.getByLabel('Choose bookmark HTML', { exact: true });
   await file.setInputFiles({
     name: 'bookmarks.html',
@@ -87,7 +86,7 @@ test('imports inert browser HTML, preserves paths and round trips an escaped exp
   );
   await page.getByRole('button', { name: 'Close', exact: true }).click();
   await expect(
-    page.getByRole('button', { name: 'Backup and restore', exact: true }),
+    page.getByRole('button', { name: 'More Library tools', exact: true }),
   ).toBeFocused();
   const folder = page.getByRole('combobox', {
     name: 'Filter by folder',
@@ -111,9 +110,7 @@ test('rejects files without a bookmark list and invalid folder structures before
 }) => {
   await page.goto('chrome://newtab/');
   await page.getByRole('link', { name: 'Library', exact: true }).click();
-  await page
-    .getByRole('button', { name: 'Backup and restore', exact: true })
-    .click();
+  await openLibraryTool(page, 'Backup and restore');
   const file = page.getByLabel('Choose bookmark HTML', { exact: true });
   await file.setInputFiles({
     name: 'invalid.html',

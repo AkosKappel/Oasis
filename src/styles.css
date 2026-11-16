@@ -294,3 +294,7 @@ select option {
     transition: none;
   }
 }
+
+[aria-label='Library navigation'] .grid {
+  grid-template-columns: minmax(0, 1fr);
+}

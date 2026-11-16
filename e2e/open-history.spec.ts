@@ -29,12 +29,13 @@ test('open counting requires opt-in, populates smart collections and clears on r
   await link.click();
   await (await popupPromise).close();
   const collection = page.getByRole('combobox', {
-    name: 'Smart collection',
+    name: 'Collections',
     exact: true,
   });
   await collection.selectOption('recently-opened');
   await expect(link).toHaveCount(0);
   await collection.selectOption('all');
+  await page.getByText('Open counting', { exact: true }).click();
   await page
     .getByRole('checkbox', {
       name: 'Count bookmark opens in Oasis',
@@ -56,6 +57,7 @@ test('open counting requires opt-in, populates smart collections and clears on r
   await collection.selectOption('frequently-opened');
   await expect(link).toBeVisible();
   await page.reload();
+  await page.getByText('Open counting', { exact: true }).click();
   await expect(
     page.getByRole('checkbox', {
       name: 'Count bookmark opens in Oasis',

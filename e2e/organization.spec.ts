@@ -1,3 +1,4 @@
+import { openLibraryTool, openLibraryFilters } from './fixtures';
 import { test, expect } from './fixtures';
 
 test('organizes bookmarks with folders and tags without losing them on deletion', async ({
@@ -8,9 +9,7 @@ test('organizes bookmarks with folders and tags without losing them on deletion'
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('chrome://newtab/');
   await page.getByRole('link', { name: 'Library', exact: true }).click();
-  await page
-    .getByRole('button', { name: 'Folders and tags', exact: true })
-    .click();
+  await openLibraryTool(page, 'Folders and tags');
   const manager = page.getByRole('dialog', { name: 'Folders and tags' });
   await manager
     .getByRole('textbox', { name: 'New folder name', exact: true })
@@ -96,6 +95,7 @@ test('organizes bookmarks with folders and tags without losing them on deletion'
   await expect(bookmark.getByText('Design', { exact: true })).toBeVisible();
   await expect(bookmark.getByText('Learning', { exact: true })).toBeVisible();
   await page.reload();
+  await openLibraryFilters(page);
   await expect(bookmark).toBeVisible();
   const folderFilter = page.getByRole('combobox', {
     name: 'Filter by folder',
@@ -123,9 +123,7 @@ test('organizes bookmarks with folders and tags without losing them on deletion'
   await search.fill('Learning');
   await expect(bookmark).toBeVisible();
   await search.fill('');
-  await page
-    .getByRole('button', { name: 'Folders and tags', exact: true })
-    .click();
+  await openLibraryTool(page, 'Folders and tags');
   await manager.getByRole('button', { name: 'Edit folder Reading' }).click();
   await manager
     .getByRole('textbox', { name: 'Rename folder', exact: true })
@@ -144,9 +142,7 @@ test('organizes bookmarks with folders and tags without losing them on deletion'
   await expect(
     secondTab.getByRole('link', { name: /Useful reference/ }),
   ).toBeVisible();
-  await page
-    .getByRole('button', { name: 'Folders and tags', exact: true })
-    .click();
+  await openLibraryTool(page, 'Folders and tags');
   page.once('dialog', (dialog) => dialog.dismiss());
   await manager
     .getByRole('button', { name: 'Delete folder Resources' })

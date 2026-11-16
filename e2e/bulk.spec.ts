@@ -1,12 +1,11 @@
+import { openLibraryTool } from './fixtures';
 import { test, expect } from './fixtures';
 test('bulk moves/tags/deletes visible bookmarks and clears selection after filters change', async ({
   page,
 }) => {
   await page.goto('chrome://newtab/');
   await page.getByRole('link', { name: 'Library', exact: true }).click();
-  await page
-    .getByRole('button', { name: 'Backup and restore', exact: true })
-    .click();
+  await openLibraryTool(page, 'Backup and restore');
   const meta = { spaceId: 'default', createdAt: 1, updatedAt: 1 };
   const backup = {
     format: 'oasis',

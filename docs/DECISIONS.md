@@ -321,3 +321,7 @@ Use a shared 64 MiB bound for bookmark import and serialized export. Validate th
 ## 2026-11-16: Restore complete archives into a new space
 
 Choose a reviewed, atomic new-space restore rather than destructive replacement or ambiguous settings merges. Normalize every table through bounded validators and remap IDs by table. Preserve user content, layout and preferences while requiring fresh enablement for weather/counting and explicit timer resume. This keeps recovery reversible and prevents imports from overwriting unrelated content or silently activating requests.
+
+## 2026-11-16: Results-first Library
+
+Keep everyday search, view and sorting near the results. Group built-in and saved collections in one selector, place organization filters in a desktop sidebar and collapse them on narrow screens. Move maintenance actions under More and collapse explanatory text. Remove marketing copy from the working Library. Native popovers preserve keyboard dismissal and return focus to their trigger before opening tools.

@@ -173,3 +173,7 @@ Task dialogs opened from Home are owned by Home rather than the preview card, so
 `space-backup.ts` exports a versioned active-space graph across content, media and settings tables. Existing graph/field validators normalize the archive before download or restore; both directions enforce a 64 MiB file bound. Restore always creates a new space in one transaction, remapping IDs and relationships, including task parents, personal media, quote collections and content preferences. Existing spaces are untouched. Quota or validation failure rolls back the new space and every imported record. Built-in image references stay stable.
 
 Runtime behavior restores safely: weather and open counting are off, focus timers are paused/ended using remaining time at export, and request leases are omitted. Active content is included; deleted records are excluded. Portable bookmark, album and quote archives remain separate options.
+
+### Library navigation
+
+Library uses a compact working header and a results column beside collections and organization filters on desktop. The same panel collapses on narrow screens. Built-in and saved queries share one collection selector. Maintenance actions use a native More popover; tool dialogs return focus to its visible trigger. Saved-search dialogs are portaled outside the collapsible panel and reopen it when returning focus. Search guidance and counting controls are secondary disclosures pending the unified Settings entry.

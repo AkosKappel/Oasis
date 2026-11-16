@@ -1,3 +1,4 @@
+import { openLibraryTool } from './fixtures';
 import { test, expect } from './fixtures';
 
 test('creates and moves subfolders, filters descendants and protects parent deletion', async ({
@@ -5,11 +6,7 @@ test('creates and moves subfolders, filters descendants and protects parent dele
 }) => {
   await page.goto('chrome://newtab/');
   await page.getByRole('link', { name: 'Library', exact: true }).click();
-  const manage = page.getByRole('button', {
-    name: 'Folders and tags',
-    exact: true,
-  });
-  await manage.click();
+  await openLibraryTool(page, 'Folders and tags');
   const manager = page.getByRole('dialog', { name: 'Folders and tags' });
   for (const name of ['Reading', 'Work']) {
     await manager
@@ -61,7 +58,7 @@ test('creates and moves subfolders, filters descendants and protects parent dele
   await expect(
     page.getByRole('link', { name: /Nested resource/ }),
   ).toBeVisible();
-  await manage.click();
+  await openLibraryTool(page, 'Folders and tags');
   await manager
     .getByRole('button', {
       name: 'Edit folder Reading / Articles',
