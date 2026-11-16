@@ -181,3 +181,5 @@ Library uses a compact working header and a results column beside collections an
 The Settings shell owns modal focus and navigation. Feature managers accept an embedded mode; their writes expose `aria-busy` so the shell blocks navigation and dismissal until completion. General exposes clock/date/search preferences. Privacy owns optional bookmark-open counting.
 
 Schema 22 adds optional deletion-batch metadata. The scoped Trash repository restores records transactionally, validates ownership and capacity, and restores task-list cascades only for a matching batch. The Undo provider lasts ten seconds and clears on a space switch. Settings → Backup and restore contains persistent Trash.
+
+Schema 23 adds `Space.setupComplete`. Its migration marks existing spaces complete; fresh profiles offer a skippable setup after preferences load. The onboarding repository commits choices and completion atomically. Browser fixtures dismiss setup through its UI except in dedicated first-run tests.

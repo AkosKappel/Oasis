@@ -381,7 +381,10 @@ it('upgrades v8 without replacing appearance or existing records', async () => {
   legacy.close();
   await database.open();
   expect(await database.preferences.get(preference.id)).toEqual(preference);
-  expect(await database.spaces.get('default')).toEqual(space);
+  expect(await database.spaces.get('default')).toEqual({
+    ...space,
+    setupComplete: true,
+  });
   expect(await database.dailyFocus.count()).toBe(0);
 });
 

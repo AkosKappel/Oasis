@@ -333,3 +333,7 @@ Home keeps one Settings icon and Focus mode. A shared dialog groups General, App
 ## 2026-11-16: Recover routine removals
 
 Bookmarks, widgets, notes and tasks move to local Trash with a short Undo action. Space deletion still requires confirmation. Trash remains until browser data is cleared and is excluded from exports. Schema 22 adds optional deletion-batch metadata so restoring a task list revives only tasks removed with it. Older list tombstones restore the list alone, with tasks available separately. Restored bookmarks use only still-active folders and tags.
+
+## 2026-11-16: Skippable first-run setup
+
+Only new profiles see a brief clock/theme/import setup. Skip and Escape finish setup with existing defaults. Schema 23 marks existing spaces as configured, so upgrades keep opening directly to Home. Completion and chosen preferences save in one transaction. No persistent setup banner is added.

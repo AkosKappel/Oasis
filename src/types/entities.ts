@@ -6,6 +6,7 @@ export interface RecordMetadata {
   deletionBatch?: string;
 }
 export interface Space extends RecordMetadata {
+  setupComplete?: boolean;
   name: string;
   icon?: string;
   color?: string;

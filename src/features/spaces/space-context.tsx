@@ -1,3 +1,4 @@
+import { createOnboardingRepository } from '@/database/onboarding';
 import { createTrashRepository } from '@/database/trash';
 import { createSpaceBackupRepository } from '@/database/space-backup';
 import { createWidgetTaskRepository } from '@/database/widget-tasks';
@@ -109,6 +110,7 @@ export function useSpaceRepositories() {
   const { spaceId } = useSpace();
   return useMemo(
     () => ({
+      onboarding: createOnboardingRepository(spaceId),
       trash: createTrashRepository(spaceId),
       spaceBackup: createSpaceBackupRepository(spaceId),
       widgetTasks: createWidgetTaskRepository(spaceId),

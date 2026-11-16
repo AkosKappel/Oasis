@@ -16,12 +16,14 @@ import {
 export function useAppearance(preview?: Appearance) {
   const { personalAppearance } = useSpaceRepositories();
   const { retryVersion } = useStorageHealth();
+  const [ready, setReady] = useState(false);
   const [appearance, setAppearance] = useState(defaultAppearance);
   const [error, setError] = useState<string>();
   useEffect(() => {
     const subscription = liveQuery(() => personalAppearance.get()).subscribe({
       next: (value) => {
         setAppearance(value);
+        setReady(true);
         setError(undefined);
       },
       error: (cause) => {
@@ -50,5 +52,5 @@ export function useAppearance(preview?: Appearance) {
     },
     [personalAppearance],
   );
-  return { appearance, error, saveAppearance };
+  return { appearance, error, saveAppearance, ready };
 }

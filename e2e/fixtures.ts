@@ -2,8 +2,9 @@ import type { Page } from '@playwright/test';
 import { test as base, expect } from '@playwright/test';
 import { resolve } from 'node:path';
 
-export const test = base.extend({
-  context: async ({ playwright }, provideContext) => {
+export const test = base.extend<{ skipSetup: boolean }>({
+  skipSetup: [true, { option: true }],
+  context: async ({ playwright, skipSetup }, provideContext) => {
     const extensionPath = resolve(
       process.env.OASIS_EXTENSION_PATH ?? '.output/chrome-mv3',
     );
@@ -16,6 +17,19 @@ export const test = base.extend({
       ],
     });
     try {
+      if (skipSetup) {
+        const warmup = await context.newPage();
+        await warmup.goto('chrome://newtab/');
+        const welcome = warmup.getByRole('dialog', {
+          name: 'Welcome to Oasis',
+        });
+        await welcome.waitFor({ state: 'visible' });
+        await welcome
+          .getByRole('button', { name: 'Skip setup', exact: true })
+          .click();
+        await expect(welcome).toHaveCount(0);
+        await warmup.close();
+      }
       await provideContext(context);
     } finally {
       await context.close();

@@ -1,3 +1,8 @@
+import { Onboarding } from '@/features/settings/onboarding';
+import {
+  useSpace,
+  useSpaceRepositories,
+} from '@/features/spaces/space-context';
 import { UndoProvider } from '@/features/settings/undo';
 import { Settings, type SettingsPage } from '@/features/settings/settings';
 import { SpaceProvider } from '@/features/spaces/space-context';
@@ -21,12 +26,16 @@ export function App() {
 }
 
 function AppContent() {
+  const { spaceId, list } = useSpace();
+  const { onboarding } = useSpaceRepositories();
   const [preview, setPreview] = useState<Appearance>();
   const {
     appearance,
+    ready: appearanceReady,
     error: appearanceError,
     saveAppearance,
   } = useAppearance(preview);
+  const [setupDismissed, setSetupDismissed] = useState(false);
   const [settingsPage, setSettingsPage] = useState<SettingsPage>();
   const [focusOpen, setFocusOpen] = useState(false);
   const [route, setRoute] = useState(() => window.location.hash);
@@ -81,6 +90,27 @@ function AppContent() {
           }}
         />
       )}
+      {appearanceReady &&
+        !setupDismissed &&
+        spaceId === 'default' &&
+        !list.find((space) => space.id === spaceId)?.setupComplete && (
+          <Onboarding
+            appearance={appearance}
+            onFinish={async (value, importBookmarks) => {
+              await onboarding.finish(value);
+              setSetupDismissed(true);
+              if (importBookmarks) setSettingsPage('data');
+              else
+                requestAnimationFrame(() =>
+                  document
+                    .querySelector<HTMLButtonElement>(
+                      'button[aria-label="Settings"]',
+                    )
+                    ?.focus(),
+                );
+            }}
+          />
+        )}
       {appearanceError && (
         <p
           role="alert"
