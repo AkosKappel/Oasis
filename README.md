@@ -47,4 +47,4 @@ Saved data stays on the device in IndexedDB; there is no backend, account or ana
 - [Release preparation and remaining owner checks](docs/RELEASE.md)
 - [Browser support and testing](docs/BROWSERS.md)
 
-Licensed under [MIT](LICENSE). Public repository and extension-store publication are prepared separately; no release is published by the development workflow.
+Licensed under [MIT](LICENSE). [Source](https://github.com/AkosKappel/Oasis) and [support](https://github.com/AkosKappel/Oasis/issues) are public. Extension-store publication is separate; the development workflow does not publish a release.

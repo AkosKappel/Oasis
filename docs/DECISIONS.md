@@ -357,3 +357,7 @@ All targets explicitly use MV3 so Firefox does not default to MV2 while Oasis us
 ## 2026-11-16: Separate engine UI checks from extension integration
 
 Shared UI runs from the production dashboard build over loopback in Chromium, Firefox and WebKit. A test-only API boundary denies extension permission requests; it does not emulate grants or native installation. This checks real engine layout, DOM, focus and IndexedDB behavior without pretending Playwright can load Firefox/WebKit extensions. The separate Chromium extension suite retains responsibility for extension integration. CI installs engine libraries; the local server is managed by Playwright and never publishes the app.
+
+## 2026-11-16: Public project documentation uses the repository
+
+The owner-authorized push publishes the prepared MIT source to the public repository. Use its readable privacy document and issue tracker as project links for store-form review. A separate hosted website is optional, so no new hosting service or deployment is introduced. Store settings, native release verification and submission remain separate owner actions.

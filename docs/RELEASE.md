@@ -54,8 +54,8 @@ Record versions and dates when completing the table. Existing automated migratio
 
 ## Owner steps
 
-1. Create/select the public repository and remote, push manually, and inspect every CI job. No remote is configured locally.
-2. Host the privacy policy and choose a support URL. Set publisher/contact details in the store accounts.
+1. Push approved commits to the public repository and inspect every CI job. Configure required checks after the first complete matrix run.
+2. Review the public policy/support links below and set them, together with publisher/contact details, in the store accounts.
 3. Complete the interactive browser/OS checks above and the screen-reader pass in ACCESSIBILITY.md.
 4. Review the listing, screenshots, MIT license and third-party/artwork notices. Keep the release free and non-commercial if using the current Open-Meteo endpoint; revisit provider terms before monetization.
 5. Upload the verified archive to the Chrome Web Store and Microsoft Edge Add-ons, fill in privacy/permission fields, and submit for review when ready.
@@ -70,3 +70,11 @@ Checked 2026-11-15. Store requirements can change; the dashboards are authoritat
 - [Open-Meteo terms](https://open-meteo.com/en/terms): free endpoint is limited to non-commercial use and requires attribution.
 
 Browser commitments, CI coverage and promotion gates are tracked in [Browser support](BROWSERS.md). CI artifacts are verification outputs, not published releases.
+
+## Public project links
+
+- [Source repository](https://github.com/AkosKappel/Oasis)
+- [Support and bug reports](https://github.com/AkosKappel/Oasis/issues)
+- [Privacy policy](https://github.com/AkosKappel/Oasis/blob/main/PRIVACY.md)
+
+The repository and issue tracker are public. These links are available for owner review in store forms; they do not imply store approval or publication. A separate website is optional.
