@@ -18,7 +18,8 @@
     "assets:icons": "node scripts/export-icons.mjs",
     "assets:notices": "node scripts/third-party-notices.mjs",
     "build:firefox": "wxt build -b firefox --mv3",
-    "zip:firefox": "wxt zip -b firefox --mv3"
+    "zip:firefox": "wxt zip -b firefox --mv3",
+    "test:ui": "playwright test --config playwright.ui.config.ts"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.5.0",

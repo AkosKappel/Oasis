@@ -353,3 +353,7 @@ Chrome and Edge are primary desktop targets; Firefox starts experimental, other 
 ## 2026-11-16: Firefox starts as an experimental MV3 target
 
 All targets explicitly use MV3 so Firefox does not default to MV2 while Oasis uses optional scripting. Firefox gets a stable UUID and candidate minimum version 140; Chromium manifests retain their permissions and service worker. Firefox package checks assert background scripts separately. Experimental packaging disables automatic source archives to avoid distributing local project material. Native flows and Mozilla consent/signing review gate supported distribution. Optional online features mean that no-backend does not justify a no-transmission declaration.
+
+## 2026-11-16: Separate engine UI checks from extension integration
+
+Shared UI runs from the production dashboard build over loopback in Chromium, Firefox and WebKit. A test-only API boundary denies extension permission requests; it does not emulate grants or native installation. This checks real engine layout, DOM, focus and IndexedDB behavior without pretending Playwright can load Firefox/WebKit extensions. The separate Chromium extension suite retains responsibility for extension integration. CI installs engine libraries; the local server is managed by Playwright and never publishes the app.

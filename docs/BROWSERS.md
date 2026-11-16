@@ -5,7 +5,7 @@ Oasis is a desktop extension. A narrow viewport test does not establish mobile e
 | Browser                          | Release policy                 | Verification                                                             |
 | -------------------------------- | ------------------------------ | ------------------------------------------------------------------------ |
 | Chrome and Edge desktop          | Primary targets, latest stable | Built packages tested in bundled Chromium; native release checks pending |
-| Firefox desktop                  | Experimental MV3, Firefox 140+ | Package audit only; native verification pending                          |
+| Firefox desktop                  | Experimental MV3, Firefox 140+ | Package and shared UI checks; native integration pending                 |
 | Brave, Vivaldi and Opera desktop | Best effort                    | No browser-specific certification                                        |
 | Safari                           | Deferred                       | No Safari extension package or native checks                             |
 | Mobile browsers                  | Deferred                       | Responsive UI only                                                       |
@@ -52,3 +52,17 @@ Experimental packaging omits automatic source archives. Prepare a separately rev
 The Firefox archive is **not AMO-ready**. Review Mozilla's transmission declaration and consent requirements for optional weather, web search and page-image requests before submission. Do not declare `none` solely because Oasis has no backend or telemetry. Accurate metadata, signing and native verification remain release gates.
 
 Sources reviewed 2026-11-16: [WXT targeting](https://wxt.dev/guide/essentials/target-different-browsers.html), [Gecko identity](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/browser_specific_settings), [Mozilla data consent](https://extensionworkshop.com/documentation/develop/firefox-builtin-data-consent/).
+
+## Shared UI engine checks
+
+A separate suite serves the built dashboard on loopback and runs in Chromium, Firefox and WebKit. It covers onboarding, dialogs/popovers, Library CRUD, IndexedDB reload persistence, narrow layouts, keyboard focus, axe checks, note editing and task navigation. Engine versions are recorded in test annotations. Extension permission calls are denied by an injected test-only boundary; production code has no test mode. These are page/engine tests, not Firefox/Safari extension installation or permission results.
+
+```sh
+pnpm build
+pnpm exec playwright install chromium firefox webkit
+pnpm test:ui --project=firefox --workers=1
+```
+
+Playwright starts and stops the loopback fixture server. The server exposes only the built extension directory and rejects path traversal. CI installs each engine's Linux dependencies and retains failures/reports. On a host missing WebKit's GTK/media libraries, use its CI job rather than claiming a local pass. Safari remains deferred despite WebKit page coverage.
+
+Local verification, 2026-11-16: shared UI flows pass in Chromium and Firefox. WebKit is configured as an enabled CI test job, but local execution requires GTK/media libraries not installed on this host. No native Firefox extension or Safari support is inferred from the page tests. The full hosted CI/OS matrix still needs an owner push and review of every job.

@@ -90,3 +90,31 @@ jobs:
           retention-days: 14
           include-hidden-files: true
           path: .output/*-firefox.zip
+
+  shared-ui:
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps ${{ matrix.engine }}
+      - run: pnpm test:ui --project=${{ matrix.engine }} --workers=1
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: shared-ui-${{ matrix.engine }}
+          retention-days: 14
+          path: |
+            test-results/ui/
+            playwright-report/ui/
