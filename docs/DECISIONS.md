@@ -317,3 +317,7 @@ Use separate task records under optional widgets rather than arrays inside widge
 ## 2026-11-16: Symmetric bookmark backup limits
 
 Use a shared 64 MiB bound for bookmark import and serialized export. Validate the exported bytes before starting a download so Oasis never knowingly emits a bookmark backup its own file reader rejects. The larger bound accommodates ordinary large libraries with notes; complete-space backups are a separate format. Label the existing format as a bookmark backup.
+
+## 2026-11-16: Restore complete archives into a new space
+
+Choose a reviewed, atomic new-space restore rather than destructive replacement or ambiguous settings merges. Normalize every table through bounded validators and remap IDs by table. Preserve user content, layout and preferences while requiring fresh enablement for weather/counting and explicit timer resume. This keeps recovery reversible and prevents imports from overwriting unrelated content or silently activating requests.

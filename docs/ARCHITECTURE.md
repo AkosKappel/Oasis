@@ -167,3 +167,9 @@ Dexie v21 adds `widgetTasks` indexed by space and `(spaceId, widgetId)`. Task li
 The Widgets manager and enabled Home previews open a native task dialog. Home shows at most five tasks per list; completion syncs through live queries. Export writes a plain-text checklist. Tasks stay outside bookmark backups. No reminders, background schedule, service or permission is added.
 
 Task dialogs opened from Home are owned by Home rather than the preview card, so a focus-session or layout change cannot discard their drafts. Completion updates optimistically until the live query observes the committed revision and rolls back on a failed write. Clearing completed tasks preserves unrelated draft text. Nested dialogs isolate their close events and restore focus to their own trigger.
+
+### Complete space archives
+
+`space-backup.ts` exports a versioned active-space graph across content, media and settings tables. Existing graph/field validators normalize the archive before download or restore; both directions enforce a 64 MiB file bound. Restore always creates a new space in one transaction, remapping IDs and relationships, including task parents, personal media, quote collections and content preferences. Existing spaces are untouched. Quota or validation failure rolls back the new space and every imported record. Built-in image references stay stable.
+
+Runtime behavior restores safely: weather and open counting are off, focus timers are paused/ended using remaining time at export, and request leases are omitted. Active content is included; deleted records are excluded. Portable bookmark, album and quote archives remain separate options.

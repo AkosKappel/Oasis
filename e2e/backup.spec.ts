@@ -68,9 +68,11 @@ test('validates, restores and downloads a portable library backup', async ({
     page.getByText('Ready: 1 bookmarks, 1 folders, 1 tags.'),
   ).toBeVisible();
   await page.getByRole('button', { name: 'Restore backup' }).click();
-  await expect(page.getByRole('status')).toHaveText(
-    'Restore complete. Added 3 items; kept 0 existing items.',
-  );
+  await expect(
+    page
+      .getByRole('dialog', { name: 'Backup and restore', exact: true })
+      .getByRole('status'),
+  ).toHaveText('Restore complete. Added 3 items; kept 0 existing items.');
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download backup' }).click();
   const download = await downloadPromise;

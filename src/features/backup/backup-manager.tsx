@@ -1,3 +1,9 @@
+import { useSpace } from '@/features/spaces/space-context';
+import {
+  parseSpaceBackup,
+  serializeSpaceBackup,
+  type SpaceBackup,
+} from '@/database/space-backup';
 import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { reportStorageError } from '@/database/storage-health';
 import { useEffect, useRef, useState } from 'react';
@@ -20,7 +26,12 @@ function downloadFile(content: string, type: string, name: string) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 export function BackupManager({ onClose }: { onClose: () => void }) {
-  const { personalBackup, personalBookmarkHtml } = useSpaceRepositories();
+  const { spaceBackup, personalBackup, personalBookmarkHtml } =
+    useSpaceRepositories();
+  const { list, select } = useSpace();
+  const [complete, setComplete] = useState<SpaceBackup>();
+  const [restored, setRestored] = useState<string>();
+  const [restoreName, setRestoreName] = useState('');
   const dialog = useRef<HTMLDialogElement>(null);
   const previousFocus = useRef(document.activeElement);
   const [backup, setBackup] = useState<Backup>();
@@ -68,6 +79,107 @@ export function BackupManager({ onClose }: { onClose: () => void }) {
       <h2 id="backup-title" className="text-2xl font-semibold">
         Backup and restore
       </h2>
+      <section
+        aria-label="Complete space backup"
+        className="mt-5 flex flex-col gap-4 border-b border-border pb-6"
+      >
+        <h3 className="text-lg font-medium">Complete space backup</h3>
+        <p className="text-sm text-muted-foreground">
+          Keep active Library content, personal images, quotes, notes, tasks,
+          saved searches, feedback and settings together. Restore creates a new
+          space and leaves existing data unchanged. Weather and counting restore
+          off; running focus timers restore paused.
+        </p>
+        <Button
+          disabled={busy}
+          onClick={() =>
+            void run(async () => {
+              downloadFile(
+                serializeSpaceBackup(await spaceBackup.export()),
+                'application/json',
+                `oasis-space-${date()}.json`,
+              );
+              setMessage(
+                'Complete space backup downloaded. Keep it somewhere safe.',
+              );
+            })
+          }
+        >
+          Download complete space
+        </Button>
+        <label className="field">
+          Choose a complete space backup
+          <input
+            type="file"
+            accept=".json,application/json"
+            disabled={busy}
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              setComplete(undefined);
+              setRestored(undefined);
+              if (file)
+                void run(async () => {
+                  if (file.size > MAX_BACKUP_BYTES)
+                    throw new Error(
+                      'Choose a complete space backup no larger than 64 MB.',
+                    );
+                  const archive = parseSpaceBackup(await file.text());
+                  setComplete(archive);
+                  setRestoreName(`${archive.space.name.slice(0, 31)} restored`);
+                });
+            }}
+          />
+        </label>
+        {complete && (
+          <form
+            className="flex flex-col gap-3"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void run(async () => {
+                const id = await spaceBackup.restore(complete, restoreName);
+                setRestored(id);
+                setComplete(undefined);
+                setMessage(
+                  'Complete space restored. Existing spaces are unchanged.',
+                );
+              });
+            }}
+          >
+            <p className="text-sm">
+              Review: {complete.tables.bookmarks.length} bookmarks,{' '}
+              {complete.tables.albumImages.length} personal images,{' '}
+              {complete.tables.quotes.length} quotes,{' '}
+              {
+                complete.tables.homeWidgets.filter((row) => row.kind === 'note')
+                  .length
+              }{' '}
+              notes, {complete.tables.widgetTasks.length} tasks and{' '}
+              {complete.tables.savedSearches.length} saved searches, plus
+              settings and content preferences.
+            </p>
+            <label className="field">
+              Restored space name
+              <input
+                required
+                maxLength={40}
+                disabled={busy}
+                value={restoreName}
+                onChange={(event) => setRestoreName(event.target.value)}
+              />
+            </label>
+            <Button disabled={busy}>Restore as new space</Button>
+          </form>
+        )}
+        {restored && (
+          <Button
+            variant="outline"
+            disabled={!list.some((space) => space.id === restored)}
+            onClick={() => select(restored)}
+          >
+            Open restored space
+          </Button>
+        )}
+      </section>
       <section
         aria-label="Oasis JSON backup"
         className="mt-5 flex flex-col gap-4"
