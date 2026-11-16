@@ -37,6 +37,10 @@ export function Settings({
   onSave: (value: Appearance) => Promise<void>;
   onClose: () => void;
 }) {
+  const [taskPanel, setTaskPanel] = useState<{
+    title: string;
+    back: () => void;
+  }>();
   const [page, setPage] = useState(initialPage);
   const ref = useRef<HTMLDialogElement>(null);
   const previous = useRef(document.activeElement);
@@ -64,6 +68,7 @@ export function Settings({
   function navigate(value: SettingsPage) {
     if (busy) return;
     onPreview(undefined);
+    setTaskPanel(undefined);
     setPage(value);
   }
   function close() {
@@ -73,11 +78,13 @@ export function Settings({
     <dialog
       ref={ref}
       className="editor !max-w-5xl"
-      aria-label={pages[page]}
+      aria-label={taskPanel?.title ?? pages[page]}
       onClose={onClose}
       onCancel={(event) => {
         event.preventDefault();
-        close();
+        if (ref.current?.querySelector('[aria-busy="true"]')) return;
+        if (taskPanel) taskPanel.back();
+        else close();
       }}
     >
       <div className="mb-6 flex items-center justify-between gap-4">
@@ -135,7 +142,13 @@ export function Settings({
           {page === 'feedback' && (
             <ContentPreferences embedded onClose={onClose} />
           )}
-          {page === 'widgets' && <WidgetManager embedded onClose={onClose} />}
+          {page === 'widgets' && (
+            <WidgetManager
+              embedded
+              onTaskPanelChange={setTaskPanel}
+              onClose={onClose}
+            />
+          )}
           {page === 'privacy' && <Privacy />}
           {page === 'data' && (
             <>

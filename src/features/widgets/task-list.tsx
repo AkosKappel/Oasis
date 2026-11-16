@@ -150,9 +150,11 @@ export function TaskListPreview({
   );
 }
 export function TaskListDialog({
+  embedded = false,
   widget,
   onClose,
 }: {
+  embedded?: boolean;
   widget: HomeWidget;
   onClose: () => void;
 }) {
@@ -169,12 +171,16 @@ export function TaskListDialog({
     [error, setError] = useState<string>(),
     [message, setMessage] = useState<string>();
   useEffect(() => {
+    if (embedded) {
+      input.current?.focus();
+      return;
+    }
     ref.current?.showModal();
     return () => {
       if (previous instanceof HTMLElement && previous.isConnected)
         previous.focus();
     };
-  }, [previous]);
+  }, [embedded, previous]);
   useEffect(() => {
     if (!busy && focusInput.current) {
       input.current?.focus();
@@ -221,10 +227,12 @@ export function TaskListDialog({
       setBusy(false);
     }
   }
-  return createPortal(
-    <dialog
-      ref={ref}
-      className="editor"
+  const Container = embedded ? 'section' : 'dialog';
+  const content = (
+    <Container
+      ref={embedded ? undefined : ref}
+      aria-busy={busy}
+      className={embedded ? undefined : 'editor'}
       aria-labelledby="task-list-title"
       onClose={(event) => {
         event.stopPropagation();
@@ -403,7 +411,7 @@ export function TaskListDialog({
         </p>
       )}
       <UndoNotice />
-    </dialog>,
-    document.body,
+    </Container>
   );
+  return embedded ? content : createPortal(content, document.body);
 }

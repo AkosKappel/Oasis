@@ -1,3 +1,4 @@
+import { Pencil } from 'lucide-react';
 import { TaskListPreview } from './task-list';
 import { countdownText, type HomeWidget } from '@/database/home-widgets';
 import { useHomeWidgets } from './use-home-widgets';
@@ -6,9 +7,11 @@ export function HomeWidgets({
   now,
   clock,
   onManageTasks,
+  onEditNote,
 }: {
   now: Date;
   clock: Appearance['clock'];
+  onEditNote: (widget: Extract<HomeWidget, { kind: 'note' }>) => void;
   onManageTasks: (widget: HomeWidget) => void;
 }) {
   const { widgets, error } = useHomeWidgets();
@@ -23,7 +26,7 @@ export function HomeWidgets({
         <article
           key={widget.id}
           aria-label={widget.label}
-          className="min-w-0 max-w-full rounded-lg border border-current/20 bg-surface/20 px-4 py-3"
+          className="group min-w-0 max-w-full rounded-lg border border-current/20 bg-surface/20 px-4 py-3"
         >
           <h2 className="break-words text-xs text-muted-foreground">
             {widget.label}
@@ -31,9 +34,20 @@ export function HomeWidgets({
           {widget.kind === 'tasks' ? (
             <TaskListPreview widget={widget} onManage={onManageTasks} />
           ) : widget.kind === 'note' ? (
-            <p className="mt-2 max-w-sm whitespace-pre-wrap break-words text-left text-sm line-clamp-6">
-              {widget.text.trim() ? widget.text : 'Your note is empty.'}
-            </p>
+            <div className="relative">
+              <button
+                type="button"
+                aria-label={`Edit note ${widget.label}`}
+                title="Edit note"
+                className="float-right ml-2 rounded p-1 opacity-0 group-hover:opacity-100 focus:opacity-100 [@media(hover:none)]:opacity-100"
+                onClick={() => onEditNote(widget)}
+              >
+                <Pencil className="size-3.5" aria-hidden="true" />
+              </button>
+              <p className="mt-2 max-w-sm whitespace-pre-wrap break-words text-left text-sm line-clamp-6">
+                {widget.text.trim() ? widget.text : 'Your note is empty.'}
+              </p>
+            </div>
           ) : widget.kind === 'clock' ? (
             <>
               <p className="mt-1 text-xl tabular-nums">

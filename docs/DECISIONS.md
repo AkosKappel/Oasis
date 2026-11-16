@@ -337,3 +337,7 @@ Bookmarks, widgets, notes and tasks move to local Trash with a short Undo action
 ## 2026-11-16: Skippable first-run setup
 
 Only new profiles see a brief clock/theme/import setup. Skip and Escape finish setup with existing defaults. Schema 23 marks existing spaces as configured, so upgrades keep opening directly to Home. Completion and chosen preferences save in one transaction. No persistent setup banner is added.
+
+## 2026-11-16: Separate daily editing from widget setup
+
+Home notes have a small hover/focus edit action with an explicit Save and revision check. A conflict keeps the draft. Task contents replace the Widgets panel inside Settings instead of stacking a second modal. Done and Escape return to Widgets and restore focus to the list action. Home task editing remains an independent dialog so layout changes preserve its draft.

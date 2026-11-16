@@ -183,3 +183,5 @@ The Settings shell owns modal focus and navigation. Feature managers accept an e
 Schema 22 adds optional deletion-batch metadata. The scoped Trash repository restores records transactionally, validates ownership and capacity, and restores task-list cascades only for a matching batch. The Undo provider lasts ten seconds and clears on a space switch. Settings → Backup and restore contains persistent Trash.
 
 Schema 23 adds `Space.setupComplete`. Its migration marks existing spaces complete; fresh profiles offer a skippable setup after preferences load. The onboarding repository commits choices and completion atomically. Browser fixtures dismiss setup through its UI except in dedicated first-run tests.
+
+Home owns note and task editors outside its configurable section tree. Notes save against the revision opened, preserving drafts on conflicts. Settings embeds task contents within its current modal, updates its accessible title and handles Escape as Back while a task list is open.

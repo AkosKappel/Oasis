@@ -38,6 +38,7 @@ test('keeps task lists optional, syncs completion and manages owned tasks with e
     name: 'Tasks: Reading',
     exact: true,
   });
+  await expect(page.getByRole('dialog')).toHaveCount(1);
   for (const text of ['Read a chapter', 'Write a short summary']) {
     await tasks.getByRole('textbox', { name: 'Task', exact: true }).fill(text);
     await tasks.getByRole('button', { name: 'Add task', exact: true }).click();

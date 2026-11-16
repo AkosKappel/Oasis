@@ -16,9 +16,13 @@ const timeZones = ['UTC', ...Intl.supportedValuesOf('timeZone')];
 export function WidgetManager({
   onClose,
   embedded = false,
+  onTaskPanelChange,
 }: {
   onClose: () => void;
   embedded?: boolean;
+  onTaskPanelChange?: (
+    panel: { title: string; back: () => void } | undefined,
+  ) => void;
 }) {
   const { offer } = useUndo();
   const { personalHomeWidgets } = useSpaceRepositories();
@@ -44,6 +48,31 @@ export function WidgetManager({
         focused.focus();
     };
   }, [embedded]);
+  function closeTasks() {
+    const id = taskList?.id;
+    setTaskList(undefined);
+    requestAnimationFrame(() =>
+      document.getElementById(`manage-tasks-${id}`)?.focus(),
+    );
+  }
+  useEffect(() => {
+    if (!onTaskPanelChange) return;
+    onTaskPanelChange(
+      taskList
+        ? {
+            title: `Tasks: ${taskList.label}`,
+            back: () => {
+              const id = taskList.id;
+              setTaskList(undefined);
+              requestAnimationFrame(() =>
+                document.getElementById(`manage-tasks-${id}`)?.focus(),
+              );
+            },
+          }
+        : undefined,
+    );
+    return () => onTaskPanelChange(undefined);
+  }, [taskList, onTaskPanelChange]);
   async function run(action: () => Promise<void>) {
     setBusy(true);
     setError(undefined);
@@ -67,6 +96,8 @@ export function WidgetManager({
     setText('');
     setVisible(kind !== 'note' && kind !== 'tasks');
   }
+  if (taskList && embedded)
+    return <TaskListDialog embedded widget={taskList} onClose={closeTasks} />;
   const Container = embedded ? 'section' : 'dialog';
   return (
     <Container
@@ -267,6 +298,7 @@ export function WidgetManager({
                   size="sm"
                   variant="outline"
                   disabled={busy}
+                  id={`manage-tasks-${widget.id}`}
                   onClick={() => setTaskList(widget)}
                   aria-label={`Manage tasks ${widget.label}`}
                 >

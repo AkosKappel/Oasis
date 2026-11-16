@@ -1,3 +1,4 @@
+import { NoteEditor } from '@/features/widgets/note-editor';
 import { TaskListDialog } from '@/features/widgets/task-list';
 import type { HomeWidget } from '@/database/home-widgets';
 import { defaultDashboardItems } from '@/database/dashboard-layout';
@@ -47,6 +48,7 @@ export function Home({
   onPinLinks: (pinned: boolean) => Promise<void>;
 }) {
   const { layout, error: layoutError } = useDashboardLayout();
+  const [note, setNote] = useState<Extract<HomeWidget, { kind: 'note' }>>();
   const [taskList, setTaskList] = useState<HomeWidget>();
   const preferenceTrigger = useRef<HTMLButtonElement>(null);
   const pendingFocus = useRef<HTMLElement | null>(null);
@@ -263,6 +265,7 @@ export function Home({
         <HomeWidgets
           now={now}
           clock={appearance.clock}
+          onEditNote={setNote}
           onManageTasks={setTaskList}
         />
       </>
@@ -453,6 +456,7 @@ export function Home({
           </footer>
         </>
       )}
+      {note && <NoteEditor widget={note} onClose={() => setNote(undefined)} />}
       {taskList && (
         <TaskListDialog
           widget={taskList}
