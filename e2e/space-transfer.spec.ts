@@ -5,15 +5,15 @@ test('reviews copies and moves between isolated spaces without modifying existin
   await page.goto('chrome://newtab/');
   await page.getByRole('link', { name: 'Library', exact: true }).click();
   await page
-    .getByRole('button', { name: 'Manage spaces', exact: true })
-    .click();
+    .getByRole('combobox', { name: 'Active space' })
+    .selectOption('__manage');
   await page
     .getByRole('textbox', { name: 'New space name', exact: true })
     .fill('Work');
   await page.getByRole('button', { name: 'Create space', exact: true }).click();
   await page
-    .getByRole('button', { name: 'Manage spaces', exact: true })
-    .click();
+    .getByRole('combobox', { name: 'Active space' })
+    .selectOption('__manage');
   await page.getByRole('button', { name: 'Add bookmark', exact: true }).click();
   await page
     .getByRole('textbox', { name: 'Title', exact: true })

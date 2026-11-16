@@ -167,28 +167,37 @@ function LayoutForm({
     </form>
   );
 }
-export function LayoutManager({ onClose }: { onClose: () => void }) {
+export function LayoutManager({
+  onClose,
+  embedded = false,
+}: {
+  onClose: () => void;
+  embedded?: boolean;
+}) {
   const ref = useRef<HTMLDialogElement>(null),
     previous = useRef(document.activeElement);
   const [busy, setBusy] = useState(false);
   const { layout, error } = useDashboardLayout();
   useEffect(() => {
+    if (embedded) return;
     const focused = previous.current;
     ref.current?.showModal();
     return () => {
       if (focused instanceof HTMLElement && focused.isConnected)
         focused.focus();
     };
-  }, []);
+  }, [embedded]);
+  const Container = embedded ? 'section' : 'dialog';
   return (
-    <dialog
-      ref={ref}
+    <Container
+      ref={embedded ? undefined : ref}
+      aria-busy={busy}
       onClose={onClose}
       onCancel={(event) => {
         if (busy) event.preventDefault();
       }}
       aria-labelledby="layout-title"
-      className="editor !max-w-2xl"
+      className={embedded ? undefined : 'editor !max-w-2xl'}
     >
       <h2 id="layout-title" className="text-2xl font-semibold">
         Home layout
@@ -208,6 +217,6 @@ export function LayoutManager({ onClose }: { onClose: () => void }) {
           </Button>
         </>
       )}
-    </dialog>
+    </Container>
   );
 }

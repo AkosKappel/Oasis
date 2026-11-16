@@ -177,3 +177,5 @@ Runtime behavior restores safely: weather and open counting are off, focus timer
 ### Library navigation
 
 Library uses a compact working header and a results column beside collections and organization filters on desktop. The same panel collapses on narrow screens. Built-in and saved queries share one collection selector. Maintenance actions use a native More popover; tool dialogs return focus to its visible trigger. Saved-search dialogs are portaled outside the collapsible panel and reopen it when returning focus. Search guidance and counting controls are secondary disclosures pending the unified Settings entry.
+
+The Settings shell owns modal focus and navigation. Feature managers accept an embedded mode; their writes expose `aria-busy` so the shell blocks navigation and dismissal until completion. General exposes clock/date/search preferences. Privacy owns optional bookmark-open counting.

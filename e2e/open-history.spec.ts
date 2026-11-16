@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { test, expect } from './fixtures';
 test('open counting requires opt-in, populates smart collections and clears on request', async ({
   page,
@@ -35,7 +36,7 @@ test('open counting requires opt-in, populates smart collections and clears on r
   await collection.selectOption('recently-opened');
   await expect(link).toHaveCount(0);
   await collection.selectOption('all');
-  await page.getByText('Open counting', { exact: true }).click();
+  await openSettingsPage(page, 'Privacy');
   await page
     .getByRole('checkbox', {
       name: 'Count bookmark opens in Oasis',
@@ -48,6 +49,7 @@ test('open counting requires opt-in, populates smart collections and clears on r
       exact: true,
     }),
   ).toBeChecked();
+  await page.getByRole('button', { name: 'Close settings' }).click();
   const counted = context.waitForEvent('page');
   await link.click();
   await (await counted).close();
@@ -57,7 +59,7 @@ test('open counting requires opt-in, populates smart collections and clears on r
   await collection.selectOption('frequently-opened');
   await expect(link).toBeVisible();
   await page.reload();
-  await page.getByText('Open counting', { exact: true }).click();
+  await openSettingsPage(page, 'Privacy');
   await expect(
     page.getByRole('checkbox', {
       name: 'Count bookmark opens in Oasis',
@@ -74,6 +76,7 @@ test('open counting requires opt-in, populates smart collections and clears on r
   await page
     .getByRole('button', { name: 'Clear open history', exact: true })
     .click();
+  await page.getByRole('button', { name: 'Close settings' }).click();
   await collection.selectOption('recently-opened');
   await expect(link).toHaveCount(0);
 });

@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { test, expect } from './fixtures';
 import type { Locator } from '@playwright/test';
 async function worstContrast(panel: Locator) {
@@ -38,7 +39,7 @@ test('uses readable glass panels in light/dark and opaque reduced-transparency f
   context,
 }, testInfo) => {
   await page.goto('chrome://newtab/');
-  await page.getByRole('button', { name: 'Image albums', exact: true }).click();
+  await openSettingsPage(page, 'Image albums');
   await page.getByRole('button', { name: 'Open air', exact: true }).click();
   await page
     .getByRole('button', { name: 'Use image', exact: true })
@@ -47,7 +48,7 @@ test('uses readable glass panels in light/dark and opaque reduced-transparency f
   await expect(page.locator('main')).toHaveClass(/home-photo/);
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   for (const theme of ['light', 'dark']) {
-    await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+    await openSettingsPage(page, 'Appearance');
     await page
       .getByRole('combobox', { name: 'Theme', exact: true })
       .selectOption(theme);
@@ -67,7 +68,7 @@ test('uses readable glass panels in light/dark and opaque reduced-transparency f
       path: testInfo.outputPath(`links-glass-${theme}.png`),
     });
     await page.keyboard.press('Escape');
-    await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+    await openSettingsPage(page, 'Appearance');
     const editor = page.getByRole('dialog', {
       name: 'Appearance',
       exact: true,

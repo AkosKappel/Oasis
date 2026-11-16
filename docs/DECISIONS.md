@@ -325,3 +325,7 @@ Choose a reviewed, atomic new-space restore rather than destructive replacement 
 ## 2026-11-16: Results-first Library
 
 Keep everyday search, view and sorting near the results. Group built-in and saved collections in one selector, place organization filters in a desktop sidebar and collapse them on narrow screens. Move maintenance actions under More and collapse explanatory text. Remove marketing copy from the working Library. Native popovers preserve keyboard dismissal and return focus to their trigger before opening tools.
+
+## 2026-11-16: One Settings entry
+
+Home keeps one Settings icon and Focus mode. A shared dialog groups General, Appearance, layout, images, quotes, feedback, widgets, privacy and backups. Existing managers render as sections inside it, preserving explicit Save/Cancel and preventing navigation during writes. Clock and search are also available directly in General. Open counting lives in Privacy. Space management is an action in the space picker.

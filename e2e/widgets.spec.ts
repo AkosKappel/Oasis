@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { test, expect } from './fixtures';
 test('adds optional world clocks and countdowns, edits visibility and persists changes', async ({
   page,
@@ -7,7 +8,7 @@ test('adds optional world clocks and countdowns, edits visibility and persists c
   await expect(page.getByRole('region', { name: 'Home widgets' })).toHaveCount(
     0,
   );
-  await page.getByRole('button', { name: 'Widgets', exact: true }).click();
+  await openSettingsPage(page, 'Widgets');
   const dialog = page.getByRole('dialog', { name: 'Widgets', exact: true });
   await dialog.getByRole('textbox', { name: 'Widget label' }).fill('Tokyo');
   await dialog
@@ -45,7 +46,7 @@ test('adds optional world clocks and countdowns, edits visibility and persists c
   await expect(
     other.getByRole('article', { name: 'Tokyo', exact: true }),
   ).toBeVisible();
-  await page.getByRole('button', { name: 'Widgets', exact: true }).click();
+  await openSettingsPage(page, 'Widgets');
   await dialog.getByRole('button', { name: 'Edit Tokyo', exact: true }).click();
   await dialog
     .getByRole('checkbox', { name: 'Show on Home', exact: true })

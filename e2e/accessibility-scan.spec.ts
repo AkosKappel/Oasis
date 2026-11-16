@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { openLibraryTool } from './fixtures';
 import type { Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
@@ -27,12 +28,12 @@ test('core pages and dialogs have no detected WCAG A/AA violations', async ({
   }
   await scan('Home');
   await page
-    .getByRole('button', { name: 'Manage spaces', exact: true })
-    .click();
+    .getByRole('combobox', { name: 'Active space' })
+    .selectOption('__manage');
   await scan('Space management');
   await page
-    .getByRole('button', { name: 'Manage spaces', exact: true })
-    .click();
+    .getByRole('combobox', { name: 'Active space' })
+    .selectOption('__manage');
   for (const name of [
     'Layout',
     'Appearance',
@@ -50,6 +51,19 @@ test('core pages and dialogs have no detected WCAG A/AA violations', async ({
       ].includes(name)
     )
       await openLibraryTool(page, name);
+    else if (
+      ['Layout', 'Appearance', 'Widgets', 'Image albums', 'Quotes'].includes(
+        name,
+      )
+    )
+      await openSettingsPage(
+        page,
+        name === 'Layout'
+          ? 'Home layout'
+          : name === 'Quotes'
+            ? 'Quote collections'
+            : name,
+      );
     else await page.getByRole('button', { name, exact: true }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
     await scan(name);
@@ -98,6 +112,19 @@ test('core pages and dialogs have no detected WCAG A/AA violations', async ({
       ].includes(name)
     )
       await openLibraryTool(page, name);
+    else if (
+      ['Layout', 'Appearance', 'Widgets', 'Image albums', 'Quotes'].includes(
+        name,
+      )
+    )
+      await openSettingsPage(
+        page,
+        name === 'Layout'
+          ? 'Home layout'
+          : name === 'Quotes'
+            ? 'Quote collections'
+            : name,
+      );
     else await page.getByRole('button', { name, exact: true }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
     await scan(name);

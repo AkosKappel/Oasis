@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from './fixtures';
 test('rates local images and quotes, persists across tabs and skips disliked daily content', async ({
@@ -7,7 +8,7 @@ test('rates local images and quotes, persists across tabs and skips disliked dai
   test.setTimeout(60_000);
   await context.setOffline(true);
   await page.goto('chrome://newtab/');
-  await page.getByRole('button', { name: 'Image albums', exact: true }).click();
+  await openSettingsPage(page, 'Image albums');
   const albums = page.getByRole('dialog', {
     name: 'Image albums',
     exact: true,
@@ -85,7 +86,7 @@ test('rates local images and quotes, persists across tabs and skips disliked dai
     'data-background-image',
     next!,
   );
-  await page.getByRole('button', { name: 'Quotes', exact: true }).click();
+  await openSettingsPage(page, 'Quote collections');
   const quotes = page.getByRole('dialog');
   await quotes
     .getByRole('textbox', { name: 'New collection name', exact: true })
@@ -183,7 +184,7 @@ test('rates local images and quotes, persists across tabs and skips disliked dai
     .getByRole('button', { name: 'Dislike this quote', exact: true })
     .click();
   await expect(
-    page.getByRole('button', { name: 'Content preferences', exact: true }),
+    page.getByRole('button', { name: 'Settings', exact: true }),
   ).toBeFocused();
   await expect(page.getByRole('figure', { name: 'Daily quote' })).toHaveCount(
     0,
@@ -192,9 +193,7 @@ test('rates local images and quotes, persists across tabs and skips disliked dai
   await expect(page.getByRole('figure', { name: 'Daily quote' })).toHaveCount(
     0,
   );
-  await page
-    .getByRole('button', { name: 'Content preferences', exact: true })
-    .click();
+  await openSettingsPage(page, 'Content preferences');
   const preferences = page.getByRole('dialog', {
     name: 'Content preferences',
     exact: true,
@@ -269,10 +268,10 @@ test('rates local images and quotes, persists across tabs and skips disliked dai
   await expect(preferences.getByRole('listitem')).toHaveCount(0);
   await preferences.getByRole('button', { name: 'Done', exact: true }).click();
   await expect(
-    page.getByRole('button', { name: 'Content preferences', exact: true }),
+    page.getByRole('button', { name: 'Settings', exact: true }),
   ).toBeFocused();
   await expect(page.getByRole('figure', { name: 'Daily quote' })).toBeVisible();
-  await page.getByRole('button', { name: 'Image albums', exact: true }).click();
+  await openSettingsPage(page, 'Image albums');
   const fixedAlbums = page.getByRole('dialog', {
     name: 'Image albums',
     exact: true,

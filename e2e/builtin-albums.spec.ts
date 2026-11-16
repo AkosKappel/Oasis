@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { test, expect } from './fixtures';
 import { readFile } from 'node:fs/promises';
 
@@ -8,7 +9,7 @@ test('browses bundled albums offline, selects images and preserves daily rotatio
   await context.setOffline(true);
   await page.goto('chrome://newtab/');
   await expect(page.locator('main')).not.toHaveClass(/home-photo/);
-  await page.getByRole('button', { name: 'Image albums', exact: true }).click();
+  await openSettingsPage(page, 'Image albums');
   const dialog = page.getByRole('dialog', {
     name: 'Image albums',
     exact: true,
@@ -67,9 +68,7 @@ test('browses bundled albums offline, selects images and preserves daily rotatio
         `oasis-${name.toLowerCase().replaceAll(' ', '-')}.png`,
       ),
     });
-    await page
-      .getByRole('button', { name: 'Image albums', exact: true })
-      .click();
+    await openSettingsPage(page, 'Image albums');
   }
   await dialog
     .getByRole('button', { name: 'Quiet geometry', exact: true })
@@ -122,7 +121,7 @@ test('browses bundled albums offline, selects images and preserves daily rotatio
   await page.screenshot({
     path: testInfo.outputPath('oasis-builtin-mobile.png'),
   });
-  await page.getByRole('button', { name: 'Image albums', exact: true }).click();
+  await openSettingsPage(page, 'Image albums');
   await expect(dialog).toBeVisible();
   expect(
     await page.evaluate(

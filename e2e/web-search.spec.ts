@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { test, expect } from './fixtures';
 test('saves a preferred engine and submits only explicit Home or palette web searches', async ({
   page,
@@ -15,7 +16,7 @@ test('saves a preferred engine and submits only explicit Home or palette web sea
   await expect(
     page.getByRole('searchbox', { name: 'Search bookmarks', exact: true }),
   ).toBeVisible();
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await page
     .getByRole('combobox', { name: 'Home search', exact: true })
     .selectOption('duckduckgo');
@@ -55,7 +56,7 @@ test('saves a preferred engine and submits only explicit Home or palette web sea
   await page.goto('chrome://newtab/');
   const other = await context.newPage();
   await other.goto('chrome://newtab/');
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await page
     .getByRole('combobox', { name: 'Home search', exact: true })
     .selectOption('google');
@@ -63,7 +64,7 @@ test('saves a preferred engine and submits only explicit Home or palette web sea
   await expect(
     page.getByRole('searchbox', { name: 'Search DuckDuckGo', exact: true }),
   ).toBeVisible();
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await page
     .getByRole('combobox', { name: 'Home search', exact: true })
     .selectOption('google');

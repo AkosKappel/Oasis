@@ -1,10 +1,11 @@
+import { openSettingsPage } from './fixtures';
 import { test, expect } from './fixtures';
 test('saves section order, visibility and width across tabs and resets only the layout', async ({
   page,
   context,
 }, testInfo) => {
   await page.goto('chrome://newtab/');
-  await page.getByRole('button', { name: 'Layout', exact: true }).click();
+  await openSettingsPage(page, 'Home layout');
   const dialog = page.getByRole('dialog', { name: 'Home layout', exact: true });
   await dialog
     .getByRole('button', { name: 'Move up: Search', exact: true })
@@ -34,7 +35,7 @@ test('saves section order, visibility and width across tabs and resets only the 
   await other.close();
   await page.reload();
   await expect(page.locator('[data-home-section="clock"]')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Layout', exact: true }).click();
+  await openSettingsPage(page, 'Home layout');
   await page.screenshot({ path: testInfo.outputPath('layout-desktop.png') });
   await page.setViewportSize({ width: 390, height: 844 });
   expect(

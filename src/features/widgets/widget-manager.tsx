@@ -12,7 +12,13 @@ import {
 import { reportStorageError } from '@/database/storage-health';
 import { useHomeWidgets } from './use-home-widgets';
 const timeZones = ['UTC', ...Intl.supportedValuesOf('timeZone')];
-export function WidgetManager({ onClose }: { onClose: () => void }) {
+export function WidgetManager({
+  onClose,
+  embedded = false,
+}: {
+  onClose: () => void;
+  embedded?: boolean;
+}) {
   const { personalHomeWidgets } = useSpaceRepositories();
   const ref = useRef<HTMLDialogElement>(null),
     previous = useRef(document.activeElement);
@@ -28,13 +34,14 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
   const [busy, setBusy] = useState(false),
     [error, setError] = useState<string>();
   useEffect(() => {
+    if (embedded) return;
     const focused = previous.current;
     ref.current?.showModal();
     return () => {
       if (focused instanceof HTMLElement && focused.isConnected)
         focused.focus();
     };
-  }, []);
+  }, [embedded]);
   async function run(action: () => Promise<void>) {
     setBusy(true);
     setError(undefined);
@@ -58,11 +65,13 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
     setText('');
     setVisible(kind !== 'note' && kind !== 'tasks');
   }
+  const Container = embedded ? 'section' : 'dialog';
   return (
-    <dialog
-      ref={ref}
-      className="editor"
+    <Container
+      ref={embedded ? undefined : ref}
+      className={embedded ? undefined : 'editor'}
       aria-labelledby="widgets-title"
+      aria-busy={busy}
       onClose={onClose}
       onCancel={(event) => {
         if (busy) event.preventDefault();
@@ -314,6 +323,6 @@ export function WidgetManager({ onClose }: { onClose: () => void }) {
           onClose={() => setTaskList(undefined)}
         />
       )}
-    </dialog>
+    </Container>
   );
 }

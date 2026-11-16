@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { test, expect } from './fixtures';
 import { readFile } from 'node:fs/promises';
 
@@ -29,7 +30,7 @@ test('manages local images, selects a background and backs up albums', async ({
     ctx.fill();
     return canvas.toDataURL('image/png').split(',')[1]!;
   });
-  await page.getByRole('button', { name: 'Image albums', exact: true }).click();
+  await openSettingsPage(page, 'Image albums');
   await page
     .getByRole('textbox', { name: 'New album name', exact: true })
     .fill('Landscapes');
@@ -92,7 +93,7 @@ test('manages local images, selects a background and backs up albums', async ({
   await other.goto(page.url());
   await expect(other.locator('main')).toHaveClass(/home-photo/);
   await other.close();
-  await page.getByRole('button', { name: 'Image albums', exact: true }).click();
+  await openSettingsPage(page, 'Image albums');
   await page.getByLabel('Upload images', { exact: true }).setInputFiles({
     name: 'unsafe.svg',
     mimeType: 'image/svg+xml',

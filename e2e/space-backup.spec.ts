@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { openLibraryTool } from './fixtures';
 import { readFile } from 'node:fs/promises';
 import AxeBuilder from '@axe-core/playwright';
@@ -9,7 +10,7 @@ test('exports and reviews a complete space, restoring safely into a new space', 
   test.setTimeout(60_000);
   await context.setOffline(true);
   await page.goto('chrome://newtab/');
-  await page.getByRole('button', { name: 'Widgets', exact: true }).click();
+  await openSettingsPage(page, 'Widgets');
   let manager = page.getByRole('dialog', { name: 'Widgets', exact: true });
   await manager
     .getByRole('combobox', { name: 'Widget type', exact: true })
@@ -93,7 +94,7 @@ test('exports and reviews a complete space, restoring safely into a new space', 
   ).toHaveText('Recovered sample');
   await expect(page.getByRole('link', { name: /Sample guide/ })).toBeVisible();
   await page.getByRole('link', { name: 'Oasis home', exact: true }).click();
-  await page.getByRole('button', { name: 'Widgets', exact: true }).click();
+  await openSettingsPage(page, 'Widgets');
   manager = page.getByRole('dialog', { name: 'Widgets', exact: true });
   await manager
     .getByRole('button', { name: 'Edit Reading ideas', exact: true })

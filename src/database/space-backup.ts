@@ -317,7 +317,7 @@ export function validateSpaceBackup(value: unknown): SpaceBackup {
     schemaVersion: 21,
     exportedAt: number(input.exportedAt),
     space: {
-      name: text(space.name, 40),
+      name: text(space.name, 80),
       ...(space.icon === undefined ? {} : { icon: text(space.icon, 200) }),
       ...(space.color === undefined ? {} : { color: text(space.color, 200) }),
     },

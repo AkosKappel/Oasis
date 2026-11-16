@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { test, expect } from './fixtures';
 
 test('persists appearance, synchronizes tabs and follows system theme', async ({
@@ -9,7 +10,7 @@ test('persists appearance, synchronizes tabs and follows system theme', async ({
   const second = await context.newPage();
   await second.emulateMedia({ colorScheme: 'light' });
   await second.goto(page.url());
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await page
     .getByRole('combobox', { name: 'Theme', exact: true })
     .selectOption('dark');
@@ -27,7 +28,7 @@ test('persists appearance, synchronizes tabs and follows system theme', async ({
   await expect(page.locator('time')).toHaveText(/^\d{2}:\d{2}$/);
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await expect(page.getByLabel('Show date', { exact: true })).not.toBeChecked();
   await expect(
     page.getByLabel('Show shortcut row', { exact: true }),
@@ -38,7 +39,7 @@ test('persists appearance, synchronizes tabs and follows system theme', async ({
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(
-    page.getByRole('button', { name: 'Appearance', exact: true }),
+    page.getByRole('button', { name: 'Settings', exact: true }),
   ).toBeFocused();
   await page.screenshot({ path: testInfo.outputPath('home-dark.png') });
   const contrasts = await page.evaluate(() => {
@@ -69,7 +70,7 @@ test('persists appearance, synchronizes tabs and follows system theme', async ({
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.keyboard.press('Escape');
   await page.getByRole('link', { name: 'Oasis home' }).click();
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await page
     .getByRole('combobox', { name: 'Theme', exact: true })
     .selectOption('system');

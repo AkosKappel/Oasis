@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { test, expect } from './fixtures';
 
 test('places Links on either side and optionally pins folders on desktop', async ({
@@ -5,7 +6,7 @@ test('places Links on either side and optionally pins folders on desktop', async
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('chrome://newtab/');
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await page
     .getByRole('combobox', { name: 'Links side', exact: true })
     .selectOption('right');

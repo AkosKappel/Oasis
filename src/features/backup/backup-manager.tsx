@@ -25,7 +25,13 @@ function downloadFile(content: string, type: string, name: string) {
   link.click();
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-export function BackupManager({ onClose }: { onClose: () => void }) {
+export function BackupManager({
+  onClose,
+  embedded = false,
+}: {
+  onClose: () => void;
+  embedded?: boolean;
+}) {
   const { spaceBackup, personalBackup, personalBookmarkHtml } =
     useSpaceRepositories();
   const { list, select } = useSpace();
@@ -40,13 +46,14 @@ export function BackupManager({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState<string>();
   const [message, setMessage] = useState('');
   useEffect(() => {
+    if (embedded) return;
     const previous = previousFocus.current;
     dialog.current?.showModal();
     return () => {
       if (previous instanceof HTMLElement && previous.isConnected)
         previous.focus();
     };
-  }, []);
+  }, [embedded]);
   async function run(action: () => Promise<void>) {
     if (busy) return;
     setBusy(true);
@@ -66,15 +73,17 @@ export function BackupManager({ onClose }: { onClose: () => void }) {
     }
   }
   const date = () => new Date().toISOString().slice(0, 10);
+  const Container = embedded ? 'section' : 'dialog';
   return (
-    <dialog
-      ref={dialog}
+    <Container
+      ref={embedded ? undefined : dialog}
+      aria-busy={busy}
       onClose={onClose}
       onCancel={(event) => {
         if (busy) event.preventDefault();
       }}
       aria-labelledby="backup-title"
-      className="editor"
+      className={embedded ? undefined : 'editor'}
     >
       <h2 id="backup-title" className="text-2xl font-semibold">
         Backup and restore
@@ -125,7 +134,7 @@ export function BackupManager({ onClose }: { onClose: () => void }) {
                     );
                   const archive = parseSpaceBackup(await file.text());
                   setComplete(archive);
-                  setRestoreName(`${archive.space.name.slice(0, 31)} restored`);
+                  setRestoreName(`${archive.space.name.slice(0, 71)} restored`);
                 });
             }}
           />
@@ -161,7 +170,7 @@ export function BackupManager({ onClose }: { onClose: () => void }) {
               Restored space name
               <input
                 required
-                maxLength={40}
+                maxLength={80}
                 disabled={busy}
                 value={restoreName}
                 onChange={(event) => setRestoreName(event.target.value)}
@@ -342,6 +351,6 @@ export function BackupManager({ onClose }: { onClose: () => void }) {
           Close
         </Button>
       </div>
-    </dialog>
+    </Container>
   );
 }

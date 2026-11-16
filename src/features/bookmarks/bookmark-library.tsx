@@ -1,3 +1,4 @@
+import type { SettingsPage } from '@/features/settings/settings';
 import type { SavedSearch } from '@/database/saved-searches';
 import { SavedSearches } from '@/features/saved-searches/saved-searches';
 import { SpaceTransferDialog } from '@/features/spaces/space-transfer-dialog';
@@ -24,10 +25,10 @@ import { useLibraryPreferences } from './use-library-preferences';
 import { sortBookmarks } from './sort-bookmarks';
 import { type LibraryPreferences } from '@/database/library-preferences';
 import { folderPaths } from '@/features/organization/folder-tree';
-import { BackupManager } from '@/features/backup/backup-manager';
 import { BookmarkCard } from './bookmark-card';
 import { useEffect, useMemo, useState } from 'react';
 import {
+  Settings2,
   MoreHorizontal,
   Bookmark as BookmarkIcon,
   Leaf,
@@ -45,14 +46,15 @@ import { OrganizationFilters } from '@/features/organization/organization-filter
 
 export function BookmarkLibrary({
   initialQuery = '',
+  onSettings,
 }: {
   initialQuery?: string;
+  onSettings: (page: SettingsPage) => void;
 }) {
   const {
     personalBookmarks,
     personalOrganization,
     personalLibraryPreferences,
-    openHistory,
   } = useSpaceRepositories();
   const {
     preferences,
@@ -86,7 +88,6 @@ export function BookmarkLibrary({
   const [bulkBusy, setBulkBusy] = useState(false);
   const [notesFor, setNotesFor] = useState<Bookmark>();
   const [statisticsOpen, setStatisticsOpen] = useState(false);
-  const [backupOpen, setBackupOpen] = useState(false);
   const [duplicatesOpen, setDuplicatesOpen] = useState(false);
   const [organizationOpen, setOrganizationOpen] = useState(false);
   const [folderFilter, setFolderFilter] = useState('');
@@ -318,7 +319,6 @@ export function BookmarkLibrary({
       >
         Skip to library
       </button>
-      {backupOpen && <BackupManager onClose={() => setBackupOpen(false)} />}
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-4 sm:px-8">
           <div className="flex items-center gap-3">
@@ -347,6 +347,15 @@ export function BookmarkLibrary({
             <h1 className="text-2xl font-semibold tracking-tight">Library</h1>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Settings"
+              title="Settings"
+              onClick={() => onSettings('general')}
+            >
+              <Settings2 className="size-4" aria-hidden="true" />
+            </Button>
             <Button
               id="library-more-trigger"
               aria-label="More Library tools"
@@ -389,7 +398,7 @@ export function BookmarkLibrary({
                 >
                   Statistics
                 </Button>
-                <Button variant="outline" onClick={() => setBackupOpen(true)}>
+                <Button variant="outline" onClick={() => onSettings('data')}>
                   Backup and restore
                 </Button>
                 <Button
@@ -598,50 +607,6 @@ export function BookmarkLibrary({
                     Clear filters
                   </Button>
                 )}
-                <details className="mt-4">
-                  <summary className="cursor-pointer text-sm">
-                    Open counting
-                  </summary>
-                  <div className="mt-4 flex flex-wrap items-center gap-3">
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        disabled={savingPreferences}
-                        checked={preferences.trackOpens ?? false}
-                        onChange={(event) =>
-                          void savePreferences({
-                            trackOpens: event.target.checked,
-                          })
-                        }
-                      />
-                      Count bookmark opens in Oasis
-                    </label>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        if (
-                          confirm(
-                            'Clear open counts and last-opened times in this space?',
-                          )
-                        )
-                          void openHistory.clear().catch((cause: unknown) => {
-                            reportStorageError(cause);
-                            setError(
-                              'Open history could not be cleared. Try again.',
-                            );
-                          });
-                      }}
-                    >
-                      Clear open history
-                    </Button>
-                    <p className="w-full text-xs text-muted-foreground">
-                      Off by default. Counts only opens made from Oasis; other
-                      browsing activity is never tracked. Turning it off keeps
-                      existing counts until you clear them.
-                    </p>
-                  </div>
-                </details>
               </div>
             </details>
           </aside>

@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { test, expect } from './fixtures';
 
 async function readable(element: import('@playwright/test').Locator) {
@@ -28,7 +29,7 @@ test('keeps 12-hour clocks and long quotes within a 320-pixel Home', async ({
   await page.setViewportSize({ width: 320, height: 740 });
   await page.clock.install({ time: new Date(2026, 10, 14, 12, 58) });
   await page.goto('chrome://newtab/');
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await page
     .getByRole('combobox', { name: 'Clock format', exact: true })
     .selectOption('12');
@@ -38,7 +39,7 @@ test('keeps 12-hour clocks and long quotes within a 320-pixel Home', async ({
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  await page.getByRole('button', { name: 'Quotes', exact: true }).click();
+  await openSettingsPage(page, 'Quote collections');
   await page
     .getByRole('textbox', { name: 'New collection name', exact: true })
     .fill('Long text');
@@ -85,13 +86,13 @@ test('keeps keyboard focus predictable across Links, command search and dismissa
   await expect(links).not.toBeVisible();
   await palette.getByRole('button', { name: 'Close', exact: true }).click();
   await expect(trigger).toBeFocused();
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await expect(
     page.getByRole('group', { name: 'Color preview', exact: true }),
   ).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(
-    page.getByRole('button', { name: 'Appearance', exact: true }),
+    page.getByRole('button', { name: 'Settings', exact: true }),
   ).toBeFocused();
 });
 
@@ -100,7 +101,7 @@ test('updates system-theme color controls while Appearance stays open', async ({
 }) => {
   await page.emulateMedia({ colorScheme: 'light' });
   await page.goto('chrome://newtab/');
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await expect(
     page.getByLabel('Primary color picker', { exact: true }),
   ).toHaveValue('#286443');
@@ -129,7 +130,7 @@ test('keeps a photo-backed Links panel and custom hover highlights readable', as
     .click();
   await expect(page.getByRole('link', { name: /Readable link/ })).toBeVisible();
   await page.getByRole('link', { name: 'Oasis home' }).click();
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await page
     .getByRole('combobox', { name: 'Theme', exact: true })
     .selectOption('light');
@@ -149,7 +150,7 @@ test('keeps a photo-backed Links panel and custom hover highlights readable', as
     ctx.fillRect(0, 0, 16, 16);
     return canvas.toDataURL('image/png').split(',')[1]!;
   });
-  await page.getByRole('button', { name: 'Image albums', exact: true }).click();
+  await openSettingsPage(page, 'Image albums');
   await page
     .getByRole('textbox', { name: 'New album name', exact: true })
     .fill('Bright photo');

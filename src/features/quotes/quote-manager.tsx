@@ -4,7 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { validateQuoteArchive } from '@/database/quotes';
 import { useQuotes } from './use-quotes';
-export function QuoteManager({ onClose }: { onClose: () => void }) {
+export function QuoteManager({
+  onClose,
+  embedded = false,
+}: {
+  onClose: () => void;
+  embedded?: boolean;
+}) {
   const { personalQuotes } = useSpaceRepositories();
   const dialog = useRef<HTMLDialogElement>(null);
   const previous = useRef(document.activeElement);
@@ -22,13 +28,14 @@ export function QuoteManager({ onClose }: { onClose: () => void }) {
     data?.collections.find((item) => item.id === selected) ??
     data?.collections[0];
   useEffect(() => {
+    if (embedded) return;
     const focused = previous.current;
     dialog.current?.showModal();
     return () => {
       if (focused instanceof HTMLElement && focused.isConnected)
         focused.focus();
     };
-  }, []);
+  }, [embedded]);
   async function run(action: () => Promise<void>) {
     setBusy(true);
     setError(undefined);
@@ -46,11 +53,13 @@ export function QuoteManager({ onClose }: { onClose: () => void }) {
       setBusy(false);
     }
   }
+  const Container = embedded ? 'section' : 'dialog';
   return (
-    <dialog
-      ref={dialog}
-      className="editor !max-w-2xl"
+    <Container
+      ref={embedded ? undefined : dialog}
+      className={embedded ? undefined : 'editor !max-w-2xl'}
       aria-labelledby="quotes-title"
+      aria-busy={busy}
       onClose={onClose}
       onCancel={(event) => {
         if (busy) event.preventDefault();
@@ -354,6 +363,6 @@ export function QuoteManager({ onClose }: { onClose: () => void }) {
           {message}
         </p>
       )}
-    </dialog>
+    </Container>
   );
 }

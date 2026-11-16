@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { test, expect } from './fixtures';
 import type { Locator } from '@playwright/test';
 async function buttonContrast(button: Locator) {
@@ -89,7 +90,7 @@ test('combines opt-in widgets over photos, keeps buttons readable and restores H
     .click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('link', { name: 'Oasis home', exact: true }).click();
-  await page.getByRole('button', { name: 'Image albums', exact: true }).click();
+  await openSettingsPage(page, 'Image albums');
   await page
     .getByRole('button', { name: 'Quiet geometry', exact: true })
     .click();
@@ -102,7 +103,7 @@ test('combines opt-in widgets over photos, keeps buttons readable and restores H
     'oasis:builtin:jade-ridges',
   );
   await page.getByRole('button', { name: 'Done', exact: true }).click();
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await page
     .getByRole('combobox', { name: 'Clock format', exact: true })
     .selectOption('24');
@@ -131,7 +132,7 @@ test('combines opt-in widgets over photos, keeps buttons readable and restores H
   await expect(
     page.getByText('Write a clear first draft', { exact: true }),
   ).toBeVisible();
-  await page.getByRole('button', { name: 'Widgets', exact: true }).click();
+  await openSettingsPage(page, 'Widgets');
   const widgets = page.getByRole('dialog', { name: 'Widgets', exact: true });
   await widgets
     .getByRole('textbox', { name: 'Widget label', exact: true })

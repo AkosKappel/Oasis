@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { openLibraryTool } from './fixtures';
 import { test, expect } from './fixtures';
 
@@ -81,7 +82,7 @@ test('shows links on demand with folder search, keyboard access and focus return
     }),
   ).toBe(true);
   await page.keyboard.press('Escape');
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await page
     .getByRole('checkbox', { name: 'Show shortcut row', exact: true })
     .check();

@@ -11,7 +11,13 @@ import {
 } from '@/database/builtin-albums';
 import { prepareImage, verifyArchivedImages } from './prepare-image';
 
-export function AlbumManager({ onClose }: { onClose: () => void }) {
+export function AlbumManager({
+  onClose,
+  embedded = false,
+}: {
+  onClose: () => void;
+  embedded?: boolean;
+}) {
   const { personalAlbums } = useSpaceRepositories();
   const dialog = useRef<HTMLDialogElement>(null);
   const previous = useRef(document.activeElement);
@@ -28,13 +34,14 @@ export function AlbumManager({ onClose }: { onClose: () => void }) {
     data?.albums[0];
   const builtin = album ? isBuiltinAlbum(album.id) : false;
   useEffect(() => {
+    if (embedded) return;
     const focused = previous.current;
     dialog.current?.showModal();
     return () => {
       if (focused instanceof HTMLElement && focused.isConnected)
         focused.focus();
     };
-  }, []);
+  }, [embedded]);
   async function run(action: () => Promise<void>) {
     setBusy(true);
     setError(undefined);
@@ -52,11 +59,13 @@ export function AlbumManager({ onClose }: { onClose: () => void }) {
       setBusy(false);
     }
   }
+  const Container = embedded ? 'section' : 'dialog';
   return (
-    <dialog
-      ref={dialog}
-      className="editor !max-w-3xl"
+    <Container
+      ref={embedded ? undefined : dialog}
+      className={embedded ? undefined : 'editor !max-w-3xl'}
       aria-labelledby="albums-title"
+      aria-busy={busy}
       onClose={onClose}
       onCancel={(event) => {
         if (busy) event.preventDefault();
@@ -446,6 +455,6 @@ export function AlbumManager({ onClose }: { onClose: () => void }) {
           {message}
         </p>
       )}
-    </dialog>
+    </Container>
   );
 }

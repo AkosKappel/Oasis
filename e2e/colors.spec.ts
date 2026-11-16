@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { test, expect } from './fixtures';
 
 test('previews custom colors, cancels safely, persists saves and resets to a preset', async ({
@@ -14,7 +15,7 @@ test('previews custom colors, cancels safely, persists saves and resets to a pre
       document.documentElement.style.getPropertyValue('--primary'),
     );
   await expect.poll(primary).toBe('#286443');
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await page
     .getByRole('textbox', { name: 'Primary hex', exact: true })
     .fill('#ffffff');
@@ -57,7 +58,7 @@ test('previews custom colors, cancels safely, persists saves and resets to a pre
   for (const ratio of contrast) expect(ratio).toBeGreaterThanOrEqual(4.5);
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
   await expect.poll(primary).toBe('#286443');
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await page
     .getByRole('textbox', { name: 'Primary hex', exact: true })
     .fill('#4568ab');
@@ -77,7 +78,7 @@ test('previews custom colors, cancels safely, persists saves and resets to a pre
     .toBe('#4568ab');
   await page.reload();
   await expect.poll(primary).toBe('#4568ab');
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await page
     .getByRole('textbox', { name: 'Primary hex', exact: true })
     .fill('#oops');

@@ -1,16 +1,12 @@
-import { LayoutManager } from '@/features/home/layout-manager';
+import { Settings, type SettingsPage } from '@/features/settings/settings';
 import { SpaceProvider } from '@/features/spaces/space-context';
 import { FocusModeDialog } from '@/features/focus/focus-mode';
-import { WidgetManager } from '@/features/widgets/widget-manager';
 import { StorageRecovery } from '@/features/storage/storage-recovery';
 import type { Appearance } from '@/database/appearance';
 import { useEffect, useState } from 'react';
 import { BookmarkLibrary } from '@/features/bookmarks/bookmark-library';
 import { CommandPalette } from '@/features/search/command-palette';
 import { useAppearance } from '@/features/appearance/use-appearance';
-import { AppearanceSettings } from '@/features/appearance/appearance-settings';
-import { QuoteManager } from '@/features/quotes/quote-manager';
-import { AlbumManager } from '@/features/albums/album-manager';
 import { Home } from '@/features/home/home';
 
 export function App() {
@@ -28,12 +24,8 @@ function AppContent() {
     error: appearanceError,
     saveAppearance,
   } = useAppearance(preview);
-  const [layoutOpen, setLayoutOpen] = useState(false);
+  const [settingsPage, setSettingsPage] = useState<SettingsPage>();
   const [focusOpen, setFocusOpen] = useState(false);
-  const [widgetsOpen, setWidgetsOpen] = useState(false);
-  const [quotesOpen, setQuotesOpen] = useState(false);
-  const [albumsOpen, setAlbumsOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [route, setRoute] = useState(() => window.location.hash);
   const [search, setSearch] = useState<{ query: string }>();
   useEffect(() => {
@@ -55,10 +47,11 @@ function AppContent() {
   }, []);
   return (
     <>
-      <StorageRecovery onManageImages={() => setAlbumsOpen(true)} />
+      <StorageRecovery onManageImages={() => setSettingsPage('albums')} />
       {route.split('?')[0] === '#library' ? (
         <BookmarkLibrary
           key={route}
+          onSettings={setSettingsPage}
           initialQuery={new URLSearchParams(route.split('?')[1]).get('q') ?? ''}
         />
       ) : (
@@ -66,28 +59,21 @@ function AppContent() {
           onPinLinks={(pinned) =>
             saveAppearance({ ...appearance, linksPinned: pinned })
           }
-          onLayout={() => setLayoutOpen(true)}
+          onSettings={() => setSettingsPage('general')}
           onFocus={() => setFocusOpen(true)}
-          onWidgets={() => setWidgetsOpen(true)}
-          onQuotes={() => setQuotesOpen(true)}
-          onAlbums={() => setAlbumsOpen(true)}
           appearance={preview ?? appearance}
-          onAppearance={() => setSettingsOpen(true)}
           onSearch={(query) => setSearch({ query })}
         />
       )}
-      {layoutOpen && <LayoutManager onClose={() => setLayoutOpen(false)} />}
       {focusOpen && <FocusModeDialog onClose={() => setFocusOpen(false)} />}
-      {widgetsOpen && <WidgetManager onClose={() => setWidgetsOpen(false)} />}
-      {quotesOpen && <QuoteManager onClose={() => setQuotesOpen(false)} />}
-      {albumsOpen && <AlbumManager onClose={() => setAlbumsOpen(false)} />}
-      {settingsOpen && (
-        <AppearanceSettings
+      {settingsPage && (
+        <Settings
+          initialPage={settingsPage}
           appearance={appearance}
           onPreview={setPreview}
           onSave={saveAppearance}
           onClose={() => {
-            setSettingsOpen(false);
+            setSettingsPage(undefined);
             setPreview(undefined);
           }}
         />

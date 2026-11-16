@@ -40,3 +40,22 @@ export async function openLibraryFilters(page: Page) {
   )
     await page.getByText('Filters and collections', { exact: true }).click();
 }
+
+export async function openSettingsPage(page: Page, name: string) {
+  if (
+    !(await page
+      .getByRole('button', { name: 'Close settings', exact: true })
+      .isVisible())
+  )
+    await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  const mobile = page.getByRole('combobox', {
+    name: 'Settings section',
+    exact: true,
+  });
+  if (await mobile.isVisible()) await mobile.selectOption({ label: name });
+  else
+    await page
+      .getByRole('navigation', { name: 'Settings sections' })
+      .getByRole('button', { name, exact: true })
+      .click();
+}

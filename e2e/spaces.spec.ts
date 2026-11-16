@@ -22,8 +22,8 @@ test('spaces isolate libraries, survive reload, capture explicitly and recover a
   }
   await add('Personal');
   await page
-    .getByRole('button', { name: 'Manage spaces', exact: true })
-    .click();
+    .getByRole('combobox', { name: 'Active space' })
+    .selectOption('__manage');
   await page
     .getByRole('textbox', { name: 'New space name', exact: true })
     .fill('Work');
@@ -80,8 +80,8 @@ test('spaces isolate libraries, survive reload, capture explicitly and recover a
     page.getByRole('link', { name: /Captured.*opens in a new tab/ }),
   ).toBeVisible();
   await page
-    .getByRole('button', { name: 'Manage spaces', exact: true })
-    .click();
+    .getByRole('combobox', { name: 'Active space' })
+    .selectOption('__manage');
   await page
     .getByRole('button', { name: 'Rename current space', exact: true })
     .click();
@@ -106,8 +106,8 @@ test('spaces isolate libraries, survive reload, capture explicitly and recover a
     .getByRole('combobox', { name: 'Active space' })
     .selectOption(work!);
   await other
-    .getByRole('button', { name: 'Manage spaces', exact: true })
-    .click();
+    .getByRole('combobox', { name: 'Active space' })
+    .selectOption('__manage');
   other.once('dialog', (dialog) => dialog.accept());
   await other
     .getByRole('button', { name: 'Delete current space', exact: true })

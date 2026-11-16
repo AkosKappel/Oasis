@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { test, expect } from './fixtures';
 const response = {
   current: { temperature_2m: 12, weather_code: 2 },
@@ -65,7 +66,7 @@ test('keeps weather opt-in, handles denied access and caches a chosen city offli
     await route.fulfill({ json: response });
   });
   await page.goto('chrome://newtab/');
-  await page.getByRole('button', { name: 'Widgets', exact: true }).click();
+  await openSettingsPage(page, 'Widgets');
   const dialog = page.getByRole('dialog', { name: 'Widgets', exact: true });
   expect(searches).toBe(0);
   expect(forecasts).toBe(0);
@@ -98,7 +99,7 @@ test('keeps weather opt-in, handles denied access and caches a chosen city offli
   await page.reload();
   await expect(weather).toContainText('12°C');
   expect(forecasts).toBe(1);
-  await page.getByRole('button', { name: 'Widgets', exact: true }).click();
+  await openSettingsPage(page, 'Widgets');
   await dialog
     .getByRole('button', { name: 'Turn weather off', exact: true })
     .click();
@@ -140,7 +141,7 @@ test('shows an unavailable state when the provider fails and keeps controls usab
     route.fulfill({ status: 503, body: 'Unavailable' }),
   );
   await page.goto('chrome://newtab/');
-  await page.getByRole('button', { name: 'Widgets', exact: true }).click();
+  await openSettingsPage(page, 'Widgets');
   const dialog = page.getByRole('dialog', { name: 'Widgets', exact: true });
   await dialog
     .getByRole('searchbox', { name: 'Weather city', exact: true })
@@ -156,7 +157,7 @@ test('shows an unavailable state when the provider fails and keeps controls usab
     'could not be reached',
   );
   await expect(weather).toContainText('No forecast saved yet');
-  await page.getByRole('button', { name: 'Widgets', exact: true }).click();
+  await openSettingsPage(page, 'Widgets');
   await expect(
     dialog.getByRole('button', { name: 'Turn weather off', exact: true }),
   ).toBeEnabled();
@@ -203,7 +204,7 @@ test('turning weather off in one space preserves another space’s browser acces
   );
   await page.goto('chrome://newtab/');
   async function enable() {
-    await page.getByRole('button', { name: 'Widgets', exact: true }).click();
+    await openSettingsPage(page, 'Widgets');
     await page
       .getByRole('searchbox', { name: 'Weather city', exact: true })
       .fill('Oslo');
@@ -218,8 +219,8 @@ test('turning weather off in one space preserves another space’s browser acces
   }
   await enable();
   await page
-    .getByRole('button', { name: 'Manage spaces', exact: true })
-    .click();
+    .getByRole('combobox', { name: 'Active space' })
+    .selectOption('__manage');
   await page
     .getByRole('textbox', { name: 'New space name', exact: true })
     .fill('Work');
@@ -233,7 +234,7 @@ test('turning weather off in one space preserves another space’s browser acces
   ).toHaveCount(1);
   await selector.selectOption({ label: 'Work' });
   await enable();
-  await page.getByRole('button', { name: 'Widgets', exact: true }).click();
+  await openSettingsPage(page, 'Widgets');
   await page
     .getByRole('button', { name: 'Turn weather off', exact: true })
     .click();
@@ -245,7 +246,7 @@ test('turning weather off in one space preserves another space’s browser acces
   await expect(
     page.getByRole('region', { name: 'Weather', exact: true }),
   ).toBeVisible();
-  await page.getByRole('button', { name: 'Widgets', exact: true }).click();
+  await openSettingsPage(page, 'Widgets');
   await page
     .getByRole('button', { name: 'Turn weather off', exact: true })
     .click();

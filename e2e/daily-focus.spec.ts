@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { test, expect } from './fixtures';
 test('opts into daily focus, edits and completes it across tabs and reloads', async ({
   page,
@@ -7,7 +8,7 @@ test('opts into daily focus, edits and completes it across tabs and reloads', as
   await expect(
     page.getByRole('region', { name: 'Daily focus', exact: true }),
   ).toHaveCount(0);
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await page
     .getByRole('checkbox', { name: 'Show daily focus', exact: true })
     .check();
@@ -49,7 +50,7 @@ test('opts into daily focus, edits and completes it across tabs and reloads', as
     page.getByText('A revised focus', { exact: true }),
   ).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('daily-focus.png') });
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await page
     .getByRole('checkbox', { name: 'Show daily focus', exact: true })
     .uncheck();

@@ -211,3 +211,14 @@ it('keeps builtin content references stable and excludes deleted data', async ()
       .backgrounds[0]!.imageId,
   ).toBe('oasis:builtin:jade-ridges');
 });
+
+it('round-trips the full supported space-name length', async () => {
+  await database.open();
+  const name = 'A'.repeat(80);
+  await database.spaces.update('default', { name });
+  const archive = await createSpaceBackupRepository(
+    'default',
+    database,
+  ).export();
+  expect(parseSpaceBackup(serializeSpaceBackup(archive)).space.name).toBe(name);
+});

@@ -1,6 +1,5 @@
 import { TaskListDialog } from '@/features/widgets/task-list';
 import type { HomeWidget } from '@/database/home-widgets';
-import { ContentPreferences } from '@/features/content/content-preferences';
 import { defaultDashboardItems } from '@/database/dashboard-layout';
 import { useDashboardLayout } from './use-dashboard-layout';
 import { BookmarkSections } from './bookmark-sections';
@@ -15,13 +14,7 @@ import { HomeWidgets } from '@/features/widgets/home-widgets';
 import { DailyFocus } from '@/features/focus/daily-focus';
 import { localDay } from '@/database/daily-focus';
 import { useEffect, useRef, useState } from 'react';
-import {
-  ArrowUpRight,
-  Library,
-  Search,
-  SlidersHorizontal,
-  Settings2,
-} from 'lucide-react';
+import { ArrowUpRight, Library, Search, Settings2 } from 'lucide-react';
 import { LinksMenu } from '@/features/links/links-menu';
 import { preferredDailyItem } from '@/lib/preferred-daily-item';
 import { useContentFeedback } from '@/features/content/use-content-feedback';
@@ -41,29 +34,20 @@ import { useAlbums } from '@/features/albums/use-albums';
 import { useLibrary } from '@/features/bookmarks/use-library';
 
 export function Home({
-  onLayout,
   onSearch,
   appearance,
-  onAppearance,
-  onAlbums,
-  onQuotes,
-  onWidgets,
+  onSettings,
   onFocus,
   onPinLinks,
 }: {
-  onLayout: () => void;
   onSearch: (query: string) => void;
   appearance: Appearance;
-  onAppearance: () => void;
-  onAlbums: () => void;
-  onQuotes: () => void;
-  onWidgets: () => void;
+  onSettings: () => void;
   onFocus: () => void;
   onPinLinks: (pinned: boolean) => Promise<void>;
 }) {
   const { layout, error: layoutError } = useDashboardLayout();
   const [taskList, setTaskList] = useState<HomeWidget>();
-  const [preferencesOpen, setPreferencesOpen] = useState(false);
   const preferenceTrigger = useRef<HTMLButtonElement>(null);
   const pendingFocus = useRef<HTMLElement | null>(null);
   const { contentFeedback } = useSpaceRepositories();
@@ -451,20 +435,13 @@ export function Home({
 
             <button
               ref={preferenceTrigger}
-              aria-label="Content preferences"
-              title="Content preferences"
+              aria-label="Settings"
+              title="Settings"
               type="button"
-              className="rounded-md px-2 text-sm text-muted-foreground hover:text-foreground"
-              onClick={() => setPreferencesOpen(true)}
+              className="rounded-md p-2 text-muted-foreground hover:text-foreground"
+              onClick={onSettings}
             >
               <Settings2 className="size-4" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              className="rounded-md px-2 text-sm text-muted-foreground hover:text-foreground"
-              onClick={onLayout}
-            >
-              Layout
             </button>
             <button
               type="button"
@@ -472,35 +449,6 @@ export function Home({
               onClick={onFocus}
             >
               Focus mode
-            </button>
-            <button
-              type="button"
-              className="rounded-md px-2 text-sm text-muted-foreground hover:text-foreground"
-              onClick={onWidgets}
-            >
-              Widgets
-            </button>
-            <button
-              type="button"
-              className="rounded-md px-2 text-sm text-muted-foreground hover:text-foreground"
-              onClick={onQuotes}
-            >
-              Quotes
-            </button>
-            <button
-              type="button"
-              className="rounded-md px-2 text-sm text-muted-foreground hover:text-foreground"
-              onClick={onAlbums}
-            >
-              Image albums
-            </button>
-            <button
-              type="button"
-              onClick={onAppearance}
-              aria-label="Appearance"
-              className="rounded-md p-2 text-muted-foreground hover:text-foreground"
-            >
-              <SlidersHorizontal className="size-4" aria-hidden="true" />
             </button>
           </footer>
         </>
@@ -510,9 +458,6 @@ export function Home({
           widget={taskList}
           onClose={() => setTaskList(undefined)}
         />
-      )}
-      {preferencesOpen && (
-        <ContentPreferences onClose={() => setPreferencesOpen(false)} />
       )}
     </main>
   );

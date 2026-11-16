@@ -1,10 +1,11 @@
+import { openSettingsPage } from './fixtures';
 import { test, expect } from './fixtures';
 
 test('styles native dropdown arrows and options with themed keyboard selection', async ({
   page,
 }) => {
   await page.goto('chrome://newtab/');
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   expect(
     await page.evaluate(() => CSS.supports('appearance', 'base-select')),
   ).toBe(true);

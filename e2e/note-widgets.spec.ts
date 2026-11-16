@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { readFile } from 'node:fs/promises';
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from './fixtures';
@@ -8,7 +9,7 @@ test('keeps scratchpads optional, preserves drafts across tab conflicts and down
   test.setTimeout(60_000);
   await context.setOffline(true);
   await page.goto('chrome://newtab/');
-  await page.getByRole('button', { name: 'Widgets', exact: true }).click();
+  await openSettingsPage(page, 'Widgets');
   const manager = page.getByRole('dialog', { name: 'Widgets', exact: true });
   await manager
     .getByRole('combobox', { name: 'Widget type', exact: true })
@@ -35,7 +36,7 @@ test('keeps scratchpads optional, preserves drafts across tab conflicts and down
   await expect(
     page.getByRole('article', { name: 'Ideas', exact: true }),
   ).toHaveCount(0);
-  await page.getByRole('button', { name: 'Widgets', exact: true }).click();
+  await openSettingsPage(page, 'Widgets');
   await manager
     .getByRole('button', { name: 'Edit Ideas', exact: true })
     .click();
@@ -61,7 +62,7 @@ test('keeps scratchpads optional, preserves drafts across tab conflicts and down
     .fill('My unsaved draft.');
   const other = await context.newPage();
   await other.goto(page.url());
-  await other.getByRole('button', { name: 'Widgets', exact: true }).click();
+  await openSettingsPage(other, 'Widgets');
   const otherManager = other.getByRole('dialog', {
     name: 'Widgets',
     exact: true,
@@ -119,7 +120,7 @@ test('keeps scratchpads optional, preserves drafts across tab conflicts and down
     path: testInfo.outputPath('note-widget-mobile.png'),
     fullPage: true,
   });
-  await page.getByRole('button', { name: 'Widgets', exact: true }).click();
+  await openSettingsPage(page, 'Widgets');
   page.once('dialog', (dialog) => dialog.accept());
   await manager
     .getByRole('button', { name: 'Remove Ideas', exact: true })

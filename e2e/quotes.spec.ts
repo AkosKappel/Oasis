@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { readFile } from 'node:fs/promises';
 import { test, expect } from './fixtures';
 test('edits local quote collections, rotates daily and supports portable backups', async ({
@@ -5,7 +6,7 @@ test('edits local quote collections, rotates daily and supports portable backups
   context,
 }) => {
   await page.goto('chrome://newtab/');
-  await page.getByRole('button', { name: 'Quotes', exact: true }).click();
+  await openSettingsPage(page, 'Quote collections');
   await page
     .getByRole('textbox', { name: 'New collection name', exact: true })
     .fill('Personal reminders');
@@ -55,7 +56,7 @@ test('edits local quote collections, rotates daily and supports portable backups
   ).toContainText('Make room for what matters.');
   await other.close();
   await page.screenshot({ path: '/tmp/oasis-previews/home-quote.png' });
-  await page.getByRole('button', { name: 'Quotes', exact: true }).click();
+  await openSettingsPage(page, 'Quote collections');
   await page
     .getByRole('button', {
       name: 'Edit quote Make room for what matters.',
@@ -71,7 +72,7 @@ test('edits local quote collections, rotates daily and supports portable backups
   await expect(page.getByRole('figure', { name: 'Daily quote' })).toContainText(
     'Keep it simple.',
   );
-  await page.getByRole('button', { name: 'Quotes', exact: true }).click();
+  await openSettingsPage(page, 'Quote collections');
   page.once('dialog', (dialog) => dialog.accept());
   await page
     .getByRole('button', { name: 'Delete collection', exact: true })

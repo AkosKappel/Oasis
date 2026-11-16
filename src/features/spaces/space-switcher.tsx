@@ -36,7 +36,7 @@ export function SpaceSwitcher() {
     <div
       role="group"
       aria-label="Spaces"
-      className="relative order-3 w-fit max-w-full basis-full sm:order-none sm:basis-auto rounded-lg border border-border bg-background p-2 text-sm"
+      className="relative w-fit max-w-full text-sm"
     >
       <div className="flex flex-wrap items-center gap-2">
         <label className="field min-w-0">
@@ -46,33 +46,30 @@ export function SpaceSwitcher() {
             className="max-w-48"
             value={spaceId}
             disabled={busy}
-            onChange={(event) => select(event.target.value)}
+            onChange={(event) => {
+              if (event.target.value === '__manage') {
+                setOpen(!open);
+                setName('');
+                setRenaming(false);
+              } else {
+                select(event.target.value);
+                setOpen(false);
+              }
+            }}
           >
             {list.map((space) => (
               <option key={space.id} value={space.id}>
                 {space.name}
               </option>
             ))}
+            <option value="__manage">Manage spaces…</option>
           </select>
         </label>
-        <Button
-          variant="outline"
-          size="sm"
-          aria-expanded={open}
-          aria-controls="space-management"
-          onClick={() => {
-            setOpen(!open);
-            setName('');
-            setRenaming(false);
-          }}
-        >
-          Manage spaces
-        </Button>
       </div>
       {open && (
         <form
           id="space-management"
-          className="mt-3 flex max-w-sm flex-col gap-3 rounded-lg border border-border bg-background p-3"
+          className="fixed right-4 top-20 z-20 flex w-80 max-w-[90vw] flex-col gap-3 rounded-lg border border-border bg-background p-3"
           onSubmit={(event) => {
             event.preventDefault();
             void run(async () => {

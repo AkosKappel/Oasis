@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { test, expect } from './fixtures';
 test('keeps bookmark sections opt-in, persists them and provides a useful empty state', async ({
   page,
@@ -7,7 +8,7 @@ test('keeps bookmark sections opt-in, persists them and provides a useful empty 
   await expect(
     page.getByRole('region', { name: 'Recently added', exact: true }),
   ).toHaveCount(0);
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
+  await openSettingsPage(page, 'Appearance');
   await page
     .getByRole('checkbox', {
       name: 'Show recently added bookmarks',

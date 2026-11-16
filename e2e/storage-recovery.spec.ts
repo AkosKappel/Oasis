@@ -107,8 +107,8 @@ test('keeps an open draft when refreshing the space list fails', async ({
   const other = await context.newPage();
   await other.goto(page.url());
   await other
-    .getByRole('button', { name: 'Manage spaces', exact: true })
-    .click();
+    .getByRole('combobox', { name: 'Active space' })
+    .selectOption('__manage');
   await other
     .getByRole('textbox', { name: 'New space name', exact: true })
     .fill('Reading');

@@ -1,3 +1,4 @@
+import { openSettingsPage } from './fixtures';
 import { openLibraryTool } from './fixtures';
 import { resolve } from 'node:path';
 import { readFile } from 'node:fs/promises';
@@ -151,7 +152,7 @@ test('verifies packaged assets and captures store previews with sample data', as
   await page.screenshot({ path: testInfo.outputPath('store-notes.png') });
   await page.keyboard.press('Escape');
   await page.getByRole('link', { name: 'Oasis home', exact: true }).click();
-  await page.getByRole('button', { name: 'Image albums', exact: true }).click();
+  await openSettingsPage(page, 'Image albums');
   await page
     .getByRole('button', { name: 'Quiet geometry', exact: true })
     .click();

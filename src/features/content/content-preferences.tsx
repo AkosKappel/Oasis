@@ -10,7 +10,13 @@ import {
   storageWriteSucceeded,
 } from '@/database/storage-health';
 import type { ContentKind } from '@/database/content-feedback';
-export function ContentPreferences({ onClose }: { onClose: () => void }) {
+export function ContentPreferences({
+  onClose,
+  embedded = false,
+}: {
+  onClose: () => void;
+  embedded?: boolean;
+}) {
   const { contentFeedback } = useSpaceRepositories();
   const { feedback, error: loadError } = useContentFeedback();
   const { data: albums } = useAlbums(),
@@ -35,12 +41,13 @@ export function ContentPreferences({ onClose }: { onClose: () => void }) {
   }, [busy]);
   const [previousFocus] = useState(document.activeElement);
   useEffect(() => {
+    if (embedded) return;
     dialog.current?.showModal();
     return () => {
       if (previousFocus instanceof HTMLElement && previousFocus.isConnected)
         previousFocus.focus();
     };
-  }, [previousFocus]);
+  }, [embedded, previousFocus]);
   const rows = useMemo(() => {
     const images = new Map(
       albums?.images.map((image) => [image.id, image.name]),
@@ -88,11 +95,13 @@ export function ContentPreferences({ onClose }: { onClose: () => void }) {
       setBusy(false);
     }
   }
-  return createPortal(
-    <dialog
-      ref={dialog}
-      className="editor"
+  const Container = embedded ? 'section' : 'dialog';
+  const content = (
+    <Container
+      ref={embedded ? undefined : dialog}
+      className={embedded ? undefined : 'editor'}
       aria-labelledby="content-preferences-title"
+      aria-busy={busy}
       onClose={onClose}
       onCancel={(event) => {
         if (busy) event.preventDefault();
@@ -272,7 +281,7 @@ export function ContentPreferences({ onClose }: { onClose: () => void }) {
           {message}
         </p>
       )}
-    </dialog>,
-    document.body,
+    </Container>
   );
+  return embedded ? content : createPortal(content, document.body);
 }
