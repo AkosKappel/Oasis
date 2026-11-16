@@ -5,7 +5,7 @@ Oasis is a desktop extension. A narrow viewport test does not establish mobile e
 | Browser                          | Release policy                 | Verification                                                             |
 | -------------------------------- | ------------------------------ | ------------------------------------------------------------------------ |
 | Chrome and Edge desktop          | Primary targets, latest stable | Built packages tested in bundled Chromium; native release checks pending |
-| Firefox desktop                  | Compatibility work in progress | No supported release yet                                                 |
+| Firefox desktop                  | Experimental MV3, Firefox 140+ | Package audit only; native verification pending                          |
 | Brave, Vivaldi and Opera desktop | Best effort                    | No browser-specific certification                                        |
 | Safari                           | Deferred                       | No Safari extension package or native checks                             |
 | Mobile browsers                  | Deferred                       | Responsive UI only                                                       |
@@ -31,3 +31,24 @@ Complete the matrix in [Release preparation](RELEASE.md) on real Chrome and Edge
 Firefox promotion requires its own manifest/API audit, actual temporary installation, the same core flows and Mozilla distribution/consent review. Safari requires a separate packaging and native validation effort.
 
 [Playwright's extension guide](https://playwright.dev/docs/chrome-extensions) documents why extension automation uses bundled Chromium. [WXT browser targeting](https://wxt.dev/guide/essentials/target-different-browsers.html) explains separate target builds and manifest versions.
+
+## Experimental Firefox build
+
+Run `pnpm build:firefox`, `node scripts/check-package.mjs firefox` and `pnpm zip:firefox` sequentially. MV3 is explicit because WXT defaults Firefox to MV2. WXT generates background scripts for Firefox, rather than a Chromium service worker. A stable project UUID identifies the add-on; keep it stable across updates. Firefox 140 is the candidate minimum, not a claim that all releases since 140 have been tested.
+
+| Area                        | Audit disposition                                  | Native gate                                                |
+| --------------------------- | -------------------------------------------------- | ---------------------------------------------------------- |
+| New tab and popup           | MV3 entrypoints generated                          | Install and open both                                      |
+| Capture, menus and commands | WXT browser namespace, no direct Chrome-only calls | Toolbar, page/link menus and shortcut                      |
+| Page details                | Optional scripting and activeTab retained          | Grant, deny, revoke and execute on a real page             |
+| Weather                     | Optional host permissions retained                 | Grant/revoke and confirm requests stop                     |
+| Storage and downloads       | IndexedDB and Blob/anchor downloads                | Cross-tab updates, backup restore and profile upgrade      |
+| UI                          | Native dialogs/popovers and modern CSS             | Engine checks plus native keyboard, zoom and screen reader |
+
+For temporary native verification, open `about:debugging#/runtime/this-firefox`, choose Load Temporary Add-on and select `.output/firefox-mv3/manifest.json`. Use a disposable profile and record Firefox/OS versions, dates and results before promoting support. Temporary installation is not store signing.
+
+Experimental packaging omits automatic source archives. Prepare a separately reviewed source archive if Mozilla submission requires one.
+
+The Firefox archive is **not AMO-ready**. Review Mozilla's transmission declaration and consent requirements for optional weather, web search and page-image requests before submission. Do not declare `none` solely because Oasis has no backend or telemetry. Accurate metadata, signing and native verification remain release gates.
+
+Sources reviewed 2026-11-16: [WXT targeting](https://wxt.dev/guide/essentials/target-different-browsers.html), [Gecko identity](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/browser_specific_settings), [Mozilla data consent](https://extensionworkshop.com/documentation/develop/firefox-builtin-data-consent/).

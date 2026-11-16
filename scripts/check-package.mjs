@@ -4,7 +4,10 @@ import { resolve, relative } from 'node:path';
 import process from 'node:process';
 
 const target = process.argv[2];
-assert(['chrome', 'edge'].includes(target), 'Choose chrome or edge.');
+assert(
+  ['chrome', 'edge', 'firefox'].includes(target),
+  'Choose chrome, edge or firefox.',
+);
 const root = resolve(`.output/${target}-mv3`);
 const read = (name) => readFile(resolve(root, name));
 const manifest = JSON.parse(await read('manifest.json'));
@@ -21,7 +24,21 @@ assert.deepEqual(manifest.optional_host_permissions.toSorted(), [
 ]);
 assert.equal(manifest.chrome_url_overrides.newtab, 'newtab.html');
 assert.equal(manifest.action.default_popup, 'popup.html');
-assert.equal(manifest.background.service_worker, 'background.js');
+if (target === 'firefox') {
+  assert.deepEqual(manifest.background.scripts, ['background.js']);
+  assert.equal(manifest.background.service_worker, undefined);
+  assert.equal(
+    manifest.browser_specific_settings.gecko.id,
+    '{6606897f-90af-4ce1-8257-177e15db756b}',
+  );
+  assert.equal(
+    manifest.browser_specific_settings.gecko.strict_min_version,
+    '140.0',
+  );
+} else {
+  assert.equal(manifest.background.service_worker, 'background.js');
+  assert.equal(manifest.browser_specific_settings, undefined);
+}
 for (const name of ['newtab.html', 'popup.html', 'background.js'])
   assert((await read(name)).length > 0, `Missing ${name}`);
 for (const size of [16, 32, 48, 128]) {
@@ -41,7 +58,13 @@ async function inspect(directory) {
     const name = relative(root, path);
     assert(!item.isSymbolicLink(), `Unexpected link: ${name}`);
     assert(
-      !/^(\.env|BACKLOG|AGENTS|node_modules|src|docs|test-results)/.test(name),
+      !name
+        .split(/[\\/]/)
+        .some((part) =>
+          /^(\.env|BACKLOG|OPERATIONS|AGENTS|CLAUDE|node_modules$|src$|docs$|test-results$)/.test(
+            part,
+          ),
+        ),
       `Private/development file: ${name}`,
     );
     assert(!/\.(map|ts|tsx)$/.test(name), `Development source: ${name}`);

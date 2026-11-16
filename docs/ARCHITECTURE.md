@@ -187,3 +187,5 @@ Schema 23 adds `Space.setupComplete`. Its migration marks existing spaces comple
 Home owns note and task editors outside its configurable section tree. Notes save against the revision opened, preserving drafts on conflicts. Settings embeds task contents within its current modal, updates its accessible title and handles Escape as Back while a task list is open.
 
 Neutral Next selections are transient Home state, scoped to the local day and current content pool. The weighted selector accepts excluded IDs so current/visited items can be skipped while affinity still derives from the full pool. No ratings or impressions are written.
+
+WXT targets Chrome, Edge and experimental Firefox with explicit MV3. Gecko identity/minimum metadata is Firefox-only. WXT generates Firefox background scripts and Chromium service workers. No API permissions are added. See BROWSERS.md for validation and distribution gates.

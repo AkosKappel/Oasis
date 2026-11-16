@@ -69,3 +69,24 @@ jobs:
             .output/*.zip
             test-results/
             playwright-report/
+
+  firefox-package:
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm zip:firefox
+      - run: node scripts/check-package.mjs firefox
+      - uses: actions/upload-artifact@v7
+        with:
+          name: firefox-experimental
+          retention-days: 14
+          include-hidden-files: true
+          path: .output/*-firefox.zip

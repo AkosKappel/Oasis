@@ -3,8 +3,21 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   srcDir: 'src',
+  manifestVersion: 3,
+  zip: { zipSources: false },
+  targetBrowsers: ['chrome', 'edge', 'firefox'],
   modules: ['@wxt-dev/module-react'],
-  manifest: {
+  manifest: ({ browser }) => ({
+    ...(browser === 'firefox'
+      ? {
+          browser_specific_settings: {
+            gecko: {
+              id: '{6606897f-90af-4ce1-8257-177e15db756b}',
+              strict_min_version: '140.0',
+            },
+          },
+        }
+      : {}),
     name: 'Oasis',
     description: 'Your personal space on the web.',
     icons: {
@@ -26,6 +39,6 @@ export default defineConfig({
         description: 'Save the current page to Oasis',
       },
     },
-  },
+  }),
   vite: () => ({ plugins: [tailwindcss()] }),
 });

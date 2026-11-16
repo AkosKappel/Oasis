@@ -349,3 +349,7 @@ Next image and Next quote appear with the existing hover/focus rating controls w
 ## 2026-11-16: Browser support is evidence-based
 
 Chrome and Edge are primary desktop targets; Firefox starts experimental, other Chromium browsers are best effort, and Safari/mobile extension support is deferred. CI separates shared checks, full Linux Chromium flows and target/OS smoke jobs, with diagnostic and package artifacts. Bundled Chromium is used for extension automation because branded Chrome/Edge removed the required sideload flags. Native browser permissions and OS integration remain explicit release gates, not inferred passes.
+
+## 2026-11-16: Firefox starts as an experimental MV3 target
+
+All targets explicitly use MV3 so Firefox does not default to MV2 while Oasis uses optional scripting. Firefox gets a stable UUID and candidate minimum version 140; Chromium manifests retain their permissions and service worker. Firefox package checks assert background scripts separately. Experimental packaging disables automatic source archives to avoid distributing local project material. Native flows and Mozilla consent/signing review gate supported distribution. Optional online features mean that no-backend does not justify a no-transmission declaration.
