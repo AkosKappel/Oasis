@@ -191,3 +191,5 @@ Neutral Next selections are transient Home state, scoped to the local day and cu
 WXT targets Chrome, Edge and experimental Firefox with explicit MV3. Gecko identity/minimum metadata is Firefox-only. WXT generates Firefox background scripts and Chromium service workers. No API permissions are added. See BROWSERS.md for validation and distribution gates.
 
 `e2e-ui/` and `playwright.ui.config.ts` exercise the built dashboard as a page across engines. A loopback-only fixture serves `.output/chrome-mv3`; API stubs live only in test initialization. No production testing endpoint, permission bypass or alternate data layer is introduced. Extension integration remains in `e2e/`.
+
+The Saved searches filter builder compiles selected owned folder/tag names and other supported criteria into the existing query string. Compilation is pure and tested against the real search matcher. It does not write until the ordinary saved-search repository save, and adds no table or backup field.

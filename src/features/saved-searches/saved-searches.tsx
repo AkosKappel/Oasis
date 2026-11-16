@@ -1,3 +1,5 @@
+import { QueryBuilder } from './query-builder';
+import type { Folder, Tag } from '@/types/entities';
 import { createPortal } from 'react-dom';
 import { useEffect, useRef, useState } from 'react';
 import { liveQuery } from 'dexie';
@@ -12,10 +14,14 @@ import type { SavedSearch } from '@/database/saved-searches';
 export function SavedSearches({
   query,
   onApply,
+  folders = [],
+  tags = [],
   hideSelect = false,
   onRecords,
 }: {
   query: string;
+  folders?: Folder[];
+  tags?: Tag[];
   hideSelect?: boolean;
   onRecords?: (records: SavedSearch[]) => void;
   onApply: (query: string) => void;
@@ -78,6 +84,8 @@ export function SavedSearches({
       {open && items && (
         <SavedSearchManager
           items={items}
+          folders={folders}
+          tags={tags}
           loadError={loadError}
           initialQuery={query}
           onApply={(value) => {
@@ -91,12 +99,16 @@ export function SavedSearches({
   );
 }
 function SavedSearchManager({
+  folders,
+  tags,
   loadError,
   items,
   initialQuery,
   onApply,
   onClose,
 }: {
+  folders: Folder[];
+  tags: Tag[];
   loadError?: string;
   items: SavedSearch[];
   initialQuery: string;
@@ -105,6 +117,7 @@ function SavedSearchManager({
 }) {
   const { savedSearches } = useSpaceRepositories();
   const dialog = useRef<HTMLDialogElement>(null);
+  const queryField = useRef<HTMLTextAreaElement>(null);
   const [previous] = useState(document.activeElement);
   const [editing, setEditing] = useState<SavedSearch>(),
     [name, setName] = useState(''),
@@ -143,7 +156,7 @@ function SavedSearchManager({
   return createPortal(
     <dialog
       ref={dialog}
-      className="editor"
+      className="editor !max-w-2xl"
       aria-labelledby="saved-searches-title"
       onCancel={(event) => {
         if (busy) event.preventDefault();
@@ -159,10 +172,9 @@ function SavedSearchManager({
         </Button>
       </div>
       <p className="mt-4 text-sm text-muted-foreground">
-        Save a query as a custom smart collection. Results update as your
-        Library changes. Use tag:, folder:, domain:, is:favorite or quoted
-        phrases. Loading a search resets other Library filters. Saved searches
-        stay in this space on this device, outside bookmark backups.
+        Create a live collection with filters or an editable query. Loading one
+        resets Library filters. Saved searches stay in this space and are
+        included in complete space backups.
       </p>
       <form
         className="mt-5"
@@ -194,9 +206,19 @@ function SavedSearchManager({
               onChange={(event) => setName(event.target.value)}
             />
           </label>
+          <QueryBuilder
+            folders={folders}
+            tags={tags}
+            onApply={(value) => {
+              setQuery(value);
+              setMessage('Filters applied. Review the query before saving.');
+              requestAnimationFrame(() => queryField.current?.focus());
+            }}
+          />
           <label className="field">
             Search query
             <textarea
+              ref={queryField}
               required
               rows={3}
               maxLength={1000}

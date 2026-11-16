@@ -184,3 +184,58 @@ test('Home preferences, note editing and task navigation work across engines', a
   ).toContainText('A saved idea.');
   await page.screenshot({ path: testInfo.outputPath('home-engine.png') });
 });
+
+test('reviews a smart-collection query from filters on a narrow layout', async ({
+  page,
+}) => {
+  await page
+    .getByRole('dialog', { name: 'Welcome to Oasis' })
+    .getByRole('button', { name: 'Skip setup' })
+    .click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('link', { name: 'Library', exact: true }).click();
+  await openLibraryFilters(page);
+  await page
+    .getByRole('button', { name: 'Saved searches', exact: true })
+    .click();
+  const manager = page.getByRole('dialog', {
+    name: 'Saved searches',
+    exact: true,
+  });
+  await manager
+    .getByRole('textbox', { name: 'Search name', exact: true })
+    .fill('Favorite references');
+  await manager.getByText('Build with filters', { exact: true }).click();
+  await manager
+    .getByRole('textbox', { name: 'Contains text', exact: true })
+    .fill('guide');
+  await manager
+    .getByRole('textbox', { name: 'Website domain', exact: true })
+    .fill('example.com');
+  await manager
+    .getByRole('checkbox', { name: 'Favorites only', exact: true })
+    .check();
+  await manager
+    .getByRole('button', { name: 'Apply filters to query', exact: true })
+    .click();
+  const query = '"guide" domain:example.com is:favorite';
+  await expect(
+    manager.getByRole('textbox', { name: 'Search query', exact: true }),
+  ).toHaveValue(query);
+  await expect(
+    manager.getByRole('textbox', { name: 'Search query', exact: true }),
+  ).toBeFocused();
+  expect(
+    await manager.evaluate((node) => node.scrollWidth <= node.clientWidth),
+  ).toBe(true);
+  await manager
+    .getByRole('button', { name: 'Save search', exact: true })
+    .click();
+  await expect(manager.getByRole('status')).toHaveText('Search saved.');
+  await manager
+    .getByRole('button', { name: 'Load Favorite references', exact: true })
+    .click();
+  await expect(
+    page.getByRole('searchbox', { name: 'Search bookmarks', exact: true }),
+  ).toHaveValue(query);
+});

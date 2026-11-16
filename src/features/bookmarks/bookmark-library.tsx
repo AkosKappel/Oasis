@@ -561,6 +561,8 @@ export function BookmarkLibrary({
                   </select>
                 </label>
                 <SavedSearches
+                  folders={folders}
+                  tags={tags}
                   hideSelect
                   onRecords={setSavedRecords}
                   query={query}
