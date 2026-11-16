@@ -1,3 +1,4 @@
+import { TrashPanel } from './trash-panel';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type { Appearance } from '@/database/appearance';
@@ -136,7 +137,12 @@ export function Settings({
           )}
           {page === 'widgets' && <WidgetManager embedded onClose={onClose} />}
           {page === 'privacy' && <Privacy />}
-          {page === 'data' && <BackupManager embedded onClose={onClose} />}
+          {page === 'data' && (
+            <>
+              <BackupManager embedded onClose={onClose} />
+              <TrashPanel />
+            </>
+          )}
         </div>
       </div>
     </dialog>

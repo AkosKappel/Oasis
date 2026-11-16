@@ -1,6 +1,6 @@
 import Dexie from 'dexie';
 import { afterEach, expect, it } from 'vitest';
-import { OasisDatabase } from './schema';
+import { OasisDatabase, SCHEMA_VERSION } from './schema';
 import { createContentFeedbackRepository } from './content-feedback';
 import { builtinAlbums } from './builtin-albums';
 import { createSpaceRepository } from './spaces';
@@ -92,7 +92,7 @@ it('upgrades v17 without changing background choices or adding ratings', async (
   const upgraded = new OasisDatabase(name);
   try {
     await upgraded.open();
-    expect(upgraded.verno).toBe(21);
+    expect(upgraded.verno).toBe(SCHEMA_VERSION);
     expect(await upgraded.backgrounds.get(background.id)).toEqual(background);
     expect(await upgraded.contentFeedback.count()).toBe(0);
   } finally {

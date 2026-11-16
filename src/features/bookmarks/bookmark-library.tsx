@@ -1,3 +1,4 @@
+import { useUndo } from '@/features/settings/undo';
 import type { SettingsPage } from '@/features/settings/settings';
 import type { SavedSearch } from '@/database/saved-searches';
 import { SavedSearches } from '@/features/saved-searches/saved-searches';
@@ -51,6 +52,7 @@ export function BookmarkLibrary({
   initialQuery?: string;
   onSettings: (page: SettingsPage) => void;
 }) {
+  const { offer } = useUndo();
   const {
     personalBookmarks,
     personalOrganization,
@@ -183,12 +185,15 @@ export function BookmarkLibrary({
     );
   }
   async function deleteSelected() {
-    if (!window.confirm(`Delete ${activeSelected.length} selected bookmarks?`))
-      return;
     setBulkBusy(true);
     setError(undefined);
     try {
+      const ids = [...activeSelected];
       await applyBulk({ kind: 'delete' });
+      offer(
+        ids.map((id) => ({ id, kind: 'bookmark' })),
+        `${ids.length} bookmarks`,
+      );
     } catch (cause) {
       reportStorageError(cause);
       setError(
@@ -296,12 +301,11 @@ export function BookmarkLibrary({
     }
   }
   async function remove(bookmark: Bookmark) {
-    if (!window.confirm(`Delete “${bookmark.title}” from your library?`))
-      return;
     setDeleting(bookmark.id);
     setError(undefined);
     try {
       await personalBookmarks.remove(bookmark.id);
+      offer([{ id: bookmark.id, kind: 'bookmark' }], bookmark.title);
     } catch (cause) {
       reportStorageError(cause);
       setError('The bookmark could not be deleted. Try again.');

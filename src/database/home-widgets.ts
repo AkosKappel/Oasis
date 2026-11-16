@@ -167,6 +167,7 @@ export function createHomeWidgetRepository(
             existing.updatedAt !== expectedUpdatedAt
           )
             throw new Error('This widget changed. Review it before removing.');
+          const deletionBatch = crypto.randomUUID();
           if (existing.kind === 'tasks')
             await database.widgetTasks
               .where('[spaceId+widgetId]')
@@ -174,10 +175,12 @@ export function createHomeWidgetRepository(
               .filter((task) => task.deletedAt === undefined)
               .modify((task) => {
                 const now = Math.max(Date.now(), task.updatedAt + 1);
+                task.deletionBatch = deletionBatch;
                 task.deletedAt = now;
                 task.updatedAt = now;
               });
           await database.homeWidgets.update(id, {
+            deletionBatch,
             deletedAt: Date.now(),
             updatedAt: Date.now(),
           });

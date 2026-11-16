@@ -1,6 +1,6 @@
 import Dexie from 'dexie';
 import { expect, it } from 'vitest';
-import { OasisDatabase } from './schema';
+import { OasisDatabase, SCHEMA_VERSION } from './schema';
 const oldStores = {
   spaces: 'id, name, updatedAt',
   bookmarks: 'id, spaceId, [spaceId+folderId], *tags, updatedAt',
@@ -45,7 +45,7 @@ it('upgrades v19 without changing existing widgets or enabling notes', async () 
   const database = new OasisDatabase(name);
   try {
     await database.open();
-    expect(database.verno).toBe(21);
+    expect(database.verno).toBe(SCHEMA_VERSION);
     expect(await database.homeWidgets.toArray()).toEqual([clock]);
   } finally {
     await database.delete();
@@ -74,7 +74,7 @@ it('upgrades v20 preserving note text and visibility with an empty task table', 
   const database = new OasisDatabase(name);
   try {
     await database.open();
-    expect(database.verno).toBe(21);
+    expect(database.verno).toBe(SCHEMA_VERSION);
     expect(await database.homeWidgets.toArray()).toEqual([note]);
     expect(await database.widgetTasks.count()).toBe(0);
   } finally {

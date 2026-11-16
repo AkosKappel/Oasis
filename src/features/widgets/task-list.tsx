@@ -1,3 +1,4 @@
+import { useUndo, UndoNotice } from '@/features/settings/undo';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ListTodo } from 'lucide-react';
@@ -155,6 +156,7 @@ export function TaskListDialog({
   widget: HomeWidget;
   onClose: () => void;
 }) {
+  const { offer } = useUndo();
   const { widgetTasks } = useSpaceRepositories();
   const { tasks, error: loadError } = useTasks(widget.id);
   const ref = useRef<HTMLDialogElement>(null),
@@ -330,6 +332,7 @@ export function TaskListDialog({
                 onClick={() =>
                   void run(async () => {
                     await widgetTasks.remove(task.id, task.updatedAt);
+                    offer([{ id: task.id, kind: 'task' }], task.text);
                     if (editing?.id === task.id) {
                       setEditing(undefined);
                       setText('');
@@ -370,16 +373,20 @@ export function TaskListDialog({
             busy || !!loadError || !tasks?.some((task) => task.completed)
           }
           onClick={() => {
-            if (window.confirm('Remove completed tasks from this list?'))
-              void run(async () => {
-                const removed = await widgetTasks.clearCompleted(widget.id);
-                setMessage('Completed tasks removed.');
-                if (editing && removed.includes(editing.id)) {
-                  setEditing(undefined);
-                  setText('');
-                }
-                focusInput.current = true;
-              });
+            void run(async () => {
+              const removed = await widgetTasks.clearCompleted(widget.id);
+              if (removed.length)
+                offer(
+                  removed.map((id) => ({ id, kind: 'task' })),
+                  `${removed.length} tasks`,
+                );
+              setMessage('Completed tasks removed.');
+              if (editing && removed.includes(editing.id)) {
+                setEditing(undefined);
+                setText('');
+              }
+              focusInput.current = true;
+            });
           }}
         >
           Remove completed tasks
@@ -395,6 +402,7 @@ export function TaskListDialog({
           {message}
         </p>
       )}
+      <UndoNotice />
     </dialog>,
     document.body,
   );

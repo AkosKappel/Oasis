@@ -1,3 +1,4 @@
+import { UndoProvider } from '@/features/settings/undo';
 import { Settings, type SettingsPage } from '@/features/settings/settings';
 import { SpaceProvider } from '@/features/spaces/space-context';
 import { FocusModeDialog } from '@/features/focus/focus-mode';
@@ -12,7 +13,9 @@ import { Home } from '@/features/home/home';
 export function App() {
   return (
     <SpaceProvider>
-      <AppContent />
+      <UndoProvider>
+        <AppContent />
+      </UndoProvider>
     </SpaceProvider>
   );
 }

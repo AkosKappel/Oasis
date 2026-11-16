@@ -3,6 +3,7 @@ export interface RecordMetadata {
   createdAt: number;
   updatedAt: number;
   deletedAt?: number;
+  deletionBatch?: string;
 }
 export interface Space extends RecordMetadata {
   name: string;

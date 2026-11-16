@@ -1,3 +1,4 @@
+import { createTrashRepository } from '@/database/trash';
 import { createSpaceBackupRepository } from '@/database/space-backup';
 import { createWidgetTaskRepository } from '@/database/widget-tasks';
 import { createSavedSearchRepository } from '@/database/saved-searches';
@@ -108,6 +109,7 @@ export function useSpaceRepositories() {
   const { spaceId } = useSpace();
   return useMemo(
     () => ({
+      trash: createTrashRepository(spaceId),
       spaceBackup: createSpaceBackupRepository(spaceId),
       widgetTasks: createWidgetTaskRepository(spaceId),
       savedSearches: createSavedSearchRepository(spaceId),

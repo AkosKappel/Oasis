@@ -298,3 +298,7 @@ select option {
 [aria-label='Library navigation'] .grid {
   grid-template-columns: minmax(0, 1fr);
 }
+
+body:has(dialog[open]) #global-undo {
+  display: none;
+}

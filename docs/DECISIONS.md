@@ -329,3 +329,7 @@ Keep everyday search, view and sorting near the results. Group built-in and save
 ## 2026-11-16: One Settings entry
 
 Home keeps one Settings icon and Focus mode. A shared dialog groups General, Appearance, layout, images, quotes, feedback, widgets, privacy and backups. Existing managers render as sections inside it, preserving explicit Save/Cancel and preventing navigation during writes. Clock and search are also available directly in General. Open counting lives in Privacy. Space management is an action in the space picker.
+
+## 2026-11-16: Recover routine removals
+
+Bookmarks, widgets, notes and tasks move to local Trash with a short Undo action. Space deletion still requires confirmation. Trash remains until browser data is cleared and is excluded from exports. Schema 22 adds optional deletion-batch metadata so restoring a task list revives only tasks removed with it. Older list tombstones restore the list alone, with tasks available separately. Restored bookmarks use only still-active folders and tags.

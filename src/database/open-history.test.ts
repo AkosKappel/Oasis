@@ -1,6 +1,6 @@
 import { afterEach, expect, it } from 'vitest';
 import Dexie from 'dexie';
-import { OasisDatabase } from './schema';
+import { OasisDatabase, SCHEMA_VERSION } from './schema';
 import { createBookmarkRepository } from './bookmarks';
 import { createOpenHistoryRepository } from './open-history';
 import { createLibraryPreferencesRepository } from './library-preferences';
@@ -112,7 +112,7 @@ it('upgrades v13 preferences with counting disabled and preserves existing bookm
   });
   legacy.close();
   await database.open();
-  expect(database.verno).toBe(21);
+  expect(database.verno).toBe(SCHEMA_VERSION);
   expect(
     await createLibraryPreferencesRepository('default', database).get(),
   ).toEqual({ view: 'list', sort: 'oldest', trackOpens: false });

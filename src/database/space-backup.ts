@@ -1,4 +1,4 @@
-import { db, type OasisDatabase } from './schema';
+import { db, SCHEMA_VERSION, type OasisDatabase } from './schema';
 import { requireSpace } from './records';
 import { createSpaceRepository } from './spaces';
 import { validateBackup, MAX_BACKUP_BYTES } from './backup';
@@ -111,7 +111,7 @@ export function validateSpaceBackup(value: unknown): SpaceBackup {
     input.format !== 'oasis-space' ||
     input.version !== 1 ||
     !Number.isInteger(input.schemaVersion) ||
-    Number(input.schemaVersion) > 21 ||
+    Number(input.schemaVersion) > SCHEMA_VERSION ||
     Number(input.schemaVersion) < 21
   )
     throw new Error(
@@ -314,7 +314,7 @@ export function validateSpaceBackup(value: unknown): SpaceBackup {
   return {
     format: 'oasis-space',
     version: 1,
-    schemaVersion: 21,
+    schemaVersion: SCHEMA_VERSION,
     exportedAt: number(input.exportedAt),
     space: {
       name: text(space.name, 80),
@@ -366,7 +366,7 @@ export function createSpaceBackupRepository(
         return validateSpaceBackup({
           format: 'oasis-space',
           version: 1,
-          schemaVersion: 21,
+          schemaVersion: SCHEMA_VERSION,
           exportedAt: Date.now(),
           space,
           tables,

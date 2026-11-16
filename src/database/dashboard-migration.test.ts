@@ -5,7 +5,7 @@ import {
 import { createLibraryPreferencesRepository } from './library-preferences';
 import Dexie from 'dexie';
 import { expect, it } from 'vitest';
-import { OasisDatabase } from './schema';
+import { OasisDatabase, SCHEMA_VERSION } from './schema';
 import { createAppearanceRepository } from './appearance';
 it('upgrades v14 without enabling Home bookmark sections or changing saved preferences', async () => {
   const name = 'dashboard-migration-test';
@@ -59,7 +59,7 @@ it('upgrades v14 without enabling Home bookmark sections or changing saved prefe
   const database = new OasisDatabase(name);
   try {
     await database.open();
-    expect(database.verno).toBe(21);
+    expect(database.verno).toBe(SCHEMA_VERSION);
     expect(
       await createLibraryPreferencesRepository('default', database).get(),
     ).toEqual({ view: 'list', sort: 'oldest', trackOpens: false });

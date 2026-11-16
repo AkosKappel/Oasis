@@ -1,6 +1,6 @@
 import { afterEach, expect, it } from 'vitest';
 import Dexie from 'dexie';
-import { OasisDatabase } from './schema';
+import { OasisDatabase, SCHEMA_VERSION } from './schema';
 import {
   createSavedSearchRepository,
   validateSavedSearch,
@@ -119,7 +119,7 @@ it('upgrades v18 while preserving content feedback and leaving saved searches em
   const upgraded = new OasisDatabase(name);
   try {
     await upgraded.open();
-    expect(upgraded.verno).toBe(21);
+    expect(upgraded.verno).toBe(SCHEMA_VERSION);
     expect(await upgraded.contentFeedback.get('vote')).toEqual(vote);
     expect(await upgraded.savedSearches.count()).toBe(0);
   } finally {

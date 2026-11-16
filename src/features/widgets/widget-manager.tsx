@@ -1,3 +1,4 @@
+import { useUndo, UndoNotice } from '@/features/settings/undo';
 import { TaskListDialog } from './task-list';
 import { downloadWidgetText } from './download-text';
 import { useSpaceRepositories } from '@/features/spaces/space-context';
@@ -19,6 +20,7 @@ export function WidgetManager({
   onClose: () => void;
   embedded?: boolean;
 }) {
+  const { offer } = useUndo();
   const { personalHomeWidgets } = useSpaceRepositories();
   const ref = useRef<HTMLDialogElement>(null),
     previous = useRef(document.activeElement);
@@ -290,17 +292,11 @@ export function WidgetManager({
                 disabled={busy}
                 onClick={() =>
                   void run(async () => {
-                    if (
-                      (widget.kind === 'note' || widget.kind === 'tasks') &&
-                      !window.confirm(
-                        `Remove “${widget.label}” and its content? Download a copy first if you want to keep it.`,
-                      )
-                    )
-                      return;
                     await personalHomeWidgets.remove(
                       widget.id,
                       widget.updatedAt,
                     );
+                    offer([{ id: widget.id, kind: 'widget' }], widget.label);
                     if (editing?.id === widget.id) reset();
                   })
                 }
@@ -311,6 +307,7 @@ export function WidgetManager({
           </li>
         ))}
       </ul>
+      <UndoNotice />
       <WeatherSettingsPanel />
       {(error || loadError) && (
         <p role="alert" className="mt-3 text-sm text-danger">
