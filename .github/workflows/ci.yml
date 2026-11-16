@@ -3,9 +3,16 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -15,6 +22,50 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
-      - run: pnpm build
+  extension:
+    needs: check
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: chrome
+            os: ubuntu-latest
+            suite: full
+          - target: edge
+            os: ubuntu-latest
+            suite: smoke
+          - target: chrome
+            os: windows-latest
+            suite: smoke
+          - target: chrome
+            os: macos-latest
+            suite: smoke
+    env:
+      OASIS_EXTENSION_PATH: .output/${{ matrix.target }}-mv3
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec wxt zip -b ${{ matrix.target }} --mv3
+      - run: node scripts/check-package.mjs ${{ matrix.target }}
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm exec playwright test
+      - if: matrix.suite == 'full'
+        run: pnpm exec playwright test --workers=1
+      - if: matrix.suite == 'smoke'
+        run: pnpm exec playwright test e2e/release.spec.ts e2e/onboarding.spec.ts e2e/space-backup.spec.ts --workers=1
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: extension-${{ matrix.target }}-${{ matrix.os }}
+          retention-days: 14
+          include-hidden-files: true
+          path: |
+            .output/*.zip
+            test-results/
+            playwright-report/

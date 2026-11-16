@@ -68,3 +68,5 @@ Checked 2026-11-15. Store requirements can change; the dashboards are authoritat
 - [Chrome privacy fields](https://developer.chrome.com/docs/webstore/cws-dashboard-privacy): single purpose, permission justifications and remote-code declaration.
 - [Edge publication workflow](https://learn.microsoft.com/en-us/microsoft-edge/extensions/publish/publish-extension): package, listing, privacy information and certification submission.
 - [Open-Meteo terms](https://open-meteo.com/en/terms): free endpoint is limited to non-commercial use and requires attribution.
+
+Browser commitments, CI coverage and promotion gates are tracked in [Browser support](BROWSERS.md). CI artifacts are verification outputs, not published releases.

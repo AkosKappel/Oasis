@@ -345,3 +345,7 @@ Home notes have a small hover/focus edit action with an explicit Save and revisi
 ## 2026-11-16: Neutral content skipping
 
 Next image and Next quote appear with the existing hover/focus rating controls when another eligible item exists. Next cycles through eligible content in this tab without writing feedback. The choice resets on reload, day or collection change. Disliked content remains excluded; existing album/author affinity still affects selection. We chose temporary selection over stored skip history to avoid interpreting exploration as a negative preference. Next can preview another image without changing the saved fixed-image choice. Ratings leave fixed backgrounds unchanged.
+
+## 2026-11-16: Browser support is evidence-based
+
+Chrome and Edge are primary desktop targets; Firefox starts experimental, other Chromium browsers are best effort, and Safari/mobile extension support is deferred. CI separates shared checks, full Linux Chromium flows and target/OS smoke jobs, with diagnostic and package artifacts. Bundled Chromium is used for extension automation because branded Chrome/Edge removed the required sideload flags. Native browser permissions and OS integration remain explicit release gates, not inferred passes.
