@@ -245,8 +245,37 @@ export function validateSpaceBackup(value: unknown): SpaceBackup {
     const remaining = number(r.remaining);
     if (remaining > 120 * 60000)
       throw new Error('The space backup contains an invalid timer.');
+    let cycle;
+    if (r.cycle !== undefined) {
+      const input = object(r.cycle);
+      const focusMinutes = number(input.focusMinutes);
+      const breakMinutes = number(input.breakMinutes);
+      const completedFocus = number(input.completedFocus);
+      if (
+        !Number.isInteger(focusMinutes) ||
+        focusMinutes < 1 ||
+        focusMinutes > 120 ||
+        !Number.isInteger(breakMinutes) ||
+        breakMinutes < 1 ||
+        breakMinutes > 60 ||
+        !Number.isSafeInteger(completedFocus)
+      )
+        throw new Error('The space backup contains an invalid focus cycle.');
+      cycle = {
+        focusMinutes,
+        breakMinutes,
+        completedFocus,
+        phase: enumValue(input.phase, ['focus', 'break']),
+      };
+      if (
+        remaining >
+        (cycle.phase === 'focus' ? focusMinutes : breakMinutes) * 60_000
+      )
+        throw new Error('The space backup contains an invalid cycle timer.');
+    }
     return {
       ...metadata(r),
+      ...(cycle === undefined ? {} : { cycle }),
       state: enumValue(r.state, ['running', 'paused', 'ended']),
       remaining,
       endsAt: number(r.endsAt),

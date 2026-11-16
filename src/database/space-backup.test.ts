@@ -222,3 +222,32 @@ it('round-trips the full supported space-name length', async () => {
   ).export();
   expect(parseSpaceBackup(serializeSpaceBackup(archive)).space.name).toBe(name);
 });
+
+it('preserves optional focus cycles in paused restores and rejects invalid cycle data', async () => {
+  await seed();
+  const focus = createFocusSessionRepository('default', database);
+  await focus.change('end');
+  await focus.start(25, 5);
+  const repo = createSpaceBackupRepository('default', database);
+  const archive = parseSpaceBackup(serializeSpaceBackup(await repo.export()));
+  const restored = await repo.restore(archive, 'Cycle copy');
+  const copy = await createFocusSessionRepository(restored, database).get();
+  expect(copy?.state).toBe('paused');
+  expect(copy?.cycle).toEqual({
+    focusMinutes: 25,
+    breakMinutes: 5,
+    phase: 'focus',
+    completedFocus: 0,
+  });
+  for (const mutation of [
+    { breakMinutes: 0 },
+    { focusMinutes: 121 },
+    { completedFocus: -1 },
+    { completedFocus: 1.5 },
+    { phase: 'other' },
+  ]) {
+    const invalid = structuredClone(archive);
+    Object.assign(invalid.tables.focusSessions[0]!.cycle as object, mutation);
+    expect(() => parseSpaceBackup(JSON.stringify(invalid))).toThrow();
+  }
+});

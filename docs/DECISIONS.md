@@ -371,3 +371,7 @@ The full hosted extension suite also checks current More-menu entry points and s
 ## 2026-11-16: Smart-collection filters compile to existing queries
 
 An optional builder inside Saved searches composes text phrases, domains, folder paths, tags and favorites using the existing AND query grammar. Applying filters only replaces the form draft, with explicit review before saving. Advanced queries are never parsed into lossy controls or rewritten automatically. Reuse query-string storage and complete-space backups, so no schema, permission or network change is needed. Folder/tag rules use names and may need updating after renames. Literal double quotes remain unsupported until the search grammar gains escaping.
+
+## 2026-11-16: Focus cycles advance explicitly
+
+Focus mode can opt into repeating focus and break phases. Each elapsed phase waits for an explicit Start break or Start next focus action. Time away never silently consumes later phases. Keep absolute deadlines, pause/resume, cross-tab persistence and a transactional stale-phase guard; add no background alarms, permissions or Home controls. Dexie v24 adds optional cycle metadata, leaving existing timers as single sessions. Complete-space backups validate the cycle and restore active timers paused. Long breaks and automatic starts remain outside this modest first version.

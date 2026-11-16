@@ -11,6 +11,8 @@ export function FocusModeDialog({ onClose }: { onClose: () => void }) {
   const { personalFocusSession } = useSpaceRepositories();
   const ref = useRef<HTMLDialogElement>(null),
     previous = useRef(document.activeElement);
+  const [cycles, setCycles] = useState(false);
+  const [breakMinutes, setBreakMinutes] = useState(5);
   const [minutes, setMinutes] = useState(25),
     [busy, setBusy] = useState(false),
     [error, setError] = useState<string>();
@@ -50,7 +52,7 @@ export function FocusModeDialog({ onClose }: { onClose: () => void }) {
           setBusy(true);
           setError(undefined);
           void personalFocusSession
-            .start(minutes)
+            .start(minutes, cycles ? breakMinutes : undefined)
             .then(onClose)
             .catch((cause: unknown) => {
               reportStorageError(cause);
@@ -76,6 +78,38 @@ export function FocusModeDialog({ onClose }: { onClose: () => void }) {
             onChange={(event) => setMinutes(Number(event.target.value))}
           />
         </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={cycles}
+            disabled={busy}
+            onChange={(event) => setCycles(event.target.checked)}
+          />
+          Alternate focus and breaks
+        </label>
+        {cycles && (
+          <>
+            <label className="field">
+              Break minutes
+              <input
+                type="number"
+                min={1}
+                max={60}
+                step={1}
+                required
+                disabled={busy}
+                value={breakMinutes}
+                onChange={(event) =>
+                  setBreakMinutes(Number(event.target.value))
+                }
+              />
+            </label>
+            <p className="text-sm text-muted-foreground">
+              Each phase waits for you to start the next. Nothing starts
+              automatically.
+            </p>
+          </>
+        )}
         <div className="flex gap-2">
           <Button disabled={busy}>Start focus</Button>
           <Button
@@ -108,11 +142,14 @@ export function FocusTimer({
     [error, setError] = useState<string>();
   const remaining = focusRemaining(session, now);
   if (session.state === 'ended') return null;
-  async function act(action: 'pause' | 'resume' | 'end') {
+  const isBreak = session.cycle?.phase === 'break';
+  async function act(action: 'pause' | 'resume' | 'end' | 'next') {
     setBusy(true);
     setError(undefined);
     try {
-      await personalFocusSession.change(action);
+      if (action === 'next')
+        await personalFocusSession.nextPhase(session.endsAt);
+      else await personalFocusSession.change(action);
     } catch (cause) {
       reportStorageError(cause);
       setError('The timer could not be updated. Try again.');
@@ -124,10 +161,16 @@ export function FocusTimer({
     <section aria-label="Focus timer" className="mt-7 text-center">
       <h2 className="text-sm text-muted-foreground">
         {remaining === 0
-          ? 'Session complete'
+          ? isBreak
+            ? 'Break complete'
+            : 'Session complete'
           : session.state === 'paused'
-            ? 'Focus paused'
-            : 'One thing at a time'}
+            ? isBreak
+              ? 'Break paused'
+              : 'Focus paused'
+            : isBreak
+              ? 'Take a break'
+              : 'One thing at a time'}
       </h2>
       <p
         role="timer"
@@ -138,10 +181,23 @@ export function FocusTimer({
       </p>
       {remaining === 0 && (
         <p role="status" className="mt-3">
-          Take a breath. Your focus session is complete.
+          {isBreak
+            ? 'Ready when you are. Your break is complete.'
+            : 'Take a breath. Your focus session is complete.'}
         </p>
       )}
-      <div className="mt-5 flex justify-center gap-3">
+      {session.cycle && (
+        <p className="mt-3 text-sm text-muted-foreground">
+          Focus sessions completed:{' '}
+          {session.cycle.completedFocus + (!isBreak && remaining === 0 ? 1 : 0)}
+        </p>
+      )}
+      <div className="mt-5 flex flex-wrap justify-center gap-3">
+        {remaining === 0 && session.cycle && (
+          <Button disabled={busy} onClick={() => void act('next')}>
+            {isBreak ? 'Start next focus' : 'Start break'}
+          </Button>
+        )}
         {remaining > 0 && (
           <Button
             disabled={busy}
@@ -149,7 +205,13 @@ export function FocusTimer({
               void act(session.state === 'paused' ? 'resume' : 'pause')
             }
           >
-            {session.state === 'paused' ? 'Resume focus' : 'Pause focus'}
+            {session.state === 'paused'
+              ? isBreak
+                ? 'Resume break'
+                : 'Resume focus'
+              : isBreak
+                ? 'Pause break'
+                : 'Pause focus'}
           </Button>
         )}
         <Button
@@ -157,7 +219,11 @@ export function FocusTimer({
           variant="outline"
           onClick={() => void act('end')}
         >
-          {remaining === 0 ? 'Dismiss timer' : 'End focus'}
+          {remaining === 0
+            ? 'Dismiss timer'
+            : session.cycle
+              ? 'End cycle'
+              : 'End focus'}
         </Button>
       </div>
       {error && (

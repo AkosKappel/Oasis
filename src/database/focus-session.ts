@@ -6,6 +6,12 @@ export interface FocusSession extends RecordMetadata {
   state: 'running' | 'paused' | 'ended';
   endsAt: number;
   remaining: number;
+  cycle?: {
+    focusMinutes: number;
+    breakMinutes: number;
+    phase: 'focus' | 'break';
+    completedFocus: number;
+  };
 }
 export function focusRemaining(session: FocusSession, now: number) {
   return session.state === 'ended'
@@ -44,9 +50,16 @@ export function createFocusSessionRepository(
         },
       );
     },
-    async start(minutes: number) {
+    async start(minutes: number, breakMinutes?: number) {
       if (!Number.isInteger(minutes) || minutes < 1 || minutes > 120)
         throw new Error('Choose a focus session from 1 to 120 minutes.');
+      if (
+        breakMinutes !== undefined &&
+        (!Number.isInteger(breakMinutes) ||
+          breakMinutes < 1 ||
+          breakMinutes > 60)
+      )
+        throw new Error('Choose a break from 1 to 60 minutes.');
       await database.transaction(
         'rw',
         database.spaces,
@@ -67,8 +80,56 @@ export function createFocusSessionRepository(
             state: 'running',
             endsAt: now + minutes * 60_000,
             remaining: minutes * 60_000,
+            ...(breakMinutes === undefined
+              ? {}
+              : {
+                  cycle: {
+                    focusMinutes: minutes,
+                    breakMinutes,
+                    phase: 'focus' as const,
+                    completedFocus: 0,
+                  },
+                }),
             createdAt: existing?.createdAt ?? now,
             updatedAt: now,
+          });
+        },
+      );
+    },
+    async nextPhase(expectedEndsAt: number) {
+      await database.transaction(
+        'rw',
+        database.spaces,
+        database.focusSessions,
+        async () => {
+          await requireSpace(database, spaceId);
+          const existing = await current();
+          const now = Date.now();
+          if (
+            !existing?.cycle ||
+            existing.state === 'ended' ||
+            existing.endsAt !== expectedEndsAt ||
+            focusRemaining(existing, now) > 0
+          )
+            throw new Error(
+              'This timer has changed. Use its current controls.',
+            );
+          const cycle = existing.cycle;
+          const phase = cycle.phase === 'focus' ? 'break' : 'focus';
+          const remaining =
+            (phase === 'break' ? cycle.breakMinutes : cycle.focusMinutes) *
+            60_000;
+          await database.focusSessions.update(id, {
+            state: 'running',
+            remaining,
+            endsAt: now + remaining,
+            updatedAt: now,
+            cycle: {
+              ...cycle,
+              phase,
+              completedFocus:
+                cycle.completedFocus + (phase === 'break' ? 1 : 0),
+            },
           });
         },
       );

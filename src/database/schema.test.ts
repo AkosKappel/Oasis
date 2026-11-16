@@ -524,3 +524,29 @@ it('preserves v12 appearance with local bookmark search as the legacy default', 
   await database.open();
   expect(await database.preferences.get(preference.id)).toEqual(preference);
 });
+
+it('upgrades v23 timers without opting existing sessions into cycles', async () => {
+  const { default: Dexie } = await import('dexie');
+  const legacy = new Dexie('oasis-test');
+  legacy
+    .version(23)
+    .stores({ spaces: 'id, name, updatedAt', focusSessions: 'id, spaceId' });
+  await legacy.open();
+  const session = {
+    id: 'default:focus-session',
+    spaceId: 'default',
+    state: 'paused',
+    endsAt: 1000,
+    remaining: 500,
+    createdAt: 1,
+    updatedAt: 1,
+  };
+  await legacy
+    .table('spaces')
+    .add({ id: 'default', name: 'Personal', createdAt: 1, updatedAt: 1 });
+  await legacy.table('focusSessions').add(session);
+  legacy.close();
+  await database.open();
+  expect(database.verno).toBe(SCHEMA_VERSION);
+  expect(await database.focusSessions.get(session.id)).toEqual(session);
+});
