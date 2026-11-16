@@ -87,10 +87,6 @@ test('manages bookmarks in the new-tab extension', async ({
   await expect(page.getByRole('alert')).toContainText('http:// or https://');
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).not.toBeVisible();
-  page.once('dialog', (dialog) => dialog.dismiss());
-  await page.getByRole('button', { name: 'Delete Updated site' }).click();
-  await expect(page.getByRole('link', { name: /Updated site/ })).toBeVisible();
-  page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: 'Delete Updated site' }).click();
   await expect(
     page.getByRole('heading', { name: 'Make room for your next discovery' }),

@@ -26,6 +26,7 @@ test('undoes bookmark removal and restores it from persistent Trash', async ({
   await card
     .getByRole('button', { name: 'Delete Reading guide', exact: true })
     .click();
+  await expect(card).toHaveCount(0);
   await page.reload();
   await openSettingsPage(page, 'Backup and restore');
   await expect(page.getByRole('region', { name: 'Trash' })).toBeVisible();

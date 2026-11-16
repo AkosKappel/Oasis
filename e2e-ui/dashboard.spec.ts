@@ -51,6 +51,10 @@ test('onboarding, responsive Library CRUD, dialogs and local persistence work ac
   await page.reload();
   await expect(link).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
+  // WebKit can deliver the breakpoint event after setViewportSize resolves.
+  await expect(
+    page.locator('aside[aria-label="Library navigation"] > details'),
+  ).not.toHaveAttribute('open', '');
   await openLibraryFilters(page);
   await expect(
     page.getByRole('combobox', { name: 'Collections', exact: true }),

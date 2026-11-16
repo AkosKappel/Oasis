@@ -57,7 +57,11 @@ test('imports inert browser HTML, preserves paths and round trips an escaped exp
   await page
     .getByRole('button', { name: 'Import bookmarks', exact: true })
     .click();
-  await expect(page.getByRole('status')).toHaveText(
+  await expect(
+    page
+      .getByRole('dialog', { name: 'Backup and restore', exact: true })
+      .getByRole('status'),
+  ).toHaveText(
     'Import complete. Added 2 bookmarks and 4 folders. Skipped 1 duplicates and 3 invalid links.',
   );
   const downloading = page.waitForEvent('download');
@@ -81,7 +85,11 @@ test('imports inert browser HTML, preserves paths and round trips an escaped exp
   await page
     .getByRole('button', { name: 'Import bookmarks', exact: true })
     .click();
-  await expect(page.getByRole('status')).toHaveText(
+  await expect(
+    page
+      .getByRole('dialog', { name: 'Backup and restore', exact: true })
+      .getByRole('status'),
+  ).toHaveText(
     'Import complete. Added 0 bookmarks and 0 folders. Skipped 2 duplicates and 0 invalid links.',
   );
   await page.getByRole('button', { name: 'Close', exact: true }).click();

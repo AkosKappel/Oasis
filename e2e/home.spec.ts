@@ -26,7 +26,11 @@ test('opens a quiet home and searches the library', async ({
   await expect(
     page.getByRole('dialog', { name: 'Search Oasis' }),
   ).toBeVisible();
-  await expect(page.getByRole('combobox')).toHaveValue('example');
+  await expect(
+    page
+      .getByRole('dialog', { name: 'Search Oasis', exact: true })
+      .getByRole('combobox'),
+  ).toHaveValue('example');
   await page.keyboard.press('Escape');
   await expect(page.getByRole('searchbox')).toBeFocused();
   await page.getByRole('link', { name: 'Library', exact: true }).click();

@@ -34,6 +34,7 @@ test('keeps 12-hour clocks and long quotes within a 320-pixel Home', async ({
     .getByRole('combobox', { name: 'Clock format', exact: true })
     .selectOption('12');
   await page.getByRole('button', { name: 'Save settings' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -141,6 +142,7 @@ test('keeps a photo-backed Links panel and custom hover highlights readable', as
     .getByRole('textbox', { name: 'Secondary hex', exact: true })
     .fill('#000000');
   await page.getByRole('button', { name: 'Save settings' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   const image = await page.evaluate(() => {
     const canvas = document.createElement('canvas');
     canvas.width = 16;

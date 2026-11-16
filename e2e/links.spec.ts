@@ -42,7 +42,11 @@ test('shows links on demand with folder search, keyboard access and focus return
   await page
     .getByRole('button', { name: 'Restore backup', exact: true })
     .click();
-  await expect(page.getByRole('status')).toContainText('Restore complete');
+  await expect(
+    page
+      .getByRole('dialog', { name: 'Backup and restore', exact: true })
+      .getByRole('status'),
+  ).toContainText('Restore complete');
   await page.getByRole('button', { name: 'Close', exact: true }).click();
   await page.getByRole('link', { name: 'Oasis home' }).click();
   await expect(

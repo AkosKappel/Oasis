@@ -361,3 +361,9 @@ Shared UI runs from the production dashboard build over loopback in Chromium, Fi
 ## 2026-11-16: Public project documentation uses the repository
 
 The owner-authorized push publishes the prepared MIT source to the public repository. Use its readable privacy document and issue tracker as project links for store-form review. A separate hosted website is optional, so no new hosting service or deployment is introduced. Store settings, native release verification and submission remain separate owner actions.
+
+## 2026-11-16: Responsive tests wait for breakpoint state
+
+The hosted WebKit trace showed `setViewportSize` resolving before React received the breakpoint change. The test saw the old open filter panel, then the intended mobile collapse occurred. Wait for the actual collapsed state before opening filters. This preserves the responsive behavior and avoids arbitrary delays or browser-specific skips.
+
+The full hosted extension suite also checks current More-menu entry points and scopes backup/search assertions to their named dialogs. Routine deletion tests exercise immediate removal and persistent recovery rather than obsolete confirmation prompts. Follow-up navigation and reloads wait for completed saves/deletions, so optimistic UI cannot produce a false pass.

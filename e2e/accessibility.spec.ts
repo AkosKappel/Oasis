@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures';
+import { test, expect, openLibraryTool } from './fixtures';
 
 test('Library dialogs retain keyboard focus and narrow layouts expose named controls', async ({
   page,
@@ -17,8 +17,12 @@ test('Library dialogs retain keyboard focus and narrow layouts expose named cont
     'Backup and restore',
     'Find duplicates',
   ]) {
-    const trigger = page.getByRole('button', { name, exact: true });
-    await trigger.click();
+    const trigger = page.getByRole('button', {
+      name: name === 'Add bookmark' ? name : 'More Library tools',
+      exact: true,
+    });
+    if (name === 'Add bookmark') await trigger.click();
+    else await openLibraryTool(page, name);
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
     await expect(dialog).toHaveAccessibleName(/\S/);
@@ -43,6 +47,9 @@ test('Library dialogs retain keyboard focus and narrow layouts expose named cont
     await expect(trigger).toBeFocused();
   }
   await page.setViewportSize({ width: 320, height: 700 });
+  await expect(
+    page.locator('aside[aria-label="Library navigation"] > details'),
+  ).not.toHaveAttribute('open', '');
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,

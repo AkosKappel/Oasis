@@ -34,7 +34,11 @@ test('bulk moves/tags/deletes visible bookmarks and clears selection after filte
   await page
     .getByRole('button', { name: 'Restore backup', exact: true })
     .click();
-  await expect(page.getByRole('status')).toContainText('Restore complete');
+  await expect(
+    page
+      .getByRole('dialog', { name: 'Backup and restore', exact: true })
+      .getByRole('status'),
+  ).toContainText('Restore complete');
   await page.getByRole('button', { name: 'Close', exact: true }).click();
   await page
     .getByRole('button', { name: 'Select bookmarks', exact: true })
@@ -91,7 +95,6 @@ test('bulk moves/tags/deletes visible bookmarks and clears selection after filte
     path: '/tmp/oasis-previews/bulk-actions.png',
     fullPage: true,
   });
-  page.once('dialog', (dialog) => dialog.accept());
   await toolbar
     .getByRole('button', { name: 'Delete selected', exact: true })
     .click();
