@@ -1,50 +1,79 @@
-# Oasis
+<p align="center">
+  <img src="public/icon/128.png" width="64" height="64" alt="Oasis leaf icon">
+</p>
 
-Your personal space on the web. A local-first browser extension combining a new-tab dashboard and bookmark library.
+<h1 align="center">Oasis</h1>
+
+<p align="center">
+  A quiet new tab and a home for your bookmarks.<br>
+  Local-first. No account. No analytics.
+</p>
+
+<p align="center">
+  <a href="#what-you-can-do">Features</a> ·
+  <a href="#try-it-locally">Try it locally</a> ·
+  <a href="PRIVACY.md">Privacy</a> ·
+  <a href="https://github.com/AkosKappel/Oasis/issues">Support</a>
+</p>
+
+![Oasis Home with a clock, bookmark search and a bundled landscape background](docs/images/home.png)
+
+## What you can do
+
+- **Start simply.** Choose a background, set your clock and add only the widgets you want: notes, tasks, focus timers or weather.
+- **Find saved links.** Organize bookmarks with folders, tags and favorites. Search quickly or build a live collection from filters.
+- **Save as you browse.** Capture a page through the toolbar, context menu or keyboard shortcut, then review it before saving.
+- **Keep things separate.** Switch between independent spaces for work, learning and personal browsing.
+- **Keep control of your content.** Undo removals, restore from Trash and move your data with imports, exports and complete-space backups.
+
+<details>
+<summary><strong>See the bookmark library</strong></summary>
+
+![Oasis Library with folders, tags, search and bookmark cards](docs/images/library.png)
+
+</details>
+
+_Screenshots show sample content and a bundled background._
+
+## Local by default
+
+Core features work offline. There is no backend, advertising or telemetry. Optional weather, submitted web searches and page-detail requests can contact the providers or websites you choose.
+
+Read the [privacy policy](PRIVACY.md) for data handling and permissions.
+
+## Try it locally
+
+Use **Node.js 24** and **pnpm 12**.
+
+```sh
+git clone https://github.com/AkosKappel/Oasis.git
+cd Oasis
+pnpm install
+pnpm build
+```
+
+1. Open `chrome://extensions` or `edge://extensions`.
+2. Enable **Developer mode**, then choose **Load unpacked**.
+3. Select `.output/chrome-mv3` and open a new tab.
+
+Chrome and Edge are the primary desktop targets. Firefox has an experimental build. See [browser support and testing](docs/BROWSERS.md) for coverage and verification status.
 
 ## Development
 
-Use Node.js 24 and pnpm 12.
+Built with WXT, React, TypeScript, Tailwind CSS and Dexie.
 
-```sh
-pnpm install
-pnpm dev
-```
+| Command      | Purpose                                      |
+| ------------ | -------------------------------------------- |
+| `pnpm dev`   | Start the WXT development environment        |
+| `pnpm check` | Check types, lint, formatting and unit tests |
+| `pnpm zip`   | Build a Chrome distribution archive          |
 
-WXT starts a Chromium development browser. To use an existing Chrome or Edge profile, run `pnpm build`, open the browser's extensions page, enable Developer mode, and load `.output/chrome-mv3` as an unpacked extension.
+Browser test commands and release checks live in the guides below. Full extension suites run in CI.
 
-```sh
-pnpm check       # TypeScript, ESLint, formatting, database tests
-pnpm build       # Production Manifest V3 extension
-pnpm zip         # Distribution archive
-pnpm exec playwright install chromium
-pnpm test:e2e    # Build and test the actual extension in Chromium
-```
+## Further reading
 
-## Scope
+[Architecture](docs/ARCHITECTURE.md) · [Design decisions](docs/DECISIONS.md) · [Browser support](docs/BROWSERS.md) · [Release guide](docs/RELEASE.md) · [Artwork](docs/ALBUM-ARTWORK.md)
 
-A minimal new-tab home with a clock, date, on-demand Links and appearance controls. Search favorites or browse bookmark folders in the Links panel. Choose either side and optionally keep it open on desktop; a visible shortcut row is optional. Use Layout to reorder, hide or widen Home sections independently in each space, or reset their arrangement. Choose system, light or dark theme, a preset or custom primary/secondary colors, clock format and which home elements to show. Color changes preview locally, save across tabs and automatically use readable text and focus colors. Focus mode provides a pauseable timer that hides Home distractions while running and follows the clock across tabs and reloads. Optional world clocks, countdowns, scratchpad notes and task lists can be added, hidden or removed through Widgets. Notes and task lists start hidden and offer plain-text downloads; they are outside bookmark backups. Tasks can be added, edited, completed and removed locally, with a bounded Home preview. Optional Recently added and Frequently opened sections show saved links; enabling them does not enable open counting. An optional daily focus adds one editable goal and completion checkbox for each local day. Create, rename and switch independent spaces from Home, Library or capture. Each tab remembers its selection; deleting a space removes its local content and settings, while the default space is protected. Backups cover the selected space. Selected bookmarks can be copied or moved to another space after reviewing folder/tag mapping; destination open counts start fresh. Smart collections show recently added, favorite, untagged and unorganized bookmarks and combine with Library filters. Per-space open counting is off by default; enable it in Settings → Privacy for recently/frequently opened collections, then disable or clear it whenever you choose. Only opens made from Oasis are counted. The bookmark editor can suggest existing tags from other bookmarks on the exact same website, with supporting counts and explicit review before saving. Saved searches turn named queries into live custom smart collections, with per-space editing and deletion. An optional filter builder composes text, domain, folder, tag and favorite criteria into a query you can review and edit before saving. The separate bookmark library supports plain-text notes, nested folders, colored tags and ranked search with typo tolerance. Choose local bookmark search or Google, DuckDuckGo, Bing or Brave for Home in Settings → General. Web queries are sent only on submission. Use Ctrl/Cmd+K to search bookmarks and navigate; filter with `tag:`, `folder:`, `domain:` or `is:favorite`, and quote names containing spaces.
+---
 
-Save pages through the toolbar popup, the page/link context menu or Alt+Shift+O (customizable in browser extension shortcuts). Context-menu and keyboard capture open an editable confirmation page. Toolbar capture offers optional page details: a description and small same-website icon/preview, cached locally after you grant access and choose to read them. Library stays offline, with no third-party lookup. Saved images can be removed in the bookmark editor. Complete space backups include active content, personal media, notes, tasks, saved searches, feedback and settings, and restore into a reviewed new space. Weather/counting restore off and timers restore paused. Portable bookmark JSON preserves bookmarks, folders, tags, favorites, notes and cached page images. Browser bookmark HTML import/export preserves folder hierarchy, titles, URLs and descriptions; import previews valid records, skips unsafe links and merges exact URLs within each folder. Portable bookmark backups exclude appearance and widget settings.
-
-Home includes offline starter albums in illustrated landscape, nature, abstract, night, woodland and architectural styles. Choose a fixed image or daily rotation with dimming, upload personal image albums, and optionally show daily quotes from custom collections. Uploads are resized locally; album and quote managers provide separate portable backups. Built-in artwork stays separate from personal uploads and is excluded from album backups. Library statistics summarize retained additions, exact hosts and optional saved open counts without collecting new activity. Duplicate review groups matching URLs for explicit keep/delete decisions while preserving query strings and fragments. The Library offers grid/list views, saved name/date/manual sorting, native bookmark/folder drag-and-drop with keyboard alternatives and selection actions to move bookmarks, add/remove tags or soft-delete them together.
-
-Optional online content providers are researched in [API sources](docs/API-SOURCES.md). Weather uses Open-Meteo only after explicit enablement and city selection, with current conditions, a three-day forecast, Celsius/Fahrenheit, shared caching and offline fallback. Its free endpoint is for personal/non-commercial use. No image or quote API is connected. Like or dislike Home backgrounds and quotes to influence local daily rotation. Likes favor the item and related album/author content; dislikes skip items. Image albums can opt into mixing all albums. Ratings leave fixed backgrounds unchanged, and feedback stays within each space. Content preferences lets you search, review and clear individual choices or reset backgrounds, quotes or all preferences.
-
-Home has one Settings entry for clock format, appearance, content, widgets, privacy and backups. New profiles offer a skippable setup. Edit a visible note directly from Home; task contents open separately from widget setup. Routine removals offer Undo and remain recoverable in Trash under Backup and restore. Next image and Next quote change the current tab without recording a rating.
-
-Storage warnings offer non-destructive retry, backup access and guidance for quota or upgrade problems. Failed saves retain open form fields.
-
-Saved data stays on the device in IndexedDB; there is no backend, account or analytics. Optional weather sends city searches and chosen coordinates to Open-Meteo after permission is granted. It does not request device location. Planned work is tracked in the local `BACKLOG.md`, the full product vision in the blueprint below.
-
-## Documentation
-
-- [Product blueprint](docs/PROJECT.md), original supplied specification, retained as planning context.
-- [Architecture](docs/ARCHITECTURE.md)
-- [Decisions](docs/DECISIONS.md)
-- [Album artwork and prompts](docs/ALBUM-ARTWORK.md)
-- [Privacy policy](PRIVACY.md)
-- [Release preparation and remaining owner checks](docs/RELEASE.md)
-- [Browser support and testing](docs/BROWSERS.md)
-
-Licensed under [MIT](LICENSE). [Source](https://github.com/AkosKappel/Oasis) and [support](https://github.com/AkosKappel/Oasis/issues) are public. Extension-store publication is separate; the development workflow does not publish a release.
+Licensed under [MIT](LICENSE). [Report a bug or suggest an improvement](https://github.com/AkosKappel/Oasis/issues).
