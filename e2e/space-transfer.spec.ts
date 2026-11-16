@@ -4,6 +4,9 @@ test('reviews copies and moves between isolated spaces without modifying existin
 }, testInfo) => {
   await page.goto('chrome://newtab/');
   await page.getByRole('link', { name: 'Library', exact: true }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Library', exact: true }),
+  ).toBeVisible();
   await page
     .getByRole('combobox', { name: 'Active space' })
     .selectOption('__manage');
