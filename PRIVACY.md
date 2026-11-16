@@ -1,12 +1,12 @@
 # Oasis privacy
 
-Effective date: 2026-11-15.
+Effective date: 2026-11-16.
 
 Oasis is a local-first new-tab dashboard and bookmark library. It has no account, backend, analytics, advertising or telemetry. The developer does not receive your bookmarks, notes, images, quotes or activity through Oasis.
 
 ## Data on your device
 
-Oasis stores spaces, bookmarks, folders, tags, notes, personal images, quotes, appearance preferences, focus goals/sessions, widgets, scratchpad notes and task lists, explicit image/quote likes and dislikes, and optional weather settings/cache in your browser profile’s IndexedDB. Per-tab space selection uses sessionStorage. Open counting is off by default. If you enable it for a space, Oasis records counts and last-opened times for bookmark opens made from Oasis. It does not read your browser’s browsing history. Image and quote feedback stores only your current explicit choices per space and adjusts local daily rotation. Oasis does not log impressions or send feedback to a recommendation service. You can disable counting and clear the saved counts in Library.
+Oasis stores spaces, bookmarks, folders, tags, notes, personal images, quotes, appearance preferences, focus goals/sessions, widgets, scratchpad notes and task lists, explicit image/quote likes and dislikes, and optional weather settings/cache in your browser profile’s IndexedDB. Per-tab space selection uses sessionStorage. Open counting is off by default. If you enable it for a space, Oasis records counts and last-opened times for bookmark opens made from Oasis. It does not read your browser’s browsing history. Image and quote feedback stores only your current explicit choices per space and adjusts local daily rotation. Oasis does not log impressions or send feedback to a recommendation service. Neutral Next controls keep a temporary selection in the current tab only and do not save a rating. You can disable counting and clear the saved counts in Settings → Privacy.
 
 Backup files are written only when you choose to export them. They may contain private content, including bookmark notes and saved open counts. Complete space archives contain active content and settings, including personal images, quotes, widget notes/tasks, saved searches and feedback. Restore creates a new space; weather/counting restore off and timers pause. Portable bookmark JSON/HTML, personal album and quote archives remain separate and do not include every setting. Notes and tasks also offer plain-text downloads. Archives cover the selected space. Keep exported files somewhere you trust.
 
@@ -29,7 +29,7 @@ Oasis replaces the new-tab page. It does not request browsing-history, geolocati
 
 ## Removing data
 
-You can delete individual content or a non-default space in Oasis. Deletion hides records using local tombstones; deleted personal and bookmark image payloads are released. Some text and identifiers can remain locally for consistency. Clear Oasis extension storage through your browser or remove the extension to erase its local database. Exported backup files and data held by destination websites are outside that deletion and must be removed separately.
+You can delete individual content or a non-default space in Oasis. Deletion hides records using local tombstones; deleted personal and bookmark image payloads are released. Removed bookmarks, notes, widgets and tasks remain recoverable in this space’s Trash. Trash is local and excluded from backups. Other removed text and identifiers can remain locally for consistency. Clear Oasis extension storage through your browser or remove the extension to erase its local database. Exported backup files and data held by destination websites are outside that deletion and must be removed separately.
 
 ## Questions
 

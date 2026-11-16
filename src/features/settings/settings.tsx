@@ -61,7 +61,8 @@ export function Settings({
       observer.disconnect();
       if (focused instanceof HTMLElement && focused.isConnected)
         requestAnimationFrame(() => {
-          if (focused.isConnected) focused.focus();
+          if (focused.isConnected && document.activeElement === document.body)
+            focused.focus();
         });
     };
   }, []);

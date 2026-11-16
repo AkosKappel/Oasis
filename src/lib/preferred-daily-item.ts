@@ -21,6 +21,7 @@ export function preferredDailyItem<T extends RotationItem>(
   feedback: ContentFeedback[],
   seed: string,
   date: Date,
+  excludedIds: ReadonlySet<string> = new Set(),
 ): T | undefined {
   const ratings = new Map(
     feedback
@@ -35,6 +36,7 @@ export function preferredDailyItem<T extends RotationItem>(
   let selected: T | undefined,
     best = Infinity;
   for (const item of items) {
+    if (excludedIds.has(item.id)) continue;
     const rating = ratings.get(item.id);
     if (rating === 'dislike') continue;
     const weight = rating === 'like' ? 8 : likedGroups.has(item.group) ? 2 : 1;
@@ -49,4 +51,30 @@ export function preferredDailyItem<T extends RotationItem>(
     }
   }
   return selected;
+}
+
+export function nextPreferredItem<T extends RotationItem>(
+  items: T[],
+  feedback: ContentFeedback[],
+  seed: string,
+  date: Date,
+  currentId: string,
+  seen: string[] = [],
+): T | undefined {
+  return (
+    preferredDailyItem(
+      items,
+      feedback,
+      `${seed}:next:${currentId}`,
+      date,
+      new Set([currentId, ...seen]),
+    ) ??
+    preferredDailyItem(
+      items,
+      feedback,
+      `${seed}:next:${currentId}`,
+      date,
+      new Set([currentId]),
+    )
+  );
 }

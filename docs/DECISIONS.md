@@ -341,3 +341,7 @@ Only new profiles see a brief clock/theme/import setup. Skip and Escape finish s
 ## 2026-11-16: Separate daily editing from widget setup
 
 Home notes have a small hover/focus edit action with an explicit Save and revision check. A conflict keeps the draft. Task contents replace the Widgets panel inside Settings instead of stacking a second modal. Done and Escape return to Widgets and restore focus to the list action. Home task editing remains an independent dialog so layout changes preserve its draft.
+
+## 2026-11-16: Neutral content skipping
+
+Next image and Next quote appear with the existing hover/focus rating controls when another eligible item exists. Next cycles through eligible content in this tab without writing feedback. The choice resets on reload, day or collection change. Disliked content remains excluded; existing album/author affinity still affects selection. We chose temporary selection over stored skip history to avoid interpreting exploration as a negative preference. Next can preview another image without changing the saved fixed-image choice. Ratings leave fixed backgrounds unchanged.

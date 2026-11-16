@@ -185,3 +185,5 @@ Schema 22 adds optional deletion-batch metadata. The scoped Trash repository res
 Schema 23 adds `Space.setupComplete`. Its migration marks existing spaces complete; fresh profiles offer a skippable setup after preferences load. The onboarding repository commits choices and completion atomically. Browser fixtures dismiss setup through its UI except in dedicated first-run tests.
 
 Home owns note and task editors outside its configurable section tree. Notes save against the revision opened, preserving drafts on conflicts. Settings embeds task contents within its current modal, updates its accessible title and handles Escape as Back while a task list is open.
+
+Neutral Next selections are transient Home state, scoped to the local day and current content pool. The weighted selector accepts excluded IDs so current/visited items can be skipped while affinity still derives from the full pool. No ratings or impressions are written.

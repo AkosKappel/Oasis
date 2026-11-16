@@ -17,7 +17,10 @@ import { localDay } from '@/database/daily-focus';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Library, Search, Settings2 } from 'lucide-react';
 import { LinksMenu } from '@/features/links/links-menu';
-import { preferredDailyItem } from '@/lib/preferred-daily-item';
+import {
+  preferredDailyItem,
+  nextPreferredItem,
+} from '@/lib/preferred-daily-item';
 import { useContentFeedback } from '@/features/content/use-content-feedback';
 import { ContentRating } from '@/features/content/content-rating';
 import { useSpaceRepositories } from '@/features/spaces/space-context';
@@ -102,6 +105,9 @@ export function Home({
   const { session, error: focusError } = useFocusSession();
   const { data: quotes } = useQuotes();
   const { data: albums } = useAlbums();
+  const [nextChoices, setNextChoices] = useState<
+    Partial<Record<ContentKind, { scope: string; id: string; seen: string[] }>>
+  >({});
   const [now, setNow] = useState(() => new Date());
   const focusing =
     !!session &&
@@ -113,11 +119,18 @@ export function Home({
         albums.background?.mixAllAlbums ||
         image.albumId === albums.background?.albumId,
     ) ?? [];
-  const backgroundImage = !storedFeedback
+  const imageItems = albumImages.map((image) => ({
+    ...image,
+    group: image.albumId,
+  }));
+  const quoteItems = (quotes?.quotes ?? [])
+    .filter((quote) => quote.collectionId === quotes?.settings?.collectionId)
+    .map((quote) => ({ ...quote, group: quote.author.trim().toLowerCase() }));
+  const defaultImage = !storedFeedback
     ? undefined
     : albums?.background?.rotateDaily
       ? preferredDailyItem(
-          albumImages.map((image) => ({ ...image, group: image.albumId })),
+          imageItems,
           feedback.filter((record) => record.kind === 'image'),
           albums.background.mixAllAlbums
             ? 'all-albums'
@@ -125,22 +138,100 @@ export function Home({
           now,
         )
       : albumImages.find((image) => image.id === albums?.background?.imageId);
-  const dailyQuote =
+  const defaultQuote =
     storedFeedback && quotes?.settings?.visible
       ? preferredDailyItem(
-          quotes.quotes
-            .filter(
-              (quote) => quote.collectionId === quotes.settings?.collectionId,
-            )
-            .map((quote) => ({
-              ...quote,
-              group: quote.author.trim().toLowerCase(),
-            })),
+          quoteItems,
           feedback.filter((record) => record.kind === 'quote'),
           quotes.settings.collectionId ?? '',
           now,
         )
       : undefined;
+
+  const dislikes = {
+    image: new Set(
+      feedback
+        .filter(
+          (record) => record.kind === 'image' && record.rating === 'dislike',
+        )
+        .map((record) => record.itemId),
+    ),
+    quote: new Set(
+      feedback
+        .filter(
+          (record) => record.kind === 'quote' && record.rating === 'dislike',
+        )
+        .map((record) => record.itemId),
+    ),
+  };
+  const imageScope = JSON.stringify([
+    localDay(now),
+    albums?.background?.albumId,
+    albums?.background?.mixAllAlbums,
+    albums?.background?.rotateDaily,
+    albums?.background?.imageId,
+    albums?.background?.updatedAt,
+  ]);
+  const quoteScope = JSON.stringify([
+    localDay(now),
+    quotes?.settings?.collectionId,
+    quotes?.settings?.updatedAt,
+  ]);
+  function override<T extends { id: string }>(
+    kind: ContentKind,
+    scope: string,
+    items: T[],
+  ) {
+    const choice = nextChoices[kind];
+    return choice?.scope === scope && !dislikes[kind].has(choice.id)
+      ? items.find((item) => item.id === choice.id)
+      : undefined;
+  }
+  const backgroundImage =
+    override('image', imageScope, imageItems) ?? defaultImage;
+  const dailyQuote = quotes?.settings?.visible
+    ? (override('quote', quoteScope, quoteItems) ?? defaultQuote)
+    : undefined;
+  function showNext(kind: ContentKind) {
+    const scope = kind === 'image' ? imageScope : quoteScope,
+      current = kind === 'image' ? backgroundImage : dailyQuote,
+      items = kind === 'image' ? imageItems : quoteItems;
+    if (!current) return;
+    const previous = nextChoices[kind],
+      seen = previous?.scope === scope ? previous.seen : [];
+    const next = nextPreferredItem<{ id: string; group: string }>(
+      items,
+      feedback.filter((record) => record.kind === kind),
+      scope,
+      now,
+      current.id,
+      seen,
+    );
+    if (!next) return;
+    setNextChoices((value) => ({
+      ...value,
+      [kind]: {
+        scope,
+        id: next.id,
+        seen: seen.includes(next.id)
+          ? [current.id, next.id]
+          : [...new Set([...seen, current.id, next.id])],
+      },
+    }));
+    const label =
+      kind === 'image'
+        ? imageItems.find((item) => item.id === next.id)?.name
+        : quoteItems.find((item) => item.id === next.id)?.text;
+    setRatingMessage(
+      `Showing ${kind === 'image' ? 'image' : 'quote'}: ${label ?? 'another item'}. No preference changed.`,
+    );
+  }
+  const hasNext = (
+    kind: ContentKind,
+    currentId: string,
+    items: { id: string }[],
+  ) =>
+    items.some((item) => item.id !== currentId && !dislikes[kind].has(item.id));
   const { library, error } = useLibrary();
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
@@ -292,6 +383,11 @@ export function Home({
             )}
             <ContentRating
               kind="quote"
+              onNext={
+                hasNext('quote', dailyQuote.id, quoteItems)
+                  ? () => showNext('quote')
+                  : undefined
+              }
               rating={
                 feedback.find(
                   (record) =>
@@ -421,6 +517,11 @@ export function Home({
               <div className="mr-auto flex items-center">
                 <ContentRating
                   kind="image"
+                  onNext={
+                    hasNext('image', backgroundImage.id, imageItems)
+                      ? () => showNext('image')
+                      : undefined
+                  }
                   rating={
                     feedback.find(
                       (record) =>

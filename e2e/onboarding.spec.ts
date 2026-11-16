@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright';
 import { test, expect, openSettingsPage } from './fixtures';
 test.use({ skipSetup: false });
 test('offers a skippable first-run setup with persistent clock choices', async ({
@@ -9,6 +10,13 @@ test('offers a skippable first-run setup with persistent clock choices', async (
   await welcome
     .getByRole('combobox', { name: 'Clock format' })
     .selectOption('24');
+  expect(
+    (
+      await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+        .analyze()
+    ).violations,
+  ).toEqual([]);
   await page.screenshot({ path: testInfo.outputPath('welcome.png') });
   await welcome.getByRole('button', { name: 'Start using Oasis' }).click();
   await expect(welcome).toHaveCount(0);

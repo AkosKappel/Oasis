@@ -52,6 +52,15 @@ export function ContentPreferences({
     const images = new Map(
       albums?.images.map((image) => [image.id, image.name]),
     );
+    const albumNames = new Map(
+      albums?.albums.map((album) => [album.id, album.name]),
+    );
+    const imageGroups = new Map(
+      albums?.images.map((image) => [image.id, albumNames.get(image.albumId)]),
+    );
+    const authors = new Map(
+      quotes?.quotes.map((quote) => [quote.id, quote.author]),
+    );
     const entries = new Map(
       quotes?.quotes.map((quote) => [
         quote.id,
@@ -61,6 +70,10 @@ export function ContentPreferences({
     return (feedback ?? [])
       .map((record) => ({
         ...record,
+        affinity:
+          record.kind === 'image'
+            ? imageGroups.get(record.itemId)
+            : authors.get(record.itemId),
         name:
           record.kind === 'image'
             ? (images.get(record.itemId) ?? 'Saved background')
@@ -116,13 +129,15 @@ export function ContentPreferences({
         </Button>
       </div>
       <p className="mt-4 text-sm text-muted-foreground">
-        Likes favor an item and related album or author content. Dislikes skip
-        items during daily rotation. Fixed backgrounds stay fixed. These choices
-        stay in this space, on this device.
+        Likes favor the same image and other images in its album, or quotes by
+        the same author. Disliked items leave daily rotation. Ratings leave
+        fixed backgrounds unchanged. These choices stay in this space, on this
+        device.
       </p>
       <p className="mt-2 text-sm text-muted-foreground">
-        Clear a preference to make the item neutral again. Clearing does not
-        delete images or quotes.
+        Next shows another item in this tab without rating it, until reload or
+        the next day. Clear a preference to make an item neutral again. Clearing
+        does not delete images or quotes.
       </p>
       <fieldset
         disabled={busy || !!loadError}
@@ -189,6 +204,11 @@ export function ContentPreferences({
                   {row.kind === 'image' ? 'Background' : 'Quote'} ·{' '}
                   {row.rating === 'like' ? 'Liked' : 'Disliked'}
                 </p>
+                {row.affinity && (
+                  <p className="mt-1 break-words text-xs text-muted-foreground">
+                    {row.kind === 'image' ? 'Album' : 'Author'}: {row.affinity}
+                  </p>
+                )}
               </div>
               <Button
                 size="sm"

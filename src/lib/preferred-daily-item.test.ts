@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import type { ContentFeedback } from '@/database/content-feedback';
-import { preferredDailyItem } from './preferred-daily-item';
+import { preferredDailyItem, nextPreferredItem } from './preferred-daily-item';
 const items = [
   { id: 'a', group: 'nature' },
   { id: 'b', group: 'nature' },
@@ -72,4 +72,44 @@ it('excludes dislikes, ignores deleted votes and keeps a liked current item sele
       )?.id,
     ).toBe(current.id);
   }
+});
+
+it('neutral next visits other eligible items before cycling and leaves feedback unchanged', () => {
+  const date = new Date(2026, 10, 16),
+    feedback = [vote('c', 'dislike')],
+    snapshot = structuredClone(feedback);
+  expect(
+    nextPreferredItem(items, feedback, 'album', date, 'a', ['a'])?.id,
+  ).toBe('b');
+  expect(
+    nextPreferredItem(items, feedback, 'album', date, 'b', ['a', 'b'])?.id,
+  ).toBe('a');
+  expect(
+    nextPreferredItem([items[0]!], feedback, 'album', date, 'a'),
+  ).toBeUndefined();
+  expect(
+    nextPreferredItem(
+      items,
+      [...feedback, vote('b', 'dislike')],
+      'album',
+      date,
+      'a',
+    ),
+  ).toBeUndefined();
+  expect(feedback).toEqual(snapshot);
+});
+
+it('keeps album affinity when the liked current item is excluded by Next', () => {
+  const counts = { b: 0, c: 0 };
+  for (let day = 0; day < 1200; day++) {
+    const next = nextPreferredItem(
+      items,
+      [vote('a', 'like')],
+      'album',
+      new Date(2026, 0, 1 + day),
+      'a',
+    );
+    counts[next!.id as 'b' | 'c']++;
+  }
+  expect(counts.b).toBeGreaterThan(counts.c * 1.5);
 });

@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright';
 import { test, expect, openSettingsPage } from './fixtures';
 test('edits a Home note directly and keeps conflict drafts without nested task dialogs', async ({
   page,
@@ -58,6 +59,13 @@ test('edits a Home note directly and keeps conflict drafts without nested task d
   await expect(
     editor.getByRole('textbox', { name: 'Note text', exact: true }),
   ).toHaveValue('An unsaved draft.');
+  expect(
+    (
+      await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+        .analyze()
+    ).violations,
+  ).toEqual([]);
   await page.screenshot({ path: testInfo.outputPath('note-direct-edit.png') });
   await editor.getByRole('button', { name: 'Cancel', exact: true }).click();
   await expect(article).toContainText('A newer note from another tab.');

@@ -203,6 +203,10 @@ test('rates local images and quotes, persists across tabs and skips disliked dai
       .getByRole('list', { name: 'Saved content preferences' })
       .getByRole('listitem'),
   ).toHaveCount(2);
+  await expect(preferences.getByText(/^Album: /)).toBeVisible();
+  await expect(
+    preferences.getByText('Author: Personal note', { exact: true }),
+  ).toBeVisible();
   await preferences
     .getByRole('combobox', { name: 'Content type', exact: true })
     .selectOption('quote');

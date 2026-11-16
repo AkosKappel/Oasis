@@ -22,7 +22,8 @@ export function NoteEditor({
     return () => {
       if (focused instanceof HTMLElement)
         requestAnimationFrame(() => {
-          if (focused.isConnected) focused.focus();
+          if (focused.isConnected && document.activeElement === document.body)
+            focused.focus();
         });
     };
   }, []);
