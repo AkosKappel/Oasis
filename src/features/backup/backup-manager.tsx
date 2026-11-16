@@ -2,7 +2,12 @@ import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { reportStorageError } from '@/database/storage-health';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { MAX_BACKUP_BYTES, parseBackup, type Backup } from '@/database/backup';
+import {
+  MAX_BACKUP_BYTES,
+  parseBackup,
+  serializeBackup,
+  type Backup,
+} from '@/database/backup';
 import { MAX_HTML_BYTES, type HtmlImport } from '@/database/bookmark-html';
 import { parseBookmarkHtml } from '@/features/transfer/parse-bookmark-html';
 
@@ -67,17 +72,17 @@ export function BackupManager({ onClose }: { onClose: () => void }) {
         aria-label="Oasis JSON backup"
         className="mt-5 flex flex-col gap-4"
       >
-        <h3 className="text-lg font-medium">Oasis backup</h3>
+        <h3 className="text-lg font-medium">Bookmark backup</h3>
         <p className="text-sm text-muted-foreground">
           Keep bookmarks, folders, tags, favorites and notes in an Oasis JSON
-          file.
+          file. This backs up Library content, not the whole space.
         </p>
         <Button
           disabled={busy}
           onClick={() =>
             void run(async () => {
               downloadFile(
-                JSON.stringify(await personalBackup.export(), null, 2),
+                serializeBackup(await personalBackup.export()),
                 'application/json',
                 `oasis-backup-${date()}.json`,
               );
@@ -100,7 +105,9 @@ export function BackupManager({ onClose }: { onClose: () => void }) {
               if (file)
                 void run(async () => {
                   if (file.size > MAX_BACKUP_BYTES)
-                    throw new Error('Choose a backup smaller than 10 MB.');
+                    throw new Error(
+                      'Choose a bookmark backup no larger than 64 MB.',
+                    );
                   setBackup(parseBackup(await file.text()));
                 });
             }}
@@ -183,7 +190,7 @@ export function BackupManager({ onClose }: { onClose: () => void }) {
         <p className="text-sm text-muted-foreground">
           Matching folder paths are merged. Exact URLs already in the same
           folder are skipped. Import up to 10,000 items and 32 folder levels per
-          file.
+          file. This backs up Library content, not the whole space.
         </p>
         {html && (
           <p className="text-sm">

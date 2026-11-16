@@ -116,7 +116,7 @@ export function SpaceSwitcher() {
               onClick={() => {
                 if (
                   confirm(
-                    `Delete “${current?.name}” and all its local data? Export its bookmarks, albums and quotes first. This cannot be undone.`,
+                    `Delete “${current?.name}” and all its local data? Back up this space first, including bookmarks, albums, quotes, notes, tasks and settings. This cannot be undone.`,
                   )
                 )
                   void run(async () => {

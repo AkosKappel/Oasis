@@ -3,6 +3,7 @@ import { OasisDatabase } from './schema';
 import {
   createBackupRepository,
   parseBackup,
+  serializeBackup,
   validateBackup,
   type Backup,
 } from './backup';
@@ -165,4 +166,19 @@ it('round trips nested folders with the same names under different parents', asy
     exported.folders.find((folder) => folder.id === 'nested')?.parentId,
   ).toBe('parent');
   expect(exported.bookmarks[0]?.folderId).toBe('nested');
+});
+
+it('round-trips an exported Library larger than the former 10 MB import limit', () => {
+  const backup = fixture();
+  const record = backup.bookmarks[0]!;
+  backup.bookmarks = Array.from({ length: 550 }, (_, index) => ({
+    ...record,
+    id: `large-${index}`,
+    notes: 'x'.repeat(20000),
+  }));
+  const json = serializeBackup(backup);
+  expect(new TextEncoder().encode(json).byteLength).toBeGreaterThan(
+    10 * 1024 * 1024,
+  );
+  expect(parseBackup(json).bookmarks).toHaveLength(550);
 });

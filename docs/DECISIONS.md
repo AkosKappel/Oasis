@@ -313,3 +313,7 @@ Keep scratchpads inside the existing Widgets manager, hidden by default, rather 
 ## 2026-11-15: Bounded local task lists
 
 Use separate task records under optional widgets rather than arrays inside widget settings, so completing a task cannot overwrite another task or the list’s settings. Keep the initial scope to add/edit/complete/remove and text export. Hide new lists by default, cap active tasks and Home previews, and leave reminders, recurrence and due dates for separate decisions.
+
+## 2026-11-16: Symmetric bookmark backup limits
+
+Use a shared 64 MiB bound for bookmark import and serialized export. Validate the exported bytes before starting a download so Oasis never knowingly emits a bookmark backup its own file reader rejects. The larger bound accommodates ordinary large libraries with notes; complete-space backups are a separate format. Label the existing format as a bookmark backup.

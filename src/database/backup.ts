@@ -14,7 +14,7 @@ export interface Backup {
   tags: Tag[];
 }
 
-export const MAX_BACKUP_BYTES = 10 * 1024 * 1024;
+export const MAX_BACKUP_BYTES = 64 * 1024 * 1024;
 const invalid = () => new Error('This file is not a valid Oasis backup.');
 function object(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value))
@@ -185,9 +185,18 @@ export function validateBackup(value: unknown): Backup {
   };
 }
 
+export function serializeBackup(value: Backup): string {
+  const json = JSON.stringify(validateBackup(value), null, 2);
+  if (new TextEncoder().encode(json).byteLength > MAX_BACKUP_BYTES)
+    throw new Error(
+      'This bookmark backup exceeds 64 MB. Export smaller spaces before downloading.',
+    );
+  return json;
+}
+
 export function parseBackup(json: string): Backup {
   if (new TextEncoder().encode(json).byteLength > MAX_BACKUP_BYTES)
-    throw new Error('Choose a backup smaller than 10 MB.');
+    throw new Error('Choose a bookmark backup no larger than 64 MB.');
   let value: unknown;
   try {
     value = JSON.parse(json);
