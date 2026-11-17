@@ -116,3 +116,25 @@ it('validates cycle lengths, isolates spaces and rolls back phase transitions', 
   }
   expect(await repository.get()).toEqual(initial);
 });
+
+it('takes an optional long break after every fourth focus session', async () => {
+  await database.open();
+  await expect(repository.start(25, undefined, 15)).rejects.toThrow(
+    'short break',
+  );
+  for (const minutes of [0, 61, 2.5])
+    await expect(repository.start(25, 5, minutes)).rejects.toThrow('break');
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(100_000);
+  await repository.start(25, 5, 15);
+  const breaks: number[] = [];
+  for (let step = 0; step < 10; step++) {
+    const current = (await repository.get())!;
+    clock.mockReturnValue(current.endsAt);
+    await repository.nextPhase(current.endsAt);
+    const next = (await repository.get())!;
+    if (next.cycle?.phase === 'break') breaks.push(next.remaining / 60_000);
+  }
+  expect(breaks).toEqual([5, 5, 5, 15, 5]);
+  const last = (await repository.get())!;
+  expect(last.cycle).toMatchObject({ longBreakMinutes: 15, completedFocus: 5 });
+});

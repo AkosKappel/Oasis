@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   focusRemaining,
+  isLongBreak,
+  LONG_BREAK_EVERY,
   timerText,
   type FocusSession,
 } from '@/database/focus-session';
@@ -13,6 +15,8 @@ export function FocusModeDialog({ onClose }: { onClose: () => void }) {
     previous = useRef(document.activeElement);
   const [cycles, setCycles] = useState(false);
   const [breakMinutes, setBreakMinutes] = useState(5);
+  const [longBreaks, setLongBreaks] = useState(false);
+  const [longBreakMinutes, setLongBreakMinutes] = useState(15);
   const [minutes, setMinutes] = useState(25),
     [busy, setBusy] = useState(false),
     [error, setError] = useState<string>();
@@ -52,7 +56,11 @@ export function FocusModeDialog({ onClose }: { onClose: () => void }) {
           setBusy(true);
           setError(undefined);
           void personalFocusSession
-            .start(minutes, cycles ? breakMinutes : undefined)
+            .start(
+              minutes,
+              cycles ? breakMinutes : undefined,
+              cycles && longBreaks ? longBreakMinutes : undefined,
+            )
             .then(onClose)
             .catch((cause: unknown) => {
               reportStorageError(cause);
@@ -104,6 +112,32 @@ export function FocusModeDialog({ onClose }: { onClose: () => void }) {
                 }
               />
             </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={longBreaks}
+                disabled={busy}
+                onChange={(event) => setLongBreaks(event.target.checked)}
+              />
+              Take a long break after every {LONG_BREAK_EVERY} focus sessions
+            </label>
+            {longBreaks && (
+              <label className="field">
+                Long break minutes
+                <input
+                  type="number"
+                  min={1}
+                  max={60}
+                  step={1}
+                  required
+                  disabled={busy}
+                  value={longBreakMinutes}
+                  onChange={(event) =>
+                    setLongBreakMinutes(Number(event.target.value))
+                  }
+                />
+              </label>
+            )}
             <p className="text-sm text-muted-foreground">
               Each phase waits for you to start the next. Nothing starts
               automatically.
@@ -143,6 +177,8 @@ export function FocusTimer({
   const remaining = focusRemaining(session, now);
   if (session.state === 'ended') return null;
   const isBreak = session.cycle?.phase === 'break';
+  const longBreak = !!session.cycle && isLongBreak(session.cycle);
+  const breakName = longBreak ? 'Long break' : 'Break';
   async function act(action: 'pause' | 'resume' | 'end' | 'next') {
     setBusy(true);
     setError(undefined);
@@ -162,14 +198,16 @@ export function FocusTimer({
       <h2 className="text-sm text-muted-foreground">
         {remaining === 0
           ? isBreak
-            ? 'Break complete'
+            ? `${breakName} complete`
             : 'Session complete'
           : session.state === 'paused'
             ? isBreak
-              ? 'Break paused'
+              ? `${breakName} paused`
               : 'Focus paused'
             : isBreak
-              ? 'Take a break'
+              ? longBreak
+                ? 'Take a long break'
+                : 'Take a break'
               : 'One thing at a time'}
       </h2>
       <p
@@ -195,7 +233,15 @@ export function FocusTimer({
       <div className="mt-5 flex flex-wrap justify-center gap-3">
         {remaining === 0 && session.cycle && (
           <Button disabled={busy} onClick={() => void act('next')}>
-            {isBreak ? 'Start next focus' : 'Start break'}
+            {isBreak
+              ? 'Start next focus'
+              : isLongBreak({
+                    ...session.cycle,
+                    phase: 'break',
+                    completedFocus: session.cycle.completedFocus + 1,
+                  })
+                ? 'Start long break'
+                : 'Start break'}
           </Button>
         )}
         {remaining > 0 && (

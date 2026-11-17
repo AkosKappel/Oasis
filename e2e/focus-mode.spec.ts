@@ -145,3 +145,62 @@ test('waits between focus and break phases and preserves a paused break across r
     page.getByRole('searchbox', { name: 'Search bookmarks' }),
   ).toBeVisible();
 });
+
+test('offers an optional long break after every fourth focus session', async ({
+  page,
+}, testInfo) => {
+  await page.clock.install({ time: new Date() });
+  await page.goto('chrome://newtab/');
+  await page.getByRole('button', { name: 'Focus mode', exact: true }).click();
+  await page
+    .getByRole('spinbutton', { name: 'Session minutes', exact: true })
+    .fill('1');
+  await page
+    .getByRole('checkbox', { name: 'Alternate focus and breaks' })
+    .check();
+  await page
+    .getByRole('spinbutton', { name: 'Break minutes', exact: true })
+    .fill('1');
+  await page.getByRole('checkbox', { name: /Take a long break/ }).check();
+  await page
+    .getByRole('spinbutton', { name: 'Long break minutes', exact: true })
+    .fill('2');
+  await page.screenshot({ path: testInfo.outputPath('long-break-setup.png') });
+  await page.getByRole('button', { name: 'Start focus', exact: true }).click();
+  const pauseFocus = page.getByRole('button', {
+    name: 'Pause focus',
+    exact: true,
+  });
+  for (let round = 1; round <= 3; round++) {
+    await expect(pauseFocus).toBeVisible();
+    await page.clock.fastForward(61_000);
+    await page
+      .getByRole('button', { name: 'Start break', exact: true })
+      .click();
+    await expect(
+      page.getByRole('button', { name: 'Pause break', exact: true }),
+    ).toBeVisible();
+    await page.clock.fastForward(61_000);
+    await page
+      .getByRole('button', { name: 'Start next focus', exact: true })
+      .click();
+  }
+  await expect(pauseFocus).toBeVisible();
+  await page.clock.fastForward(61_000);
+  await page
+    .getByRole('button', { name: 'Start long break', exact: true })
+    .click();
+  await expect(
+    page.getByRole('heading', { name: 'Take a long break', exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole('timer')).toHaveText('02:00');
+  await page.reload();
+  await expect(
+    page.getByRole('heading', { name: 'Take a long break', exact: true }),
+  ).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('long-break.png') });
+  await page.clock.fastForward(121_000);
+  await expect(
+    page.getByRole('heading', { name: 'Long break complete', exact: true }),
+  ).toBeVisible();
+});

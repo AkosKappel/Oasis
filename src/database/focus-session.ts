@@ -9,9 +9,30 @@ export interface FocusSession extends RecordMetadata {
   cycle?: {
     focusMinutes: number;
     breakMinutes: number;
+    longBreakMinutes?: number;
     phase: 'focus' | 'break';
     completedFocus: number;
   };
+}
+type FocusCycle = NonNullable<FocusSession['cycle']>;
+export const LONG_BREAK_EVERY = 4;
+export function isLongBreak(cycle: FocusCycle) {
+  return (
+    cycle.phase === 'break' &&
+    cycle.longBreakMinutes !== undefined &&
+    cycle.completedFocus > 0 &&
+    cycle.completedFocus % LONG_BREAK_EVERY === 0
+  );
+}
+export function phaseMinutes(cycle: FocusCycle) {
+  if (cycle.phase === 'focus') return cycle.focusMinutes;
+  return isLongBreak(cycle) ? cycle.longBreakMinutes! : cycle.breakMinutes;
+}
+function validBreak(minutes: number | undefined) {
+  return (
+    minutes === undefined ||
+    (Number.isInteger(minutes) && minutes >= 1 && minutes <= 60)
+  );
 }
 export function focusRemaining(session: FocusSession, now: number) {
   return session.state === 'ended'
@@ -50,16 +71,17 @@ export function createFocusSessionRepository(
         },
       );
     },
-    async start(minutes: number, breakMinutes?: number) {
+    async start(
+      minutes: number,
+      breakMinutes?: number,
+      longBreakMinutes?: number,
+    ) {
       if (!Number.isInteger(minutes) || minutes < 1 || minutes > 120)
         throw new Error('Choose a focus session from 1 to 120 minutes.');
-      if (
-        breakMinutes !== undefined &&
-        (!Number.isInteger(breakMinutes) ||
-          breakMinutes < 1 ||
-          breakMinutes > 60)
-      )
+      if (!validBreak(breakMinutes) || !validBreak(longBreakMinutes))
         throw new Error('Choose a break from 1 to 60 minutes.');
+      if (breakMinutes === undefined && longBreakMinutes !== undefined)
+        throw new Error('Choose a short break before a long break.');
       await database.transaction(
         'rw',
         database.spaces,
@@ -86,6 +108,9 @@ export function createFocusSessionRepository(
                   cycle: {
                     focusMinutes: minutes,
                     breakMinutes,
+                    ...(longBreakMinutes === undefined
+                      ? {}
+                      : { longBreakMinutes }),
                     phase: 'focus' as const,
                     completedFocus: 0,
                   },
@@ -114,22 +139,21 @@ export function createFocusSessionRepository(
             throw new Error(
               'This timer has changed. Use its current controls.',
             );
-          const cycle = existing.cycle;
-          const phase = cycle.phase === 'focus' ? 'break' : 'focus';
-          const remaining =
-            (phase === 'break' ? cycle.breakMinutes : cycle.focusMinutes) *
-            60_000;
+          const previous = existing.cycle;
+          const phase = previous.phase === 'focus' ? 'break' : 'focus';
+          const cycle = {
+            ...previous,
+            phase,
+            completedFocus:
+              previous.completedFocus + (phase === 'break' ? 1 : 0),
+          } as const;
+          const remaining = phaseMinutes(cycle) * 60_000;
           await database.focusSessions.update(id, {
             state: 'running',
             remaining,
             endsAt: now + remaining,
             updatedAt: now,
-            cycle: {
-              ...cycle,
-              phase,
-              completedFocus:
-                cycle.completedFocus + (phase === 'break' ? 1 : 0),
-            },
+            cycle,
           });
         },
       );

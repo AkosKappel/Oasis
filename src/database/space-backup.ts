@@ -18,7 +18,11 @@ import {
   type WeatherLocation,
   type WeatherForecast,
 } from './weather';
-import { focusRemaining, type FocusSession } from './focus-session';
+import {
+  focusRemaining,
+  phaseMinutes,
+  type FocusSession,
+} from './focus-session';
 import { taskText } from './widget-tasks';
 import { builtinAlbums } from './builtin-albums';
 export const SPACE_TABLES = [
@@ -251,6 +255,10 @@ export function validateSpaceBackup(value: unknown): SpaceBackup {
       const focusMinutes = number(input.focusMinutes);
       const breakMinutes = number(input.breakMinutes);
       const completedFocus = number(input.completedFocus);
+      const longBreakMinutes =
+        input.longBreakMinutes === undefined
+          ? undefined
+          : number(input.longBreakMinutes);
       if (
         !Number.isInteger(focusMinutes) ||
         focusMinutes < 1 ||
@@ -258,19 +266,21 @@ export function validateSpaceBackup(value: unknown): SpaceBackup {
         !Number.isInteger(breakMinutes) ||
         breakMinutes < 1 ||
         breakMinutes > 60 ||
+        (longBreakMinutes !== undefined &&
+          (!Number.isInteger(longBreakMinutes) ||
+            longBreakMinutes < 1 ||
+            longBreakMinutes > 60)) ||
         !Number.isSafeInteger(completedFocus)
       )
         throw new Error('The space backup contains an invalid focus cycle.');
       cycle = {
         focusMinutes,
         breakMinutes,
+        ...(longBreakMinutes === undefined ? {} : { longBreakMinutes }),
         completedFocus,
         phase: enumValue(input.phase, ['focus', 'break']),
       };
-      if (
-        remaining >
-        (cycle.phase === 'focus' ? focusMinutes : breakMinutes) * 60_000
-      )
+      if (remaining > phaseMinutes(cycle) * 60_000)
         throw new Error('The space backup contains an invalid cycle timer.');
     }
     return {

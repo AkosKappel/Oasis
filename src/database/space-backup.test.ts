@@ -245,9 +245,25 @@ it('preserves optional focus cycles in paused restores and rejects invalid cycle
     { completedFocus: -1 },
     { completedFocus: 1.5 },
     { phase: 'other' },
+    { longBreakMinutes: 0 },
+    { longBreakMinutes: 61 },
   ]) {
     const invalid = structuredClone(archive);
     Object.assign(invalid.tables.focusSessions[0]!.cycle as object, mutation);
     expect(() => parseSpaceBackup(JSON.stringify(invalid))).toThrow();
   }
+  const long = structuredClone(archive);
+  Object.assign(long.tables.focusSessions[0]!.cycle as object, {
+    longBreakMinutes: 20,
+    phase: 'break',
+    completedFocus: 4,
+  });
+  Object.assign(long.tables.focusSessions[0]!, { remaining: 20 * 60_000 });
+  expect(
+    parseSpaceBackup(JSON.stringify(long)).tables.focusSessions[0]!.cycle,
+  ).toMatchObject({ longBreakMinutes: 20 });
+  Object.assign(long.tables.focusSessions[0]!.cycle as object, {
+    completedFocus: 3,
+  });
+  expect(() => parseSpaceBackup(JSON.stringify(long))).toThrow('cycle timer');
 });
