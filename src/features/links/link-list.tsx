@@ -34,7 +34,7 @@ export function LinkList({
   }
   return (
     <>
-      <ul aria-label="Saved links" className="space-y-0.5">
+      <ul aria-label="Saved links" className="space-y-0">
         {bookmarks.slice(0, limit).map((bookmark, index) => {
           const labels = bookmark.tags.flatMap((id) =>
             tagMap.has(id) ? [tagMap.get(id)!.name] : [],
@@ -79,10 +79,10 @@ export function LinkList({
                 href={bookmark.url}
                 onClick={onOpen}
                 title={`${bookmark.title}\n${bookmark.url}${labels.length ? `\nTags: ${labels.join(', ')}` : ''}`}
-                className="flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-secondary hover:text-secondary-foreground"
+                className="flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-secondary hover:text-secondary-foreground"
               >
                 <BookmarkIcon bookmark={bookmark} />
-                <span className="min-w-0 flex-1 truncate font-medium">
+                <span className="min-w-0 flex-1 truncate font-normal">
                   {bookmark.title}
                 </span>
                 {!!labels.length && (
@@ -140,36 +140,5 @@ export function LinkList({
         </button>
       )}
     </>
-  );
-}
-
-export function LinkFolder({
-  name,
-  bookmarks,
-  query,
-  ...props
-}: Omit<Parameters<typeof LinkList>[0], 'bookmarks'> & {
-  name: string;
-  bookmarks: Bookmark[];
-  query: string;
-}) {
-  const [open, setOpen] = useState(!!query);
-  return (
-    <details
-      open={open}
-      onToggle={(event) => setOpen(event.currentTarget.open)}
-      className="border-t border-border py-1"
-    >
-      <summary
-        className="cursor-pointer truncate rounded px-2 py-2 text-sm font-medium"
-        title={name}
-      >
-        {name}{' '}
-        <span className="text-xs font-normal text-muted-foreground">
-          ({bookmarks.length})
-        </span>
-      </summary>
-      {open && <LinkList {...props} bookmarks={bookmarks} />}
-    </details>
   );
 }

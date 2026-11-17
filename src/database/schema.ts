@@ -22,7 +22,7 @@ import type {
   Quote,
   QuoteSettings,
 } from '@/types/entities';
-export const SCHEMA_VERSION = 24;
+export const SCHEMA_VERSION = 25;
 export class OasisDatabase extends Dexie {
   widgetTasks!: EntityTable<WidgetTask, 'id'>;
   savedSearches!: EntityTable<SavedSearch, 'id'>;
@@ -119,6 +119,7 @@ export class OasisDatabase extends Dexie {
           .modify({ setupComplete: true }),
       );
     this.version(24).stores({ focusSessions: 'id, spaceId' });
+    this.version(25).stores({ preferences: 'id, spaceId' });
     this.on('blocked', () => reportStorageIssue('blocked'));
     this.on('versionchange', () => {
       this.close();

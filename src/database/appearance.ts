@@ -16,6 +16,9 @@ export interface Appearance {
   showFrequentBookmarks?: boolean;
   linksSide: 'left' | 'right';
   linksPinned: boolean;
+  showLinksFavorites?: boolean;
+  showLinksRecent?: boolean;
+  showLinksFrequent?: boolean;
   primaryColor?: string;
   secondaryColor?: string;
 }
@@ -45,6 +48,11 @@ export function validateAppearance(value: Appearance): Appearance {
       typeof value.showRecentBookmarks !== 'boolean') ||
     (value.showFrequentBookmarks !== undefined &&
       typeof value.showFrequentBookmarks !== 'boolean') ||
+    [
+      value.showLinksFavorites,
+      value.showLinksRecent,
+      value.showLinksFrequent,
+    ].some((flag) => flag !== undefined && typeof flag !== 'boolean') ||
     typeof value.showFavorites !== 'boolean' ||
     !['left', 'right'].includes(value.linksSide ?? 'left') ||
     (value.linksPinned !== undefined && typeof value.linksPinned !== 'boolean')
@@ -81,6 +89,15 @@ export function validateAppearance(value: Appearance): Appearance {
       : {}),
     ...(value.showFrequentBookmarks !== undefined
       ? { showFrequentBookmarks: value.showFrequentBookmarks }
+      : {}),
+    ...(value.showLinksFavorites !== undefined
+      ? { showLinksFavorites: value.showLinksFavorites }
+      : {}),
+    ...(value.showLinksRecent !== undefined
+      ? { showLinksRecent: value.showLinksRecent }
+      : {}),
+    ...(value.showLinksFrequent !== undefined
+      ? { showLinksFrequent: value.showLinksFrequent }
       : {}),
     linksSide: value.linksSide ?? 'left',
     linksPinned: value.linksPinned ?? false,

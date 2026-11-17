@@ -385,3 +385,9 @@ Shared buttons use a shadow focus ring in regular themes. Forced-colors mode rem
 Home Links shows compact rows, quick collections and collapsible full-path folder groups. Manual ordering shares Library ranks, with drag handles and keyboard move buttons. Recent/frequent collections retain usage ordering and use existing opt-in open counts. Search runs before the 50-link history limit. Folder lists render 50 links at a time with an explicit expansion control.
 
 Bookmark icons prefer an optional emoji or short label, then an existing validated cached favicon, then the title initial. Custom labels are limited to 16 UTF-16 code units and reject control and bidirectional formatting characters. No schema, dependencies, permissions or network requests are added. Full titles, URLs and tag names remain available in native hover details and accessible link text while visible text truncates.
+
+## 2026-11-17: Links is a compact folder explorer
+
+Replace collection filter buttons and flat full-path groups with nested folder disclosure rows. Favorites, recently used and frequently used are independent disclosure sections above the tree. All three start visible and collapsed; each can be disabled per space in Appearance without affecting Home widgets or Privacy's open counting. Search and a single-tag select apply together across the tree and sections. Filtering retains and expands matching ancestors; unfiltered trees include empty folders. Local manual ordering and icon behavior remain shared with Library.
+
+Dexie v25 records the optional appearance fields without rewriting older preferences. Missing flags mean visible. Imported orphan folders and cycles remain reachable; iterative counting handles deep chains without recursive data traversal. Indentation stops increasing after five levels to preserve usable row width. Link rows retain full hover and accessible details while visible titles and tags truncate.

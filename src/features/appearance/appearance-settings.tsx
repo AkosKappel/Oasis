@@ -321,6 +321,29 @@ export function AppearanceSettings({
               />
               Keep Links open on desktop
             </label>
+            <fieldset className="space-y-2">
+              <legend className="mb-2 text-sm font-medium">
+                Links sections
+              </legend>
+              {(
+                [
+                  ['showLinksFavorites', 'Favorites'],
+                  ['showLinksRecent', 'Recently used'],
+                  ['showLinksFrequent', 'Frequently used'],
+                ] as const
+              ).map(([field, label]) => (
+                <label key={field} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={draft[field] ?? true}
+                    onChange={(event) =>
+                      update({ [field]: event.target.checked })
+                    }
+                  />
+                  Show {label.toLowerCase()} in Links
+                </label>
+              ))}
+            </fieldset>
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"

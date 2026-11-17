@@ -444,6 +444,11 @@ export function Home({
             className={`flex flex-wrap items-center justify-between gap-3 text-sm ${appearance.linksSide === 'right' ? 'flex-row-reverse' : ''}`}
           >
             <LinksMenu
+              sections={{
+                favorites: appearance.showLinksFavorites ?? true,
+                recent: appearance.showLinksRecent ?? true,
+                frequent: appearance.showLinksFrequent ?? true,
+              }}
               side={appearance.linksSide}
               pinned={appearance.linksPinned}
               onPin={onPinLinks}
