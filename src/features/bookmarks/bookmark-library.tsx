@@ -1,4 +1,5 @@
 import { LinkCheckDialog } from '@/features/link-checks/link-check-dialog';
+import { PageTextDialog } from '@/features/page-texts/page-text-dialog';
 import { SessionDialog } from '@/features/sessions/session-dialog';
 import { useUndo } from '@/features/settings/undo';
 import type { SettingsPage } from '@/features/settings/settings';
@@ -30,6 +31,7 @@ import { type LibraryPreferences } from '@/database/library-preferences';
 import { folderPaths } from '@/features/organization/folder-tree';
 import { BookmarkCard } from './bookmark-card';
 import { useEffect, useMemo, useState } from 'react';
+import { liveQuery } from 'dexie';
 import {
   Settings2,
   MoreHorizontal,
@@ -59,6 +61,7 @@ export function BookmarkLibrary({
     personalBookmarks,
     personalOrganization,
     personalLibraryPreferences,
+    pageTexts,
   } = useSpaceRepositories();
   const {
     preferences,
@@ -92,6 +95,12 @@ export function BookmarkLibrary({
   const [bulkBusy, setBulkBusy] = useState(false);
   const [notesFor, setNotesFor] = useState<Bookmark>();
   const [linkCheckOpen, setLinkCheckOpen] = useState(false);
+  const [pageTextFor, setPageTextFor] = useState<Bookmark>();
+  const [savedTexts, setSavedTexts] = useState<Set<string>>(new Set());
+  const [textSearch, setTextSearch] = useState({
+    query: '',
+    ids: new Set<string>(),
+  });
   const [sessionOpen, setSessionOpen] = useState(false);
   const [statisticsOpen, setStatisticsOpen] = useState(false);
   const [duplicatesOpen, setDuplicatesOpen] = useState(false);
@@ -113,32 +122,66 @@ export function BookmarkLibrary({
   const favoritesOnly = collection === 'favorites';
   const [error, setError] = useState<string>();
   const [deleting, setDeleting] = useState<string>();
-  const filtered = useMemo(
+  const plainQuery = query.trim();
+  // Operators are answered by the regular search; page text only adds plain-text matches.
+  const textQuery =
+    plainQuery.length >= 3 && !plainQuery.includes(':') ? plainQuery : '';
+  const textMatches = useMemo(
     () =>
-      bookmarks
-        ? filterBookmarks(
-            smartCollection(bookmarks, collection),
-            folders,
-            tags,
-            {
-              query,
-              favoritesOnly,
-              folderId,
-              tagId,
-            },
-          )
-        : undefined,
-    [
-      bookmarks,
+      textQuery && textSearch.query === textQuery
+        ? textSearch.ids
+        : new Set<string>(),
+    [textQuery, textSearch],
+  );
+  const filtered = useMemo(() => {
+    if (!bookmarks) return undefined;
+    const pool = smartCollection(bookmarks, collection);
+    const filters = { query, favoritesOnly, folderId, tagId };
+    const matches = filterBookmarks(pool, folders, tags, filters);
+    if (!textMatches.size) return matches;
+    // Saved page text matches follow the ranked results and keep the other filters.
+    const found = new Set(matches.map((bookmark) => bookmark.id));
+    const extra = filterBookmarks(
+      pool.filter(
+        (bookmark) => textMatches.has(bookmark.id) && !found.has(bookmark.id),
+      ),
       folders,
       tags,
-      query,
-      favoritesOnly,
-      folderId,
-      tagId,
-      collection,
-    ],
-  );
+      { ...filters, query: '' },
+    );
+    return [...matches, ...extra];
+  }, [
+    bookmarks,
+    folders,
+    tags,
+    query,
+    favoritesOnly,
+    folderId,
+    tagId,
+    collection,
+    textMatches,
+  ]);
+  useEffect(() => {
+    const subscription = liveQuery(() => pageTexts.savedIds()).subscribe({
+      next: setSavedTexts,
+      error: (cause) => reportStorageError(cause, true),
+    });
+    return () => subscription.unsubscribe();
+  }, [pageTexts]);
+  useEffect(() => {
+    if (!textQuery || !savedTexts.size) return;
+    let active = true;
+    const timer = window.setTimeout(() => {
+      void pageTexts
+        .search(textQuery)
+        .then((ids) => active && setTextSearch({ query: textQuery, ids }))
+        .catch((cause: unknown) => reportStorageError(cause, true));
+    }, 250);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [textQuery, savedTexts, pageTexts]);
   const visible = useMemo(
     () => (filtered ? sortBookmarks(filtered, preferences.sort) : undefined),
     [filtered, preferences.sort],
@@ -936,6 +979,11 @@ export function BookmarkLibrary({
                     })}
                     deleting={!!deleting}
                     onNotes={setNotesFor}
+                    onPageText={
+                      savedTexts.has(bookmark.id)
+                        ? () => setPageTextFor(bookmark)
+                        : undefined
+                    }
                     onEdit={(bookmark) => setEditor({ bookmark })}
                     onDelete={(bookmark) => void remove(bookmark)}
                   />
@@ -976,6 +1024,12 @@ export function BookmarkLibrary({
               document.getElementById('bookmark-selection-toggle')?.focus(),
             );
           }}
+        />
+      )}
+      {pageTextFor && (
+        <PageTextDialog
+          bookmark={pageTextFor}
+          onClose={() => setPageTextFor(undefined)}
         />
       )}
       {linkCheckOpen && visible && (

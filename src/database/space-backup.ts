@@ -25,6 +25,11 @@ import {
 } from './focus-session';
 import { taskText } from './widget-tasks';
 import { validDesktopCell } from './desktop';
+import {
+  MAX_PAGE_TEXT,
+  normalizePageText,
+  validateHighlights,
+} from './page-texts';
 import { builtinAlbums } from './builtin-albums';
 export const SPACE_TABLES = [
   'bookmarks',
@@ -47,6 +52,7 @@ export const SPACE_TABLES = [
   'savedSearches',
   'widgetTasks',
   'desktopItems',
+  'pageTexts',
 ] as const;
 type TableName = (typeof SPACE_TABLES)[number];
 type Row = {
@@ -130,7 +136,9 @@ export function validateSpaceBackup(value: unknown): SpaceBackup {
   const normalized = {} as Record<TableName, Row[]>;
   for (const name of SPACE_TABLES) {
     // Backups from before Dexie v26 have no desktop table.
-    const rows = tables[name] ?? (name === 'desktopItems' ? [] : undefined);
+    const rows =
+      tables[name] ??
+      (name === 'desktopItems' || name === 'pageTexts' ? [] : undefined);
     if (!Array.isArray(rows) || rows.length > 100000)
       throw new Error(
         'The space backup contains a missing or oversized table.',
@@ -318,6 +326,18 @@ export function validateSpaceBackup(value: unknown): SpaceBackup {
       normalized.desktopItems.length
   )
     throw new Error('The space backup contains overlapping desktop items.');
+  normalized.pageTexts = normalized.pageTexts.map((r) => {
+    const content = normalizePageText(text(r.text, MAX_PAGE_TEXT));
+    if (!bookmarkIds.has(String(r.bookmarkId)) || r.id !== r.bookmarkId)
+      throw new Error('The space backup contains invalid page text.');
+    return {
+      ...metadata(r),
+      bookmarkId: String(r.bookmarkId),
+      text: content,
+      capturedAt: number(r.capturedAt),
+      highlights: validateHighlights(content, r.highlights),
+    };
+  });
   normalized.weatherSettings = normalized.weatherSettings.map((r) => ({
     ...metadata(r),
     enabled: bool(r.enabled),
@@ -436,6 +456,9 @@ export function createSpaceBackupRepository(
         tables.desktopItems = tables.desktopItems.filter((r) =>
           targets.has(String(r.targetId)),
         );
+        tables.pageTexts = tables.pageTexts.filter((r) =>
+          targets.has(String(r.bookmarkId)),
+        );
         return validateSpaceBackup({
           format: 'oasis-space',
           version: 1,
@@ -531,6 +554,10 @@ export function createSpaceBackupRepository(
                 'quoteCollections',
                 source.collectionId,
               );
+            if (table === 'pageTexts') {
+              row.bookmarkId = reference('bookmarks', source.bookmarkId);
+              row.id = row.bookmarkId as string;
+            }
             if (table === 'desktopItems')
               row.targetId = reference(
                 source.kind === 'bookmark' ? 'bookmarks' : 'folders',

@@ -1,5 +1,6 @@
 import type { WidgetTask } from './widget-tasks';
 import type { DesktopItem } from './desktop';
+import type { PageText } from './page-texts';
 import type { SavedSearch } from './saved-searches';
 import type { ContentFeedback } from './content-feedback';
 import type { DashboardLayout } from './dashboard-layout';
@@ -23,10 +24,11 @@ import type {
   Quote,
   QuoteSettings,
 } from '@/types/entities';
-export const SCHEMA_VERSION = 26;
+export const SCHEMA_VERSION = 27;
 export class OasisDatabase extends Dexie {
   widgetTasks!: EntityTable<WidgetTask, 'id'>;
   desktopItems!: EntityTable<DesktopItem, 'id'>;
+  pageTexts!: EntityTable<PageText, 'id'>;
   savedSearches!: EntityTable<SavedSearch, 'id'>;
   contentFeedback!: EntityTable<ContentFeedback, 'id'>;
   dashboardLayouts!: EntityTable<DashboardLayout, 'id'>;
@@ -123,6 +125,7 @@ export class OasisDatabase extends Dexie {
     this.version(24).stores({ focusSessions: 'id, spaceId' });
     this.version(25).stores({ preferences: 'id, spaceId' });
     this.version(26).stores({ desktopItems: 'id, spaceId' });
+    this.version(27).stores({ pageTexts: 'id, spaceId' });
     this.on('blocked', () => reportStorageIssue('blocked'));
     this.on('versionchange', () => {
       this.close();

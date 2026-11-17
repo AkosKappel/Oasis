@@ -1,3 +1,4 @@
+import { normalizePageText } from '@/database/page-texts';
 import type { TagSuggestion } from '@/database/tag-suggestions';
 import { safeBookmarkMedia } from '@/database/bookmark-media';
 import type { PageDetails } from '@/features/capture/read-page-details';
@@ -35,7 +36,7 @@ export function BookmarkEditor({
   defaultFolderId,
   onClose,
 }: BookmarkEditorProps) {
-  const { personalBookmarks } = useSpaceRepositories();
+  const { personalBookmarks, pageTexts } = useSpaceRepositories();
   const dialog = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState<string>();
   const formRef = useRef<HTMLFormElement>(null);
@@ -89,6 +90,9 @@ export function BookmarkEditor({
     [media.image],
   );
   const [mediaChanged, setMediaChanged] = useState(false);
+  const [pageText, setPageText] = useState('');
+  const [keepText, setKeepText] = useState(false);
+  const [savedId, setSavedId] = useState(bookmark?.id);
   async function readDetails() {
     if (!onReadDetails || !formRef.current || reading || saving) return;
     const url = String(new FormData(formRef.current).get('url') ?? '');
@@ -103,6 +107,7 @@ export function BookmarkEditor({
         image: result.image ?? value.image,
       }));
       setMediaChanged(true);
+      setPageText(normalizePageText(result.text ?? ''));
       setDetailsMessage(
         result.description || result.favicon || result.image
           ? 'Page details read. Review before saving.'
@@ -136,7 +141,7 @@ export function BookmarkEditor({
     setSaving(true);
     setError(undefined);
     try {
-      await personalBookmarks.save(
+      const id = await personalBookmarks.save(
         {
           ...(mediaChanged
             ? {
@@ -156,8 +161,11 @@ export function BookmarkEditor({
           folderId: String(data.get('folderId') ?? ''),
           tags: data.getAll('tags').map(String),
         },
-        bookmark?.id,
+        savedId,
       );
+      // Remember the new ID so a retry after a page-text failure edits instead of duplicating.
+      setSavedId(id);
+      if (keepText && pageText) await pageTexts.save(id, pageText);
       storageWriteSucceeded();
       if (onSaved) onSaved();
       else onClose();
@@ -261,6 +269,24 @@ export function BookmarkEditor({
               Optional access reads this page’s description and caches small
               images from the same website. No third-party lookup.
             </p>
+            {!!pageText && (
+              <label className="flex items-start gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={keepText}
+                  onChange={(event) => setKeepText(event.target.checked)}
+                />
+                <span>
+                  Keep a text copy of this page (
+                  {pageText.length.toLocaleString()} characters)
+                  <span className="block text-xs text-muted-foreground">
+                    Stored only in this browser. Read it, search it and add
+                    highlights from Library.
+                  </span>
+                </span>
+              </label>
+            )}
           </div>
         )}
         {(localIcon || localPreview) && (

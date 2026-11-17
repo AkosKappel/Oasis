@@ -20,6 +20,7 @@ import { createWeatherRepository } from './weather';
 import { createLibraryPreferencesRepository } from './library-preferences';
 import { createFocusSessionRepository } from './focus-session';
 import { createDesktopRepository } from './desktop';
+import { createPageTextRepository } from './page-texts';
 const database = new OasisDatabase('complete-space-backup');
 afterEach(() => database.delete());
 async function seed() {
@@ -316,4 +317,32 @@ it('restores desktop places with remapped targets and accepts older backups with
   );
   await createBookmarkRepository('default', database).remove(bookmark);
   expect((await repo.export()).tables.desktopItems).toHaveLength(1);
+});
+
+it('restores saved page text with highlights under the new bookmark IDs', async () => {
+  const { bookmark } = await seed();
+  const pages = createPageTextRepository('default', database);
+  await pages.save(bookmark, 'Keep this sentence.');
+  const record = (await pages.get(bookmark))!;
+  await pages.addHighlight(bookmark, record.updatedAt, 5, 9, 'Note');
+  const repo = createSpaceBackupRepository('default', database);
+  const archive = parseSpaceBackup(serializeSpaceBackup(await repo.export()));
+  expect(archive.tables.pageTexts).toHaveLength(1);
+  const restored = await repo.restore(archive, 'Text copy');
+  const copied = (await database.bookmarks.toArray()).find(
+    (item) => item.spaceId === restored,
+  )!;
+  const copy = await createPageTextRepository(restored, database).get(
+    copied.id,
+  );
+  expect(copy?.text).toBe('Keep this sentence.');
+  expect(copy?.highlights).toMatchObject([{ start: 5, end: 9, note: 'Note' }]);
+  const invalid = structuredClone(archive);
+  Object.assign(invalid.tables.pageTexts[0]!, { bookmarkId: 'missing' });
+  expect(() => parseSpaceBackup(JSON.stringify(invalid))).toThrow();
+  const legacy = structuredClone(archive) as unknown as {
+    tables: Record<string, unknown>;
+  };
+  delete legacy.tables.pageTexts;
+  expect(parseSpaceBackup(JSON.stringify(legacy)).tables.pageTexts).toEqual([]);
 });

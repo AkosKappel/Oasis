@@ -2,7 +2,7 @@ import { useMemo, type DragEvent } from 'react';
 import { safeBookmarkMedia } from '@/database/bookmark-media';
 import { BookmarkIcon } from './bookmark-icon';
 import { TrackedBookmarkLink } from '@/features/bookmarks/tracked-bookmark-link';
-import { FileText, Pencil, Star, Trash2 } from 'lucide-react';
+import { BookOpenText, FileText, Pencil, Star, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
 
@@ -21,6 +21,7 @@ interface BookmarkCardProps {
   tags: Tag[];
   onEdit: (bookmark: Bookmark) => void;
   onNotes: (bookmark: Bookmark) => void;
+  onPageText?: () => void;
   onDelete: (bookmark: Bookmark) => void;
 }
 
@@ -39,6 +40,7 @@ export function BookmarkCard({
   tags,
   onEdit,
   onNotes,
+  onPageText,
   onDelete,
 }: BookmarkCardProps) {
   const preview = useMemo(
@@ -233,6 +235,17 @@ export function BookmarkCard({
         >
           <FileText className="size-4" aria-hidden="true" />
         </Button>
+        {onPageText && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={onPageText}
+            aria-label={`Page text for ${bookmark.title}`}
+            title="Saved page text"
+          >
+            <BookOpenText className="size-4" aria-hidden="true" />
+          </Button>
+        )}
         <Button
           variant="outline"
           size="icon"

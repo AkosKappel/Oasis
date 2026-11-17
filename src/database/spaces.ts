@@ -60,6 +60,8 @@ export function createSpaceRepository(database: OasisDatabase = db) {
                 dataUrl?: string;
                 favicon?: string;
                 image?: string;
+                text?: string;
+                highlights?: unknown[];
               }) => {
                 record.deletedAt ??= now;
                 record.updatedAt = now;
@@ -68,6 +70,10 @@ export function createSpaceRepository(database: OasisDatabase = db) {
                   record.image = undefined;
                 }
                 if (table.name === 'albumImages') record.dataUrl = '';
+                if (table.name === 'pageTexts') {
+                  record.text = '';
+                  record.highlights = [];
+                }
               },
             );
         }

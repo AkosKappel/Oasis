@@ -3,6 +3,7 @@ export interface PageDetails {
   description: string;
   favicon?: string;
   image?: string;
+  text?: string;
 }
 // Chrome serializes this function into the active tab, so every runtime helper must stay inside it.
 export async function readPageDetails(): Promise<PageDetails> {
@@ -225,5 +226,11 @@ export async function readPageDetails(): Promise<PageDetails> {
       ?.content;
   const savedImage = await image(preview, 'preview');
   if (location.href !== pageUrl) return { url: location.href, description: '' };
-  return { url: pageUrl, description, favicon, image: savedImage };
+  // Prefer the main content; the copy is only stored if the user opts in.
+  const content =
+    document.querySelector<HTMLElement>('article') ??
+    document.querySelector<HTMLElement>('main') ??
+    document.body;
+  const text = (content?.innerText ?? '').slice(0, 200_000);
+  return { url: pageUrl, description, favicon, image: savedImage, text };
 }

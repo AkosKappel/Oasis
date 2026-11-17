@@ -575,3 +575,31 @@ it('adds an empty desktop table to v25 databases without touching layouts', asyn
   expect(await database.desktopItems.count()).toBe(0);
   expect(await database.dashboardLayouts.get(layout.id)).toEqual(layout);
 });
+it('adds an empty page text table to v26 databases without touching bookmarks', async () => {
+  const { default: Dexie } = await import('dexie');
+  const legacy = new Dexie('oasis-test');
+  legacy.version(26).stores({
+    spaces: 'id, name, updatedAt',
+    bookmarks: 'id, spaceId, [spaceId+folderId], *tags, updatedAt',
+    desktopItems: 'id, spaceId',
+  });
+  await legacy.open();
+  const bookmark = {
+    id: 'b1',
+    spaceId: 'default',
+    title: 'Guide',
+    url: 'https://example.com',
+    tags: [],
+    createdAt: 1,
+    updatedAt: 1,
+  };
+  await legacy
+    .table('spaces')
+    .add({ id: 'default', name: 'Personal', createdAt: 1, updatedAt: 1 });
+  await legacy.table('bookmarks').add(bookmark);
+  legacy.close();
+  await database.open();
+  expect(database.verno).toBe(SCHEMA_VERSION);
+  expect(await database.pageTexts.count()).toBe(0);
+  expect(await database.bookmarks.get('b1')).toEqual(bookmark);
+});
