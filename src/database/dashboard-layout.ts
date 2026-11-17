@@ -10,8 +10,10 @@ export const HOME_SECTIONS = {
   widgets: 'Widgets',
   weather: 'Weather',
   quote: 'Quote',
+  desktop: 'Links desktop',
 } as const;
 export type HomeSection = keyof typeof HOME_SECTIONS;
+const ADDED_SECTIONS: HomeSection[] = ['desktop'];
 export interface DashboardItem {
   id: HomeSection;
   visible: boolean;
@@ -24,13 +26,23 @@ export interface DashboardLayout extends RecordMetadata {
 export function defaultDashboardItems(): DashboardItem[] {
   return (Object.keys(HOME_SECTIONS) as HomeSection[]).map((id) => ({
     id,
-    visible: true,
-    width: 'normal',
+    visible: id !== 'desktop',
+    width: id === 'desktop' ? 'wide' : 'normal',
   }));
 }
 export function validateDashboardItems(
   input: DashboardItem[],
 ): DashboardItem[] {
+  // Layouts saved before a section existed get it appended with its default.
+  if (Array.isArray(input))
+    input = [
+      ...input,
+      ...defaultDashboardItems().filter(
+        (item) =>
+          ADDED_SECTIONS.includes(item.id) &&
+          !input.some((saved) => saved?.id === item.id),
+      ),
+    ];
   if (
     !Array.isArray(input) ||
     input.length !== Object.keys(HOME_SECTIONS).length ||

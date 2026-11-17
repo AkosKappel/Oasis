@@ -24,6 +24,7 @@ import {
   type FocusSession,
 } from './focus-session';
 import { taskText } from './widget-tasks';
+import { validDesktopCell } from './desktop';
 import { builtinAlbums } from './builtin-albums';
 export const SPACE_TABLES = [
   'bookmarks',
@@ -45,6 +46,7 @@ export const SPACE_TABLES = [
   'contentFeedback',
   'savedSearches',
   'widgetTasks',
+  'desktopItems',
 ] as const;
 type TableName = (typeof SPACE_TABLES)[number];
 type Row = {
@@ -127,7 +129,8 @@ export function validateSpaceBackup(value: unknown): SpaceBackup {
     throw new Error('The space backup contains unknown data tables.');
   const normalized = {} as Record<TableName, Row[]>;
   for (const name of SPACE_TABLES) {
-    const rows = tables[name];
+    // Backups from before Dexie v26 have no desktop table.
+    const rows = tables[name] ?? (name === 'desktopItems' ? [] : undefined);
     if (!Array.isArray(rows) || rows.length > 100000)
       throw new Error(
         'The space backup contains a missing or oversized table.',
@@ -294,6 +297,27 @@ export function validateSpaceBackup(value: unknown): SpaceBackup {
       endsAt: number(r.endsAt),
     };
   });
+  const bookmarkIds = new Set(normalized.bookmarks.map((r) => r.id)),
+    folderIds = new Set(normalized.folders.map((r) => r.id));
+  normalized.desktopItems = normalized.desktopItems.map((r) => {
+    const kind = enumValue(r.kind, ['bookmark', 'folder']);
+    const targetId = text(r.targetId, 200);
+    const column = number(r.column),
+      row = number(r.row);
+    if (
+      !validDesktopCell(column, row) ||
+      !(kind === 'bookmark' ? bookmarkIds : folderIds).has(targetId)
+    )
+      throw new Error('The space backup contains an invalid desktop item.');
+    return { ...metadata(r), kind, targetId, column, row };
+  });
+  if (
+    new Set(normalized.desktopItems.map((r) => `${r.column}:${r.row}`)).size !==
+      normalized.desktopItems.length ||
+    new Set(normalized.desktopItems.map((r) => r.targetId)).size !==
+      normalized.desktopItems.length
+  )
+    throw new Error('The space backup contains overlapping desktop items.');
   normalized.weatherSettings = normalized.weatherSettings.map((r) => ({
     ...metadata(r),
     enabled: bool(r.enabled),
@@ -405,6 +429,13 @@ export function createSpaceBackupRepository(
               .filter((r) => r.deletedAt === undefined)
               .toArray()
           ).map((r) => ({ ...r, spaceId: 'default' }));
+        // Items whose link or folder is in Trash stay out until it is restored.
+        const targets = new Set(
+          [...tables.bookmarks, ...tables.folders].map((r) => r.id),
+        );
+        tables.desktopItems = tables.desktopItems.filter((r) =>
+          targets.has(String(r.targetId)),
+        );
         return validateSpaceBackup({
           format: 'oasis-space',
           version: 1,
@@ -499,6 +530,11 @@ export function createSpaceBackupRepository(
               row.collectionId = reference(
                 'quoteCollections',
                 source.collectionId,
+              );
+            if (table === 'desktopItems')
+              row.targetId = reference(
+                source.kind === 'bookmark' ? 'bookmarks' : 'folders',
+                source.targetId,
               );
             if (table === 'widgetTasks')
               row.widgetId = reference('homeWidgets', source.widgetId);

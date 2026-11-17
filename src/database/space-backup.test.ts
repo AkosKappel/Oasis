@@ -19,6 +19,7 @@ import { createContentFeedbackRepository } from './content-feedback';
 import { createWeatherRepository } from './weather';
 import { createLibraryPreferencesRepository } from './library-preferences';
 import { createFocusSessionRepository } from './focus-session';
+import { createDesktopRepository } from './desktop';
 const database = new OasisDatabase('complete-space-backup');
 afterEach(() => database.delete());
 async function seed() {
@@ -267,4 +268,52 @@ it('preserves optional focus cycles in paused restores and rejects invalid cycle
     completedFocus: 3,
   });
   expect(() => parseSpaceBackup(JSON.stringify(long))).toThrow('cycle timer');
+});
+
+it('restores desktop places with remapped targets and accepts older backups without them', async () => {
+  const { bookmark } = await seed();
+  const desktop = createDesktopRepository('default', database);
+  const folder = (await database.folders.toArray())[0]!.id;
+  const placed = await desktop.add('bookmark', bookmark);
+  await desktop.add('folder', folder);
+  await desktop.move(placed, 4, 2);
+  const repo = createSpaceBackupRepository('default', database);
+  const archive = parseSpaceBackup(serializeSpaceBackup(await repo.export()));
+  expect(archive.tables.desktopItems).toHaveLength(2);
+  const restored = await repo.restore(archive, 'Desktop copy');
+  const items = await createDesktopRepository(restored, database).list();
+  const copiedLink = items.find((item) => item.kind === 'bookmark')!;
+  expect([copiedLink.column, copiedLink.row]).toEqual([4, 2]);
+  const target = await database.bookmarks.get(copiedLink.targetId);
+  expect(target?.spaceId).toBe(restored);
+  expect(target?.title).toBe('Guide');
+
+  const legacy = structuredClone(archive) as unknown as {
+    schemaVersion: number;
+    tables: Record<string, unknown>;
+  };
+  legacy.schemaVersion = 25;
+  delete legacy.tables.desktopItems;
+  expect(parseSpaceBackup(JSON.stringify(legacy)).tables.desktopItems).toEqual(
+    [],
+  );
+  for (const mutation of [
+    { column: 8 },
+    { targetId: 'missing' },
+    { kind: 'widget' },
+  ]) {
+    const invalid = structuredClone(archive);
+    Object.assign(invalid.tables.desktopItems[0]!, mutation);
+    expect(() => parseSpaceBackup(JSON.stringify(invalid))).toThrow();
+  }
+  const overlapping = structuredClone(archive);
+  Object.assign(overlapping.tables.desktopItems[1]!, {
+    column: overlapping.tables.desktopItems[0]!.column,
+    row: overlapping.tables.desktopItems[0]!.row,
+  });
+  expect(() => parseSpaceBackup(JSON.stringify(overlapping))).toThrow(
+    'overlapping',
+  );
+  await createBookmarkRepository('default', database).remove(bookmark);
+  expect((await repo.export()).tables.desktopItems).toHaveLength(1);
 });

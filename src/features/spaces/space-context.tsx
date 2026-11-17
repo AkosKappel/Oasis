@@ -1,3 +1,4 @@
+import { createDesktopRepository } from '@/database/desktop';
 import { createOnboardingRepository } from '@/database/onboarding';
 import { createTrashRepository } from '@/database/trash';
 import { createSpaceBackupRepository } from '@/database/space-backup';
@@ -114,6 +115,7 @@ export function useSpaceRepositories() {
       trash: createTrashRepository(spaceId),
       spaceBackup: createSpaceBackupRepository(spaceId),
       widgetTasks: createWidgetTaskRepository(spaceId),
+      desktop: createDesktopRepository(spaceId),
       savedSearches: createSavedSearchRepository(spaceId),
       contentFeedback: createContentFeedbackRepository(spaceId),
       spaceTransfers: createSpaceTransferRepository(spaceId),

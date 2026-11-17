@@ -32,6 +32,7 @@ const tileClass =
   'flex w-full min-w-0 flex-col items-center gap-1 rounded-md p-2 text-center text-xs hover:bg-secondary hover:text-secondary-foreground';
 
 export function LinkTiles({
+  rootName = 'Links',
   folders,
   unorganized,
   sections,
@@ -42,6 +43,7 @@ export function LinkTiles({
   onMove,
   onOpen,
 }: {
+  rootName?: string;
   folders: LinkFolderNode[];
   unorganized: Bookmark[];
   sections: TileSection[];
@@ -57,7 +59,7 @@ export function LinkTiles({
   const tagNames = new Map(tags.map((tag) => [tag.id, tag.name]));
   const root: Place = {
     id: '',
-    name: 'Links',
+    name: rootName,
     folders,
     bookmarks: unorganized,
     section: false,

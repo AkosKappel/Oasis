@@ -67,7 +67,7 @@ it('upgrades v24 while preserving preferences and keeping section defaults indep
   try {
     await database.open();
     expect(database.verno).toBe(SCHEMA_VERSION);
-    expect(SCHEMA_VERSION).toBe(25);
+    expect(SCHEMA_VERSION).toBeGreaterThanOrEqual(25);
     expect(await database.preferences.get(saved.id)).toEqual(saved);
     const appearance = await createAppearanceRepository(
       'default',

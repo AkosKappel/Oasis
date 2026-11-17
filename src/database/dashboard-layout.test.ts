@@ -55,3 +55,17 @@ it('rejects missing/duplicate sections and retains the last layout on failed wri
   }
   expect((await repository.get()).items).toEqual(saved.items);
 });
+
+it('appends the hidden desktop section to layouts saved before it existed', () => {
+  const legacy = defaultDashboardItems()
+    .filter((item) => item.id !== 'desktop')
+    .toReversed();
+  const upgraded = validateDashboardItems(legacy);
+  expect(upgraded.slice(0, -1)).toEqual(legacy);
+  expect(upgraded.at(-1)).toEqual({
+    id: 'desktop',
+    visible: false,
+    width: 'wide',
+  });
+  expect(() => validateDashboardItems(legacy.slice(1))).toThrow('valid');
+});

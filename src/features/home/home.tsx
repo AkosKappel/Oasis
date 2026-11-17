@@ -36,6 +36,7 @@ import type { Appearance } from '@/database/appearance';
 import { useQuotes } from '@/features/quotes/use-quotes';
 import { useAlbums } from '@/features/albums/use-albums';
 import { useLibrary } from '@/features/bookmarks/use-library';
+import { LinksDesktop } from '@/features/links/links-desktop';
 
 export function Home({
   onSearch,
@@ -365,6 +366,13 @@ export function Home({
       <>
         <WeatherWidget now={now} />
       </>
+    ),
+    desktop: library && (
+      <LinksDesktop
+        bookmarks={library.bookmarks}
+        folders={library.folders}
+        tags={library.tags}
+      />
     ),
     quote: (
       <>

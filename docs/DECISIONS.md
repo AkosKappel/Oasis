@@ -417,3 +417,7 @@ The owner asked for a tiles view of Links, possibly growing into a desktop where
 ## 2026-11-17: Automatic phase starts are opt-in and need an open tab
 
 The owner asked for automatic starts, which revises the earlier "phases start only on request" rule for users who opt in. With "Start the next phase automatically", an open Oasis tab starts the next phase when the current one ends, timed from the deadline so every tab agrees. The existing stale-phase transaction lets only one tab win. If no tab notices the deadline within 90 seconds (background tabs can tick once a minute), the user was away and the cycle waits for an explicit start as before, so time away still never silently consumes phases. There is still no background alarm, notification or permission.
+
+## 2026-11-17: Links desktop is an opt-in Home section with a fixed grid
+
+D-15d places links and folders at chosen positions. A fixed 8 by 6 grid with integer cells keeps placement predictable, keyboard operable and easy to validate in backups; free pixel positions would need collision and resizing rules on every screen size. It is a new Home layout section, hidden by default, so the minimal Home stays the default. Narrow windows show the same items in reading order and arranging needs a wider window. Folders open in a dialog instead of floating windows. Desktop items reference existing bookmarks and folders rather than copying them, so edits and Trash apply everywhere.

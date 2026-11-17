@@ -550,3 +550,28 @@ it('upgrades v23 timers without opting existing sessions into cycles', async () 
   expect(database.verno).toBe(SCHEMA_VERSION);
   expect(await database.focusSessions.get(session.id)).toEqual(session);
 });
+it('adds an empty desktop table to v25 databases without touching layouts', async () => {
+  const { default: Dexie } = await import('dexie');
+  const legacy = new Dexie('oasis-test');
+  legacy.version(25).stores({
+    spaces: 'id, name, updatedAt',
+    dashboardLayouts: 'id, spaceId',
+  });
+  await legacy.open();
+  const layout = {
+    id: 'default:layout',
+    spaceId: 'default',
+    items: [{ id: 'quote', visible: true, width: 'normal' }],
+    createdAt: 1,
+    updatedAt: 1,
+  };
+  await legacy
+    .table('spaces')
+    .add({ id: 'default', name: 'Personal', createdAt: 1, updatedAt: 1 });
+  await legacy.table('dashboardLayouts').add(layout);
+  legacy.close();
+  await database.open();
+  expect(database.verno).toBe(SCHEMA_VERSION);
+  expect(await database.desktopItems.count()).toBe(0);
+  expect(await database.dashboardLayouts.get(layout.id)).toEqual(layout);
+});
