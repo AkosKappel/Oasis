@@ -39,6 +39,22 @@ export function libraryStatistics(
     );
     if (month && bookmark.createdAt <= now.getTime()) month.count++;
   }
+  // 26 weeks of saves by local day, oldest first, ending today.
+  const dayKey = (date: Date) =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  const activity = Array.from({ length: 182 }, (_, index) => {
+    const date = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() - 181 + index,
+    );
+    return { day: dayKey(date), count: 0 };
+  });
+  const byDay = new Map(activity.map((entry) => [entry.day, entry]));
+  for (const bookmark of bookmarks) {
+    const entry = byDay.get(dayKey(new Date(bookmark.createdAt)));
+    if (entry && bookmark.createdAt <= now.getTime()) entry.count++;
+  }
   const activeFolders = library.folders.filter(
     (item) => item.deletedAt === undefined,
   );
@@ -54,6 +70,7 @@ export function libraryStatistics(
       .slice(0, 10);
   return {
     bookmarks: bookmarks.length,
+    activity,
     tagUsage: top(
       tagCounts,
       new Map(

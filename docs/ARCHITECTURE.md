@@ -220,3 +220,9 @@ The card action "Find related bookmarks" switches Library results to the bookmar
 - "Suggest a folder" in the bookmark editor counts which owned, active folders hold other bookmarks from the same hostname (up to three, with counts), like tag suggestions. Choosing one only sets the form field.
 - The "Not opened in 90 days" collection lists bookmarks whose last Oasis open, or their creation date when never opened, is older than 90 days, oldest first. It is offered only while open counting is on, since only opens made from Oasis are known.
 - Statistics add tag usage and bookmarks per folder (full paths, top ten).
+
+## Color backgrounds, capture folder and save activity
+
+- Appearance can set an optional Home background (`homeBackground` with `backgroundFrom`/`backgroundTo` hex values) used when no image is shown. Home reuses the light-on-photo text style and adds the smallest black overlay (`whiteTextOverlay`) that keeps white text at 4.5:1 on every chosen color.
+- Library preferences may hold `captureFolderId`, checked for ownership on save. Toolbar, menu and shortcut capture start with that folder. Complete-space backups remap it and drop it when the folder is not in the backup.
+- Statistics include a 26-week grid of bookmarks saved per local day from creation dates, summarized in one sentence for screen readers.

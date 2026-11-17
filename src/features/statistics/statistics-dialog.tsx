@@ -121,6 +121,7 @@ export function StatisticsDialog({
           )}
         </section>
       </div>
+      <SavesHeatmap activity={stats.activity} />
       <div className="mt-6 grid gap-6 sm:grid-cols-2">
         {(
           [
@@ -190,5 +191,54 @@ export function StatisticsDialog({
         )}
       </section>
     </dialog>
+  );
+}
+
+function SavesHeatmap({
+  activity,
+}: {
+  activity: { day: string; count: number }[];
+}) {
+  const total = activity.reduce((sum, entry) => sum + entry.count, 0);
+  const peak = activity.reduce(
+    (best, entry) => (entry.count > best.count ? entry : best),
+    activity[0]!,
+  );
+  const level = (count: number) =>
+    count === 0 ? 0 : Math.min(4, Math.ceil((count / peak.count) * 4));
+  const shades = [
+    'bg-border/40',
+    'bg-primary/30',
+    'bg-primary/55',
+    'bg-primary/80',
+    'bg-primary',
+  ];
+  return (
+    <section className="mt-6" aria-labelledby="activity-title">
+      <h3 id="activity-title" className="font-semibold">
+        Saved in the last 26 weeks
+      </h3>
+      <p className="mt-1 text-sm">
+        {total
+          ? `${total.toLocaleString()} ${total === 1 ? 'bookmark' : 'bookmarks'} saved. Busiest day: ${peak.day} (${peak.count}).`
+          : 'No bookmarks saved in the last 26 weeks.'}
+      </p>
+      <div
+        aria-hidden="true"
+        className="mt-3 grid max-w-full grid-flow-col grid-rows-7 gap-0.5 overflow-x-auto"
+      >
+        {activity.map((entry) => (
+          <span
+            key={entry.day}
+            title={`${entry.day}: ${entry.count}`}
+            data-day={entry.day}
+            className={`size-2.5 rounded-sm sm:size-3 ${shades[level(entry.count)]}`}
+          />
+        ))}
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        Uses saved creation dates. Opening links is not recorded here.
+      </p>
+    </section>
   );
 }

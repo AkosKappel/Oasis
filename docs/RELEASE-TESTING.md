@@ -94,7 +94,7 @@ Paths use the visible labels. "Settings" is the gear button on Home (bottom righ
 - [ ] Organize by dragging: drag cards into folders. With Sort by → Manual order and no filters, drag cards to reorder. Try the keyboard Move up and Move down buttons.
 - [ ] More Library tools → Folders and tags: nested folders, rename, move to another parent, colored tags. Deleting a folder keeps its bookmarks; deleting a tag keeps its bookmarks.
 - [ ] More Library tools → Find duplicates: keep one copy, delete the others.
-- [ ] More Library tools → Statistics: totals, Added by month, Top hosts and Most opened.
+- [ ] More Library tools → Statistics: totals, Added by month, Top hosts, Most opened, Tag usage, Bookmarks per folder and the 26-week saves grid.
 
 ## Tools that ask for permissions
 
@@ -128,6 +128,8 @@ These prompts only exist in a real browser. Test allow, deny and remove for each
 ## Settings, privacy and storage
 
 - [ ] Settings → Appearance: theme, accents, custom Primary and Secondary colors with Reset colors. Cancel undoes the live preview.
+- [ ] Settings → Appearance → Home background: try Solid color and Gradient with light and dark colors; Home text stays readable, and a selected background image still takes precedence.
+- [ ] Settings → General → Folder for new captures: pick a folder, then save a page from the toolbar, a right-click menu and Alt+Shift+O; each starts in that folder.
 - [ ] Change a setting in one tab and watch a second tab follow without a reload.
 - [ ] Settings → Privacy: open counting is off by default. Turn it on, open bookmarks from Oasis, then Clear open history.
 - [ ] Offline (disconnect the network): Home, Library, search and backups keep working. Only weather, web search and link checks need the network.

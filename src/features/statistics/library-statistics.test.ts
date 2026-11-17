@@ -129,3 +129,25 @@ it('ranks tag usage and bookmarks per folder by full path, ignoring deleted reco
     ['Work', 1],
   ]);
 });
+it('counts saves per local day for 26 weeks ending today', () => {
+  const now = new Date(2026, 10, 17, 12);
+  const at = (days: number) => new Date(2026, 10, 17 - days, 9).getTime();
+  const stats = libraryStatistics(
+    {
+      bookmarks: [
+        { ...base, id: '1', createdAt: at(0) },
+        { ...base, id: '2', createdAt: at(0) },
+        { ...base, id: '3', createdAt: at(181) },
+        { ...base, id: '4', createdAt: at(182) },
+        { ...base, id: '5', createdAt: at(1), deletedAt: 1 },
+      ],
+      folders: [],
+      tags: [],
+    },
+    now,
+  );
+  expect(stats.activity).toHaveLength(182);
+  expect(stats.activity.at(-1)).toEqual({ day: '2026-11-17', count: 2 });
+  expect(stats.activity[0]!.count).toBe(1);
+  expect(stats.activity.reduce((sum, entry) => sum + entry.count, 0)).toBe(3);
+});
