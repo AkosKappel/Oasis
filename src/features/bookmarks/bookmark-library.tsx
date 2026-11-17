@@ -1,3 +1,4 @@
+import { LinkCheckDialog } from '@/features/link-checks/link-check-dialog';
 import { SessionDialog } from '@/features/sessions/session-dialog';
 import { useUndo } from '@/features/settings/undo';
 import type { SettingsPage } from '@/features/settings/settings';
@@ -90,6 +91,7 @@ export function BookmarkLibrary({
   const [bulkEditor, setBulkEditor] = useState<'move' | 'tags'>();
   const [bulkBusy, setBulkBusy] = useState(false);
   const [notesFor, setNotesFor] = useState<Bookmark>();
+  const [linkCheckOpen, setLinkCheckOpen] = useState(false);
   const [sessionOpen, setSessionOpen] = useState(false);
   const [statisticsOpen, setStatisticsOpen] = useState(false);
   const [duplicatesOpen, setDuplicatesOpen] = useState(false);
@@ -397,6 +399,13 @@ export function BookmarkLibrary({
               }}
             >
               <div className="flex flex-col gap-2">
+                <Button
+                  variant="outline"
+                  disabled={!visible?.length || !!loadError}
+                  onClick={() => setLinkCheckOpen(true)}
+                >
+                  Check links
+                </Button>
                 <Button
                   variant="outline"
                   disabled={!library || !!loadError}
@@ -967,6 +976,12 @@ export function BookmarkLibrary({
               document.getElementById('bookmark-selection-toggle')?.focus(),
             );
           }}
+        />
+      )}
+      {linkCheckOpen && visible && (
+        <LinkCheckDialog
+          bookmarks={visible}
+          onClose={() => setLinkCheckOpen(false)}
         />
       )}
       {sessionOpen && library && (

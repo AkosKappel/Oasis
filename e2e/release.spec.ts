@@ -22,8 +22,8 @@ test('verifies packaged assets and captures store previews with sample data', as
   expect(manifest.optional_permissions).toEqual(['scripting', 'tabs']);
   expect(manifest.host_permissions ?? []).toEqual([]);
   expect(manifest.optional_host_permissions.sort()).toEqual([
-    'https://api.open-meteo.com/*',
-    'https://geocoding-api.open-meteo.com/*',
+    'http://*/*',
+    'https://*/*',
   ]);
   expect(manifest.chrome_url_overrides.newtab).toBe('newtab.html');
   expect(manifest.action.default_popup).toBe('popup.html');

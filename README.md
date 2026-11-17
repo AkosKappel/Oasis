@@ -37,9 +37,11 @@ _Screenshots show sample content and a bundled background._
 
 ## Local by default
 
-Core features work offline. There is no backend, advertising or telemetry. Optional weather, submitted web searches and page-detail requests can contact the providers or websites you choose.
+Core features work offline. There is no backend, advertising or telemetry. Optional weather, submitted web searches, page-detail requests and explicitly selected link checks can contact the providers or websites you choose.
 
 Save a reviewed window session into a bookmark folder, or reopen a folder in background tabs through Library’s Sessions and tabs tool. Tab-reading access is optional and requested only when you read the window.
+
+Check selected Library links on demand with optional site access. Results distinguish missing pages from redirects, access restrictions and inconclusive requests; bookmarks are kept unchanged.
 
 Read the [privacy policy](PRIVACY.md) for data handling and permissions.
 

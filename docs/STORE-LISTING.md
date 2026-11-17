@@ -28,11 +28,12 @@ Permission justifications:
 - contextMenus: show user-invoked page and link capture actions.
 - Optional tabs: read a current-window snapshot only after an explicit session-saving action, with review before local bookmark creation and an in-app revoke control.
 - Optional scripting: read page details only through an explicit toolbar-capture action and temporary activeTab access. Same-origin raster copies are saved locally; access can be revoked in capture or browser settings.
+- Optional HTTP(S) host declarations: enable narrow runtime requests for the sites selected in explicit link checks. Requests use HEAD without cookies/referrer or redirects; no all-sites runtime request or background crawl is used. Grants can be revoked, and check results are temporary.
 - Optional host permissions for api.open-meteo.com and geocoding-api.open-meteo.com: user-enabled city search and weather forecasts. Core features do not need those hosts.
 - New-tab override: display the user’s local dashboard and bookmark access.
 
 Remote code: none. Scripts, styles and illustrated starter images are packaged. Weather responses are data, not executable code.
 
-Data handling: local bookmark content, notes and optional Oasis open counts are stored in the browser profile. Optional page-detail reads fetch small same-origin images without cookies or referrer. Optional weather transmits city queries/selected coordinates to Open-Meteo. Explicit web searches and link navigation go to their chosen destinations. Do not claim that Oasis never makes network requests. Review the actual dashboard categories against this behavior before submitting; do not treat local storage as developer collection.
+Data handling: local bookmark content, notes and optional Oasis open counts are stored in the browser profile. Optional page-detail reads fetch small same-origin images without cookies or referrer. Explicit link checks send selected URLs to their sites without cookies/referrer and retain results only in the open dialog. Optional weather transmits city queries/selected coordinates to Open-Meteo. Explicit web searches and link navigation go to their chosen destinations. Do not claim that Oasis never makes network requests. Review the actual dashboard categories against this behavior before submitting; do not treat local storage as developer collection.
 
 Public project links: [privacy policy](https://github.com/AkosKappel/Oasis/blob/main/PRIVACY.md), [support](https://github.com/AkosKappel/Oasis/issues), [source](https://github.com/AkosKappel/Oasis). The owner must review these in store forms and supply publisher identity/contact, markets and distribution visibility. No placeholder URLs are included in the manifest.

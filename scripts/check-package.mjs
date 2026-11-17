@@ -19,8 +19,8 @@ assert.deepEqual(manifest.permissions.toSorted(), [
 assert.deepEqual(manifest.optional_permissions, ['scripting', 'tabs']);
 assert.deepEqual(manifest.host_permissions ?? [], []);
 assert.deepEqual(manifest.optional_host_permissions.toSorted(), [
-  'https://api.open-meteo.com/*',
-  'https://geocoding-api.open-meteo.com/*',
+  'http://*/*',
+  'https://*/*',
 ]);
 assert.equal(manifest.chrome_url_overrides.newtab, 'newtab.html');
 assert.equal(manifest.action.default_popup, 'popup.html');
