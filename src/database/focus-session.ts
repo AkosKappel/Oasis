@@ -10,12 +10,23 @@ export interface FocusSession extends RecordMetadata {
     focusMinutes: number;
     breakMinutes: number;
     longBreakMinutes?: number;
+    autoStart?: boolean;
     phase: 'focus' | 'break';
     completedFocus: number;
   };
 }
 type FocusCycle = NonNullable<FocusSession['cycle']>;
 export const LONG_BREAK_EVERY = 4;
+// Background tabs may tick only once a minute; later than this, the user was away.
+export const AUTO_START_GRACE = 90_000;
+export function canAutoStart(session: FocusSession, now: number) {
+  return (
+    !!session.cycle?.autoStart &&
+    session.state === 'running' &&
+    now >= session.endsAt &&
+    now - session.endsAt <= AUTO_START_GRACE
+  );
+}
 export function isLongBreak(cycle: FocusCycle) {
   return (
     cycle.phase === 'break' &&
@@ -75,6 +86,7 @@ export function createFocusSessionRepository(
       minutes: number,
       breakMinutes?: number,
       longBreakMinutes?: number,
+      autoStart = false,
     ) {
       if (!Number.isInteger(minutes) || minutes < 1 || minutes > 120)
         throw new Error('Choose a focus session from 1 to 120 minutes.');
@@ -111,6 +123,7 @@ export function createFocusSessionRepository(
                     ...(longBreakMinutes === undefined
                       ? {}
                       : { longBreakMinutes }),
+                    ...(autoStart ? { autoStart: true } : {}),
                     phase: 'focus' as const,
                     completedFocus: 0,
                   },
@@ -121,7 +134,7 @@ export function createFocusSessionRepository(
         },
       );
     },
-    async nextPhase(expectedEndsAt: number) {
+    async nextPhase(expectedEndsAt: number, automatic = false) {
       await database.transaction(
         'rw',
         database.spaces,
@@ -134,7 +147,8 @@ export function createFocusSessionRepository(
             !existing?.cycle ||
             existing.state === 'ended' ||
             existing.endsAt !== expectedEndsAt ||
-            focusRemaining(existing, now) > 0
+            focusRemaining(existing, now) > 0 ||
+            (automatic && !canAutoStart(existing, now))
           )
             throw new Error(
               'This timer has changed. Use its current controls.',
@@ -148,10 +162,12 @@ export function createFocusSessionRepository(
               previous.completedFocus + (phase === 'break' ? 1 : 0),
           } as const;
           const remaining = phaseMinutes(cycle) * 60_000;
+          // An automatic start continues from the deadline so open tabs agree.
+          const startedAt = automatic ? existing.endsAt : now;
           await database.focusSessions.update(id, {
             state: 'running',
             remaining,
-            endsAt: now + remaining,
+            endsAt: startedAt + remaining,
             updatedAt: now,
             cycle,
           });

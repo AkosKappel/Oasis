@@ -2,6 +2,7 @@ import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
+  canAutoStart,
   focusRemaining,
   isLongBreak,
   LONG_BREAK_EVERY,
@@ -17,6 +18,7 @@ export function FocusModeDialog({ onClose }: { onClose: () => void }) {
   const [breakMinutes, setBreakMinutes] = useState(5);
   const [longBreaks, setLongBreaks] = useState(false);
   const [longBreakMinutes, setLongBreakMinutes] = useState(15);
+  const [autoStart, setAutoStart] = useState(false);
   const [minutes, setMinutes] = useState(25),
     [busy, setBusy] = useState(false),
     [error, setError] = useState<string>();
@@ -60,6 +62,7 @@ export function FocusModeDialog({ onClose }: { onClose: () => void }) {
               minutes,
               cycles ? breakMinutes : undefined,
               cycles && longBreaks ? longBreakMinutes : undefined,
+              cycles && autoStart,
             )
             .then(onClose)
             .catch((cause: unknown) => {
@@ -138,9 +141,19 @@ export function FocusModeDialog({ onClose }: { onClose: () => void }) {
                 />
               </label>
             )}
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={autoStart}
+                disabled={busy}
+                onChange={(event) => setAutoStart(event.target.checked)}
+              />
+              Start the next phase automatically
+            </label>
             <p className="text-sm text-muted-foreground">
-              Each phase waits for you to start the next. Nothing starts
-              automatically.
+              {autoStart
+                ? 'The next phase starts on time while an Oasis tab is open. If you are away when a phase ends, it waits for you.'
+                : 'Each phase waits for you to start the next. Nothing starts automatically.'}
             </p>
           </>
         )}
@@ -175,6 +188,12 @@ export function FocusTimer({
   const [busy, setBusy] = useState(false),
     [error, setError] = useState<string>();
   const remaining = focusRemaining(session, now);
+  const autoAdvance = canAutoStart(session, now);
+  useEffect(() => {
+    if (!autoAdvance) return;
+    // Another open tab may win the transaction; its result arrives through the live query.
+    personalFocusSession.nextPhase(session.endsAt, true).catch(() => undefined);
+  }, [autoAdvance, personalFocusSession, session.endsAt]);
   if (session.state === 'ended') return null;
   const isBreak = session.cycle?.phase === 'break';
   const longBreak = !!session.cycle && isLongBreak(session.cycle);

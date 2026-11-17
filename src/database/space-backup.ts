@@ -266,6 +266,8 @@ export function validateSpaceBackup(value: unknown): SpaceBackup {
         !Number.isInteger(breakMinutes) ||
         breakMinutes < 1 ||
         breakMinutes > 60 ||
+        (input.autoStart !== undefined &&
+          typeof input.autoStart !== 'boolean') ||
         (longBreakMinutes !== undefined &&
           (!Number.isInteger(longBreakMinutes) ||
             longBreakMinutes < 1 ||
@@ -277,6 +279,7 @@ export function validateSpaceBackup(value: unknown): SpaceBackup {
         focusMinutes,
         breakMinutes,
         ...(longBreakMinutes === undefined ? {} : { longBreakMinutes }),
+        ...(input.autoStart === true ? { autoStart: true } : {}),
         completedFocus,
         phase: enumValue(input.phase, ['focus', 'break']),
       };

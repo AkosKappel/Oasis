@@ -204,3 +204,47 @@ test('offers an optional long break after every fourth focus session', async ({
     page.getByRole('heading', { name: 'Long break complete', exact: true }),
   ).toBeVisible();
 });
+
+test('starts the next phase automatically only while Oasis is open', async ({
+  page,
+}) => {
+  await page.clock.install({ time: new Date() });
+  await page.goto('chrome://newtab/');
+  await page.getByRole('button', { name: 'Focus mode', exact: true }).click();
+  await page
+    .getByRole('spinbutton', { name: 'Session minutes', exact: true })
+    .fill('1');
+  await page
+    .getByRole('checkbox', { name: 'Alternate focus and breaks' })
+    .check();
+  await page
+    .getByRole('spinbutton', { name: 'Break minutes', exact: true })
+    .fill('1');
+  await page
+    .getByRole('checkbox', { name: 'Start the next phase automatically' })
+    .check();
+  await expect(
+    page.getByText('starts on time while an Oasis tab'),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Start focus', exact: true }).click();
+  await expect(
+    page.getByRole('button', { name: 'Pause focus', exact: true }),
+  ).toBeVisible();
+  await page.clock.runFor(61_000);
+  await expect(
+    page.getByRole('heading', { name: 'Take a break', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Start break', exact: true }),
+  ).toHaveCount(0);
+  await page.clock.runFor(61_000);
+  await expect(
+    page.getByRole('button', { name: 'Pause focus', exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText('Focus sessions completed: 1')).toBeVisible();
+  // One jump models a sleeping computer: the next tick is long after the deadline.
+  await page.clock.fastForward(10 * 60_000);
+  await expect(
+    page.getByRole('button', { name: 'Start break', exact: true }),
+  ).toBeVisible();
+});

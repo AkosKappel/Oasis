@@ -247,6 +247,7 @@ it('preserves optional focus cycles in paused restores and rejects invalid cycle
     { phase: 'other' },
     { longBreakMinutes: 0 },
     { longBreakMinutes: 61 },
+    { autoStart: 'yes' },
   ]) {
     const invalid = structuredClone(archive);
     Object.assign(invalid.tables.focusSessions[0]!.cycle as object, mutation);

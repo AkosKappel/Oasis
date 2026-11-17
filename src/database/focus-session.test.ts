@@ -2,6 +2,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { OasisDatabase } from './schema';
 import {
   createFocusSessionRepository,
+  AUTO_START_GRACE,
   focusRemaining,
   timerText,
 } from './focus-session';
@@ -137,4 +138,37 @@ it('takes an optional long break after every fourth focus session', async () => 
   expect(breaks).toEqual([5, 5, 5, 15, 5]);
   const last = (await repository.get())!;
   expect(last.cycle).toMatchObject({ longBreakMinutes: 15, completedFocus: 5 });
+});
+
+it('auto-starts the next phase from the deadline only shortly after it', async () => {
+  await database.open();
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(100_000);
+  await repository.start(25, 5, undefined, true);
+  const focus = (await repository.get())!;
+  expect(focus.cycle?.autoStart).toBe(true);
+  await expect(repository.nextPhase(focus.endsAt, true)).rejects.toThrow(
+    'changed',
+  );
+  clock.mockReturnValue(focus.endsAt + 30_000);
+  const results = await Promise.allSettled([
+    repository.nextPhase(focus.endsAt, true),
+    repository.nextPhase(focus.endsAt, true),
+  ]);
+  expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+  const rest = (await repository.get())!;
+  expect(rest.cycle?.phase).toBe('break');
+  expect(rest.endsAt).toBe(focus.endsAt + 5 * 60_000);
+  clock.mockReturnValue(rest.endsAt + AUTO_START_GRACE + 1);
+  await expect(repository.nextPhase(rest.endsAt, true)).rejects.toThrow(
+    'changed',
+  );
+  await repository.nextPhase(rest.endsAt);
+  expect((await repository.get())?.cycle?.phase).toBe('focus');
+  await repository.change('end');
+  await repository.start(25, 5);
+  const manual = (await repository.get())!;
+  clock.mockReturnValue(manual.endsAt);
+  await expect(repository.nextPhase(manual.endsAt, true)).rejects.toThrow(
+    'changed',
+  );
 });
