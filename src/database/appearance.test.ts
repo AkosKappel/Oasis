@@ -117,3 +117,25 @@ it('keeps recent/frequent sections opt-in and preserves per-space choices', asyn
     }),
   ).rejects.toThrow('valid');
 });
+it('stores optional Home background colors and rejects incomplete ones', async () => {
+  await repository.save({
+    ...defaultAppearance,
+    homeBackground: 'gradient',
+    backgroundFrom: '#ABC',
+    backgroundTo: '#123456',
+  });
+  expect(await repository.get()).toMatchObject({
+    homeBackground: 'gradient',
+    backgroundFrom: '#aabbcc',
+    backgroundTo: '#123456',
+  });
+  for (const invalid of [
+    { homeBackground: 'gradient' as const, backgroundFrom: '#123456' },
+    { homeBackground: 'color' as const },
+    { homeBackground: 'color' as const, backgroundFrom: 'blue' },
+    { homeBackground: 'image' as 'color', backgroundFrom: '#123456' },
+  ])
+    await expect(
+      repository.save({ ...defaultAppearance, ...invalid }),
+    ).rejects.toThrow('background');
+});

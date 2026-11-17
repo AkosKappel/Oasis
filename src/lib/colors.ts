@@ -49,3 +49,27 @@ export function readableAccent(
   }
   return dark ? '#ffffff' : '#000000';
 }
+
+/**
+ * Smallest black overlay (0 to 0.9) that keeps white text at 4.5:1 on every color,
+ * so a custom Home background can reuse the light-on-photo text style.
+ */
+export function whiteTextOverlay(colors: string[]): number {
+  for (let step = 0; step <= 18; step++) {
+    const alpha = step / 20;
+    if (
+      colors.every((color) => {
+        const dimmed = `#${channels(color)
+          .map((value) =>
+            Math.round(value * (1 - alpha))
+              .toString(16)
+              .padStart(2, '0'),
+          )
+          .join('')}`;
+        return contrastRatio('#ffffff', dimmed) >= 4.5;
+      })
+    )
+      return alpha;
+  }
+  return 0.9;
+}

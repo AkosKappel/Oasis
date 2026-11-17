@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import {
   normalizeHex,
+  whiteTextOverlay,
   contrastRatio,
   readableAccent,
   readableForeground,
@@ -75,4 +76,16 @@ it('keeps all preset foregrounds and link colors readable in both themes', () =>
           contrastRatio(colors.primaryContent, surface),
         ).toBeGreaterThanOrEqual(7);
     }
+});
+it('dims Home background colors just enough for white text', () => {
+  expect(whiteTextOverlay(['#1d3d5c'])).toBe(0);
+  const light = whiteTextOverlay(['#ffffff', '#f5e663']);
+  expect(light).toBeGreaterThan(0.4);
+  expect(light).toBeLessThanOrEqual(0.9);
+  const dimmed = Math.round(255 * (1 - light))
+    .toString(16)
+    .padStart(2, '0');
+  expect(
+    contrastRatio('#ffffff', `#${dimmed.repeat(3)}`),
+  ).toBeGreaterThanOrEqual(4.5);
 });

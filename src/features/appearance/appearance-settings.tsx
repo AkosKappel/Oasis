@@ -252,6 +252,74 @@ export function AppearanceSettings({
             >
               Reset colors
             </Button>
+            <fieldset className="min-w-0 space-y-3">
+              <legend className="mb-2 text-sm font-medium">
+                Home background
+              </legend>
+              <label className="field">
+                Background style
+                <select
+                  value={draft.homeBackground ?? 'theme'}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    update(
+                      value === 'theme'
+                        ? {
+                            homeBackground: undefined,
+                            backgroundFrom: undefined,
+                            backgroundTo: undefined,
+                          }
+                        : {
+                            homeBackground: value as 'color' | 'gradient',
+                            backgroundFrom: draft.backgroundFrom ?? '#286443',
+                            backgroundTo:
+                              value === 'gradient'
+                                ? (draft.backgroundTo ?? '#1d3d5c')
+                                : undefined,
+                          },
+                    );
+                  }}
+                >
+                  <option value="theme">Theme colors</option>
+                  <option value="color">Solid color</option>
+                  <option value="gradient">Gradient</option>
+                </select>
+              </label>
+              {draft.homeBackground && (
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="color"
+                      value={draft.backgroundFrom ?? '#286443'}
+                      onChange={(event) =>
+                        update({ backgroundFrom: event.target.value })
+                      }
+                      className="h-10 w-12 cursor-pointer rounded border border-border bg-surface p-1"
+                    />
+                    {draft.homeBackground === 'gradient'
+                      ? 'Gradient start'
+                      : 'Background color'}
+                  </label>
+                  {draft.homeBackground === 'gradient' && (
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="color"
+                        value={draft.backgroundTo ?? '#1d3d5c'}
+                        onChange={(event) =>
+                          update({ backgroundTo: event.target.value })
+                        }
+                        className="h-10 w-12 cursor-pointer rounded border border-border bg-surface p-1"
+                      />
+                      Gradient end
+                    </label>
+                  )}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Used when no background image is shown. Light colors are dimmed
+                so Home text stays readable.
+              </p>
+            </fieldset>
             <label className="field">
               Clock format
               <select

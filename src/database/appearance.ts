@@ -21,6 +21,9 @@ export interface Appearance {
   showLinksFrequent?: boolean;
   primaryColor?: string;
   secondaryColor?: string;
+  homeBackground?: 'color' | 'gradient';
+  backgroundFrom?: string;
+  backgroundTo?: string;
 }
 export interface AppearanceRecord extends Appearance, RecordMetadata {
   spaceId: string;
@@ -72,6 +75,17 @@ export function validateAppearance(value: Appearance): Appearance {
     (value.secondaryColor !== undefined && !secondaryColor)
   )
     throw new Error('Enter colors as hex values, such as #286443.');
+  const backgroundFrom = normalizeHex(value.backgroundFrom);
+  const backgroundTo = normalizeHex(value.backgroundTo);
+  if (
+    (value.homeBackground !== undefined &&
+      !['color', 'gradient'].includes(value.homeBackground)) ||
+    (value.backgroundFrom !== undefined && !backgroundFrom) ||
+    (value.backgroundTo !== undefined && !backgroundTo) ||
+    (value.homeBackground && !backgroundFrom) ||
+    (value.homeBackground === 'gradient' && !backgroundTo)
+  )
+    throw new Error('Choose valid Home background colors.');
   return {
     theme: value.theme,
     accent: value.accent,
@@ -103,6 +117,9 @@ export function validateAppearance(value: Appearance): Appearance {
     linksPinned: value.linksPinned ?? false,
     ...(primaryColor ? { primaryColor } : {}),
     ...(secondaryColor ? { secondaryColor } : {}),
+    ...(value.homeBackground ? { homeBackground: value.homeBackground } : {}),
+    ...(backgroundFrom ? { backgroundFrom } : {}),
+    ...(backgroundTo ? { backgroundTo } : {}),
   };
 }
 export function createAppearanceRepository(

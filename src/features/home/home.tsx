@@ -14,6 +14,7 @@ import { focusRemaining } from '@/database/focus-session';
 import { HomeWidgets } from '@/features/widgets/home-widgets';
 import { DailyFocus } from '@/features/focus/daily-focus';
 import { localDay } from '@/database/daily-focus';
+import { whiteTextOverlay } from '@/lib/colors';
 import { useContentProviders } from '@/features/content/use-content-providers';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Library, Search, Settings2 } from 'lucide-react';
@@ -126,6 +127,12 @@ export function Home({
       ? providers.picture
       : undefined;
   const webQuote = providers.quote;
+  const backgroundColors =
+    appearance.homeBackground && appearance.backgroundFrom
+      ? appearance.homeBackground === 'gradient' && appearance.backgroundTo
+        ? [appearance.backgroundFrom, appearance.backgroundTo]
+        : [appearance.backgroundFrom]
+      : undefined;
   const [nextChoices, setNextChoices] = useState<
     Partial<Record<ContentKind, { scope: string; id: string; seen: string[] }>>
   >({});
@@ -469,7 +476,7 @@ export function Home({
   };
   return (
     <main
-      className={`home min-h-dvh px-6 py-6 sm:px-10 sm:py-8 ${backgroundImage || webPicture ? 'home-photo' : ''}`}
+      className={`home min-h-dvh px-6 py-6 sm:px-10 sm:py-8 ${backgroundImage || webPicture || backgroundColors ? 'home-photo' : ''}`}
       data-links-pinned={
         !focusing && appearance.linksPinned ? appearance.linksSide : undefined
       }
@@ -483,7 +490,12 @@ export function Home({
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }
-          : undefined
+          : backgroundColors
+            ? {
+                // White text is kept at 4.5:1 by the smallest sufficient dimming.
+                backgroundImage: `linear-gradient(rgb(0 0 0 / ${whiteTextOverlay(backgroundColors)}), rgb(0 0 0 / ${whiteTextOverlay(backgroundColors)})), linear-gradient(135deg, ${backgroundColors[0]}, ${backgroundColors.at(-1)})`,
+              }
+            : undefined
       }
     >
       {focusing && session ? (

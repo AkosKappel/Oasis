@@ -437,3 +437,7 @@ X-03 left semantic search open between local and external processing. An externa
 ## 2026-11-17: Maintenance helpers stay local and explain their limits
 
 Blueprint gaps (paste a URL into search, folder suggestions, unused bookmarks, tag and folder statistics) were filled with local derivations only. Folder suggestions mirror the existing same-host tag suggestions rather than reading page content. "Not opened in 90 days" only appears while open counting is on, because Oasis cannot see opens made outside it; never-opened bookmarks age from their save date. Pasted addresses go through the normal editor and validation instead of saving silently.
+
+## 2026-11-17: Custom Home colors are dimmed for readability
+
+Solid and gradient Home backgrounds reuse the photo text style (white text) instead of choosing text color per background, because gradients can span light and dark colors. Oasis applies the smallest black overlay that keeps white text at 4.5:1 on every chosen color; very light choices therefore look muted. Images keep precedence over colors.
