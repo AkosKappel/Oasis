@@ -28,6 +28,8 @@ test('forced colors preserve keyboard focus, button boundaries and native select
   ).toBe(true);
   await page.getByRole('link', { name: 'Library', exact: true }).click();
   const add = page.getByRole('button', { name: 'Add bookmark', exact: true });
+  // The button stays disabled until the library loads, and a disabled button cannot take focus.
+  await expect(add).toBeEnabled();
   await add.focus();
   await page.keyboard.press('Enter');
   const dialog = page.getByRole('dialog', {
@@ -78,6 +80,8 @@ test('forced colors preserve keyboard focus, button boundaries and native select
   const list = page.getByRole('button', { name: 'List view', exact: true });
   await list.click();
   await expect(list).toHaveAttribute('aria-pressed', 'true');
+  // The pressed state is optimistic; the button is disabled until the save finishes.
+  await expect(list).toBeEnabled();
   await collections.focus();
   expect(
     await list.evaluate((element) => getComputedStyle(element).outlineStyle),
