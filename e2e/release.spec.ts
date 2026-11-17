@@ -164,6 +164,10 @@ test('verifies packaged assets and captures store previews with sample data', as
   await expect(page.locator('main')).toHaveClass(/home-photo/);
   await page.screenshot({ path: testInfo.outputPath('store-home.png') });
   await page.getByRole('button', { name: 'Links', exact: true }).click();
+  await page
+    .getByRole('dialog', { name: 'Links', exact: true })
+    .locator('summary[title="Favorites"]')
+    .click();
   await expect(
     page.getByRole('list', { name: 'Saved links', exact: true }),
   ).toBeVisible();

@@ -32,6 +32,7 @@ export function LinkList({
     )
       void onMove(id, before);
   }
+  if (!bookmarks.length) return null;
   return (
     <>
       <ul aria-label="Saved links" className="space-y-0">
