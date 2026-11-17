@@ -56,7 +56,7 @@ Record versions and dates when completing the table. Existing automated migratio
 
 1. Push approved commits to the public repository and inspect every CI job. Configure required checks after the first complete matrix run.
 2. Review the public policy/support links below and set them, together with publisher/contact details, in the store accounts.
-3. Complete the interactive browser/OS checks above and the screen-reader pass in ACCESSIBILITY.md.
+3. Work through the hands-on checklist in [RELEASE-TESTING.md](RELEASE-TESTING.md), the interactive browser/OS checks above and the screen-reader pass in ACCESSIBILITY.md.
 4. Review the listing, screenshots, MIT license and third-party/artwork notices. Keep the release free and non-commercial if using the current Open-Meteo endpoint; revisit provider terms before monetization.
 5. Upload the verified archive to the Chrome Web Store and Microsoft Edge Add-ons, fill in privacy/permission fields, and submit for review when ready.
 
