@@ -65,6 +65,9 @@ function AppContent() {
           key={route}
           onSettings={setSettingsPage}
           initialQuery={new URLSearchParams(route.split('?')[1]).get('q') ?? ''}
+          initialAddUrl={
+            new URLSearchParams(route.split('?')[1]).get('add') ?? undefined
+          }
         />
       ) : (
         <Home

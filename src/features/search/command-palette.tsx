@@ -9,6 +9,20 @@ import { useEffect, useRef, useState } from 'react';
 import { filterBookmarks } from '@/features/bookmarks/filter-bookmarks';
 import { useLibrary } from '@/features/bookmarks/use-library';
 
+/** A pasted http(s) address the palette can offer to save. */
+export function savableUrl(value: string) {
+  try {
+    const url = new URL(value.trim());
+    return ['http:', 'https:'].includes(url.protocol) &&
+      !url.username &&
+      !url.password
+      ? url.href
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function CommandPalette({
   initialQuery,
   preferredEngine,
@@ -46,10 +60,20 @@ export function CommandPalette({
   ].filter((action) =>
     action.title.toLowerCase().includes(query.trim().toLowerCase()),
   );
+  const pasted = savableUrl(query);
   const webUrl = webSearchUrl(preferredEngine, query);
   const source = searchEngine(preferredEngine);
   const results = [
     ...bookmarks,
+    ...(pasted
+      ? [
+          {
+            id: 'save-url',
+            title: `Save “${pasted}” as a bookmark`,
+            url: `#library?add=${encodeURIComponent(pasted)}`,
+          },
+        ]
+      : []),
     ...actions,
     ...(webUrl
       ? [

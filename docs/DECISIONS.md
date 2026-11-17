@@ -433,3 +433,7 @@ D-14 asked for provider choices before integrating outside content. Unsplash nee
 ## 2026-11-17: Related bookmarks use local word statistics before any model
 
 X-03 left semantic search open between local and external processing. An external embedding service would send bookmark content off the device, and a bundled embedding model adds tens of megabytes plus a WebAssembly runtime. As a first step, related bookmarks use TF-IDF similarity over existing text, tags, folder and site: no dependency, no network and instant results. The limitation is stated in the UI and docs (shared words, not meanings). True semantic search remains a separate owner decision about consent, download size and cost.
+
+## 2026-11-17: Maintenance helpers stay local and explain their limits
+
+Blueprint gaps (paste a URL into search, folder suggestions, unused bookmarks, tag and folder statistics) were filled with local derivations only. Folder suggestions mirror the existing same-host tag suggestions rather than reading page content. "Not opened in 90 days" only appears while open counting is on, because Oasis cannot see opens made outside it; never-opened bookmarks age from their save date. Pasted addresses go through the normal editor and validation instead of saving silently.

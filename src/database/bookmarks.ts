@@ -1,4 +1,4 @@
-import { suggestBookmarkTags } from './tag-suggestions';
+import { suggestBookmarkFolders, suggestBookmarkTags } from './tag-suggestions';
 import {
   assertBookmarkMediaBudget,
   validateBookmarkMedia,
@@ -111,6 +111,35 @@ export function createBookmarkRepository(
               .toArray(),
           ]);
           return suggestBookmarkTags(bookmarks, tags, url, spaceId, excludeId);
+        },
+      );
+    },
+    async suggestFolders(url: string, excludeId?: string) {
+      return database.transaction(
+        'r',
+        database.spaces,
+        database.bookmarks,
+        database.folders,
+        async () => {
+          await requireSpace(database, spaceId);
+          if (excludeId)
+            await requireOwnedRecord(
+              database.bookmarks,
+              excludeId,
+              spaceId,
+              'bookmark',
+            );
+          const [bookmarks, folders] = await Promise.all([
+            database.bookmarks.where('spaceId').equals(spaceId).toArray(),
+            database.folders.where('spaceId').equals(spaceId).toArray(),
+          ]);
+          return suggestBookmarkFolders(
+            bookmarks,
+            folders,
+            url,
+            spaceId,
+            excludeId,
+          );
         },
       );
     },

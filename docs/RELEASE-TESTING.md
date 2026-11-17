@@ -25,6 +25,7 @@ Paths use the visible labels. "Settings" is the gear button on Home (bottom righ
 - [ ] Clock and date: switch Settings → General → Clock format between System, 12-hour and 24-hour; toggle Show date.
 - [ ] Search box with Home search = Bookmarks: typing and pressing Enter opens the search dialog with your query and matching bookmarks.
 - [ ] Settings → General → Home search: pick Google, DuckDuckGo, Bing and Brave in turn. Enter opens that engine with your query. Nothing is sent while typing.
+- [ ] Paste a web address into Ctrl+K search and choose Save … as a bookmark: the editor opens prefilled; reload afterwards does not reopen it.
 - [ ] Ctrl+K (Cmd+K on macOS) opens "Search Oasis" from Home and Library. Arrow keys select, Enter opens, Escape closes and returns focus.
 - [ ] Settings → Home layout: hide, reorder and widen sections, then Save layout. Reset layout restores the default. Open a second tab and confirm it follows.
 
@@ -80,7 +81,8 @@ Paths use the visible labels. "Settings" is the gear button on Home (bottom righ
 ## Library (Home → Library)
 
 - [ ] Add bookmark: save one with a title, URL, description, folder, tags and favorite. Try an invalid URL and a URL with a username: both are refused with a clear message.
-- [ ] Suggest tags in the editor offers tags you already use on the same site.
+- [ ] Suggest tags in the editor offers tags you already use on the same site. Suggest a folder offers folders that hold other links from that site.
+- [ ] With open counting on, Collections → Not opened in 90 days lists bookmarks you have not opened from Oasis recently.
 - [ ] Edit, then delete a bookmark. The Undo toast restores it. Later, restore it from Settings → Backup and restore → Trash.
 - [ ] Add notes and Edit notes on a card. Notes are searchable.
 - [ ] Find related bookmarks (magnifier button on a card): the list shows bookmarks sharing words, tags, folder or site. Show all bookmarks returns to the full list.

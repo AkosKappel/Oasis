@@ -1,5 +1,8 @@
 import { normalizePageText } from '@/database/page-texts';
-import type { TagSuggestion } from '@/database/tag-suggestions';
+import type {
+  FolderSuggestion,
+  TagSuggestion,
+} from '@/database/tag-suggestions';
 import { safeBookmarkMedia } from '@/database/bookmark-media';
 import type { PageDetails } from '@/features/capture/read-page-details';
 import { useSpaceRepositories } from '@/features/spaces/space-context';
@@ -41,6 +44,38 @@ export function BookmarkEditor({
   const [error, setError] = useState<string>();
   const formRef = useRef<HTMLFormElement>(null);
   const [suggesting, setSuggesting] = useState(false);
+  const [folderId, setFolderId] = useState(
+    bookmark?.folderId ?? defaultFolderId ?? '',
+  );
+  const [folderSuggestions, setFolderSuggestions] =
+    useState<FolderSuggestion[]>();
+  const [folderMessage, setFolderMessage] = useState<string>();
+  async function suggestFolders() {
+    if (!formRef.current || saving || reading || suggesting) return;
+    setSuggesting(true);
+    setError(undefined);
+    setFolderMessage(undefined);
+    setFolderSuggestions(undefined);
+    try {
+      const url = String(new FormData(formRef.current).get('url') ?? '');
+      const result = await personalBookmarks.suggestFolders(url, bookmark?.id);
+      setFolderSuggestions(result);
+      setFolderMessage(
+        result.length
+          ? 'Choose a folder before saving.'
+          : 'No folders hold other bookmarks from this website yet.',
+      );
+    } catch (cause) {
+      reportStorageError(cause, true);
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'A folder could not be suggested. Try again.',
+      );
+    } finally {
+      setSuggesting(false);
+    }
+  }
   const [suggestions, setSuggestions] = useState<TagSuggestion[]>();
   const [suggestionMessage, setSuggestionMessage] = useState<string>();
   const [selectedTags, setSelectedTags] = useState(
@@ -339,7 +374,8 @@ export function BookmarkEditor({
           Folder
           <select
             name="folderId"
-            defaultValue={bookmark?.folderId ?? defaultFolderId ?? ''}
+            value={folderId}
+            onChange={(event) => setFolderId(event.target.value)}
           >
             <option value="">Unorganized</option>
             {folderOptions(folders).map((folder) => (
@@ -349,6 +385,63 @@ export function BookmarkEditor({
             ))}
           </select>
         </label>
+        {folders.length > 0 && (
+          <div className="space-y-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => void suggestFolders()}
+            >
+              {suggesting ? 'Finding suggestions…' : 'Suggest a folder'}
+            </Button>
+            {folderMessage && (
+              <p role="status" className="text-sm text-muted-foreground">
+                {folderMessage}
+              </p>
+            )}
+            {!!folderSuggestions?.length && (
+              <ul
+                aria-label="Suggested folders"
+                className="flex flex-col gap-2"
+              >
+                {folderSuggestions
+                  .filter((item) =>
+                    folders.some((folder) => folder.id === item.folder.id),
+                  )
+                  .map((item) => {
+                    const path =
+                      folderOptions(folders).find(
+                        (option) => option.id === item.folder.id,
+                      )?.path ?? item.folder.name;
+                    return (
+                      <li
+                        key={item.folder.id}
+                        className="flex flex-wrap items-center justify-between gap-2"
+                      >
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-auto min-h-9 max-w-full text-left"
+                          disabled={folderId === item.folder.id}
+                          onClick={() => setFolderId(item.folder.id)}
+                        >
+                          <span className="min-w-0 break-words">
+                            {folderId === item.folder.id ? 'Using' : 'Use'}{' '}
+                            {path}
+                          </span>
+                        </Button>
+                        <p className="text-xs text-muted-foreground">
+                          {item.uses} of {item.bookmarks} from this website
+                        </p>
+                      </li>
+                    );
+                  })}
+              </ul>
+            )}
+          </div>
+        )}
         <fieldset className="rounded-lg border border-border p-3">
           <legend className="px-1 text-sm font-medium">Tags</legend>
           {tags.length ? (

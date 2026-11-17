@@ -6,12 +6,24 @@ export type SmartCollection =
   | 'untagged'
   | 'unorganized'
   | 'recently-opened'
-  | 'frequently-opened';
+  | 'frequently-opened'
+  | 'not-opened';
+export const NOT_OPENED_DAYS = 90;
 export function smartCollection(
   bookmarks: Bookmark[],
   collection: SmartCollection,
+  now = Date.now(),
 ): Bookmark[] {
   switch (collection) {
+    case 'not-opened': {
+      // Only opens made from Oasis count; never-opened bookmarks age from when they were saved.
+      const cutoff = now - NOT_OPENED_DAYS * 86_400_000;
+      const activity = (bookmark: Bookmark) =>
+        bookmark.lastOpenedAt ?? bookmark.createdAt;
+      return bookmarks
+        .filter((bookmark) => activity(bookmark) < cutoff)
+        .sort((a, b) => activity(a) - activity(b) || a.id.localeCompare(b.id));
+    }
     case 'recent':
       return [...bookmarks]
         .sort((a, b) => b.createdAt - a.createdAt || a.id.localeCompare(b.id))

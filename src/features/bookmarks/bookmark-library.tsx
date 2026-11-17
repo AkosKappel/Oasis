@@ -1,5 +1,7 @@
 import { LinkCheckDialog } from '@/features/link-checks/link-check-dialog';
 import { relatedBookmarks } from './related-bookmarks';
+import { savableUrl } from '@/features/search/command-palette';
+import type { BookmarkInput } from '@/database/bookmarks';
 import { PageTextDialog } from '@/features/page-texts/page-text-dialog';
 import { SessionDialog } from '@/features/sessions/session-dialog';
 import { useUndo } from '@/features/settings/undo';
@@ -52,9 +54,11 @@ import { OrganizationFilters } from '@/features/organization/organization-filter
 
 export function BookmarkLibrary({
   initialQuery = '',
+  initialAddUrl,
   onSettings,
 }: {
   initialQuery?: string;
+  initialAddUrl?: string;
   onSettings: (page: SettingsPage) => void;
 }) {
   const { offer } = useUndo();
@@ -117,7 +121,25 @@ export function BookmarkLibrary({
     tagFilter === 'untagged' || tags.some((tag) => tag.id === tagFilter)
       ? tagFilter
       : '';
-  const [editor, setEditor] = useState<{ bookmark?: Bookmark }>();
+  const [editor, setEditor] = useState<
+    { bookmark?: Bookmark; initialValues?: BookmarkInput } | undefined
+  >(() => {
+    const url = initialAddUrl && savableUrl(initialAddUrl);
+    return url
+      ? {
+          initialValues: {
+            url,
+            title: new URL(url).hostname.replace(/^www\./, ''),
+            description: '',
+            isFavorite: false,
+          },
+        }
+      : undefined;
+  });
+  useEffect(() => {
+    // A reload should not reopen the save form for a pasted address.
+    if (initialAddUrl) history.replaceState(null, '', '#library');
+  }, [initialAddUrl]);
   const [query, setQuery] = useState(initialQuery);
   const [collection, setCollection] = useState<SmartCollection>('all');
   const favoritesOnly = collection === 'favorites';
@@ -616,6 +638,12 @@ export function BookmarkLibrary({
                       <option value="frequently-opened">
                         Frequently opened
                       </option>
+                      {(preferences.trackOpens ||
+                        collection === 'not-opened') && (
+                        <option value="not-opened">
+                          Not opened in 90 days
+                        </option>
+                      )}
                     </optgroup>
                     {!!savedRecords.length && (
                       <optgroup label="Saved searches">
@@ -1104,6 +1132,7 @@ export function BookmarkLibrary({
       {editor && (
         <BookmarkEditor
           bookmark={editor.bookmark}
+          initialValues={editor.initialValues}
           folders={folders}
           tags={tags}
           defaultFolderId={folderId === 'unorganized' ? undefined : folderId}

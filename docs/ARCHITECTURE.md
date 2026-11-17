@@ -213,3 +213,10 @@ Dexie v28 adds `contentProviders`, one record per space with two opt-in switches
 ## Related bookmarks
 
 The card action "Find related bookmarks" switches Library results to the bookmarks most similar to the chosen one, up to twelve, while keeping the active collection, folder, tag and search filters. `related-bookmarks.ts` scores TF-IDF cosine similarity over title, description and note words plus weighted tag, folder and site terms. It runs locally in memory, needs no model, network or storage, and handles 10,000 bookmarks in well under a second. It matches shared words, not meanings: synonyms are not related.
+
+## Library maintenance helpers
+
+- The command palette offers "Save … as a bookmark" when the query is an http(s) address without credentials. It opens Library at `#library?add=<url>`, which prefills the editor and then drops the parameter so a reload does not reopen it.
+- "Suggest a folder" in the bookmark editor counts which owned, active folders hold other bookmarks from the same hostname (up to three, with counts), like tag suggestions. Choosing one only sets the form field.
+- The "Not opened in 90 days" collection lists bookmarks whose last Oasis open, or their creation date when never opened, is older than 90 days, oldest first. It is offered only while open counting is on, since only opens made from Oasis are known.
+- Statistics add tag usage and bookmarks per folder (full paths, top ten).

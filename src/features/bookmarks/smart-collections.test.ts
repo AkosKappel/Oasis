@@ -52,3 +52,28 @@ it('orders opened collections using counts and times, excluding unopened records
     smartCollection(opened, 'frequently-opened').map((item) => item.id),
   ).toEqual(['0', '1']);
 });
+it('lists bookmarks not opened from Oasis in 90 days, oldest activity first', () => {
+  const day = 86_400_000,
+    now = 200 * day;
+  const old = { ...records[0]!, id: 'old', createdAt: 10 * day };
+  const openedLongAgo = {
+    ...records[0]!,
+    id: 'stale',
+    createdAt: 0,
+    lastOpenedAt: 50 * day,
+  };
+  const openedRecently = {
+    ...records[0]!,
+    id: 'fresh',
+    createdAt: 0,
+    lastOpenedAt: 150 * day,
+  };
+  const newlySaved = { ...records[0]!, id: 'new', createdAt: 180 * day };
+  expect(
+    smartCollection(
+      [newlySaved, openedLongAgo, openedRecently, old],
+      'not-opened',
+      now,
+    ).map((bookmark) => bookmark.id),
+  ).toEqual(['old', 'stale']);
+});
