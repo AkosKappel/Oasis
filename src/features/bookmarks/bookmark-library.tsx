@@ -1,4 +1,5 @@
 import { LinkCheckDialog } from '@/features/link-checks/link-check-dialog';
+import { relatedBookmarks } from './related-bookmarks';
 import { PageTextDialog } from '@/features/page-texts/page-text-dialog';
 import { SessionDialog } from '@/features/sessions/session-dialog';
 import { useUndo } from '@/features/settings/undo';
@@ -182,10 +183,16 @@ export function BookmarkLibrary({
       window.clearTimeout(timer);
     };
   }, [textQuery, savedTexts, pageTexts]);
-  const visible = useMemo(
-    () => (filtered ? sortBookmarks(filtered, preferences.sort) : undefined),
-    [filtered, preferences.sort],
-  );
+  const [relatedTo, setRelatedTo] = useState<Bookmark>();
+  const visible = useMemo(() => {
+    if (!filtered) return undefined;
+    if (!relatedTo) return sortBookmarks(filtered, preferences.sort);
+    // Related mode keeps the similarity order and the active filters.
+    const allowed = new Set(filtered.map((bookmark) => bookmark.id));
+    return relatedBookmarks(relatedTo, bookmarks ?? [], folders, tags).filter(
+      (bookmark) => allowed.has(bookmark.id),
+    );
+  }, [filtered, preferences.sort, relatedTo, bookmarks, folders, tags]);
   const displayed = visible?.slice(0, resultLimit);
   async function savePreferences(patch: Partial<LibraryPreferences>) {
     if (savingPreferences) return;
@@ -912,6 +919,24 @@ export function BookmarkLibrary({
                 )}
               </section>
             )}
+            {relatedTo && (
+              <div
+                role="status"
+                className="mt-5 flex flex-wrap items-center gap-3 rounded-lg border border-border p-3 text-sm"
+              >
+                <span className="min-w-0 flex-1 break-words">
+                  {visible?.length
+                    ? `Bookmarks related to “${relatedTo.title}”, by shared words, tags, folder and site.`
+                    : `No related bookmarks found for “${relatedTo.title}”.`}
+                </span>
+                <Button
+                  variant="outline"
+                  onClick={() => setRelatedTo(undefined)}
+                >
+                  Show all bookmarks
+                </Button>
+              </div>
+            )}
             {!!visible?.length && (
               <ul
                 aria-label="Bookmarks"
@@ -979,6 +1004,10 @@ export function BookmarkLibrary({
                     })}
                     deleting={!!deleting}
                     onNotes={setNotesFor}
+                    onRelated={() => {
+                      setRelatedTo(bookmark);
+                      setResultLimit(60);
+                    }}
                     onPageText={
                       savedTexts.has(bookmark.id)
                         ? () => setPageTextFor(bookmark)

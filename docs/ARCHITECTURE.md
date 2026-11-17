@@ -209,3 +209,7 @@ Read page details also returns the page's main text (`article`, then `main`, the
 ## Daily web content
 
 Dexie v28 adds `contentProviders`, one record per space with two opt-in switches (`picture`, `quote`), today's cached item for each and short fetch claims. Home asks the repository to claim a source for the local day; one tab wins for 60 seconds, fetches with an eight-second timeout and stores the validated item. Parsing keeps only plain text, Wikimedia image hosts and HTTPS Commons and license links. The picture replaces the album background only after it has loaded, so offline Home keeps the album image; like, dislike and Next stay with album images. The quote replaces the collection quote while available. Turning a source off clears its cached item and, for quotes, removes `zenquotes.io` access. Complete-space backups keep the switches but not cached items, and restore the quote source off because its access is a browser grant.
+
+## Related bookmarks
+
+The card action "Find related bookmarks" switches Library results to the bookmarks most similar to the chosen one, up to twelve, while keeping the active collection, folder, tag and search filters. `related-bookmarks.ts` scores TF-IDF cosine similarity over title, description and note words plus weighted tag, folder and site terms. It runs locally in memory, needs no model, network or storage, and handles 10,000 bookmarks in well under a second. It matches shared words, not meanings: synonyms are not related.

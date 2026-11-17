@@ -429,3 +429,7 @@ X-04 needed storage, permissions and ownership decisions. Text is read through t
 ## 2026-11-17: Keyless daily providers first
 
 D-14 asked for provider choices before integrating outside content. Unsplash needs an application key that a distributed extension cannot keep secret, and Pexels has paused new keys. Wikimedia Commons' picture of the day (through the Wikipedia featured feed) and ZenQuotes' quote of the day need no key, so they ship first, each behind its own opt-in. Wikimedia content is freely licensed and shown with author, license and source link. ZenQuotes requires a link back on its free tier. Each source fetches at most once per local day, with a claim so several tabs do not fetch together, and falls back to local albums and collections when offline. Pictures are not copied into storage; the browser's HTTP cache covers repeat views. Provider items are not rateable because ratings drive the local rotation.
+
+## 2026-11-17: Related bookmarks use local word statistics before any model
+
+X-03 left semantic search open between local and external processing. An external embedding service would send bookmark content off the device, and a bundled embedding model adds tens of megabytes plus a WebAssembly runtime. As a first step, related bookmarks use TF-IDF similarity over existing text, tags, folder and site: no dependency, no network and instant results. The limitation is stated in the UI and docs (shared words, not meanings). True semantic search remains a separate owner decision about consent, download size and cost.

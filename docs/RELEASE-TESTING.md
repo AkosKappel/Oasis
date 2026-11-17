@@ -83,6 +83,7 @@ Paths use the visible labels. "Settings" is the gear button on Home (bottom righ
 - [ ] Suggest tags in the editor offers tags you already use on the same site.
 - [ ] Edit, then delete a bookmark. The Undo toast restores it. Later, restore it from Settings → Backup and restore → Trash.
 - [ ] Add notes and Edit notes on a card. Notes are searchable.
+- [ ] Find related bookmarks (magnifier button on a card): the list shows bookmarks sharing words, tags, folder or site. Show all bookmarks returns to the full list.
 - [ ] Grid view and List view, every Sort by option. Reload: choices stay.
 - [ ] Search with typos, quoted phrases and the operators `tag:`, `folder:`, `domain:` and `is:favorite`. Search help explains them.
 - [ ] Collections select: Recently added, Favorites, Untagged, Unorganized. Recently opened and Frequently opened need Settings → Privacy → Count bookmark opens in Oasis.
