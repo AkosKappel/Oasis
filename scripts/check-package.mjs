@@ -16,7 +16,7 @@ assert.deepEqual(manifest.permissions.toSorted(), [
   'activeTab',
   'contextMenus',
 ]);
-assert.deepEqual(manifest.optional_permissions, ['scripting']);
+assert.deepEqual(manifest.optional_permissions, ['scripting', 'tabs']);
 assert.deepEqual(manifest.host_permissions ?? [], []);
 assert.deepEqual(manifest.optional_host_permissions.toSorted(), [
   'https://api.open-meteo.com/*',

@@ -1,6 +1,6 @@
 # Oasis privacy
 
-Effective date: 2026-11-16.
+Effective date: 2026-11-17.
 
 Oasis is a local-first new-tab dashboard and bookmark library. It has no account, backend, analytics, advertising or telemetry. The developer does not receive your bookmarks, notes, images, quotes or activity through Oasis.
 
@@ -18,10 +18,13 @@ If you enable weather and grant optional host access, city searches go to `geoco
 
 Home search defaults to your local bookmarks. If you choose Google, DuckDuckGo, Bing or Brave, submitting a query navigates to that provider with the query in the URL. Oasis does not send suggestions or queries while you type. Opening a saved bookmark similarly connects you to the destination site. Each destination applies its own privacy policy.
 
+Session saving reads titles and URLs in the current browser window only after you choose Read window tabs and grant optional tab access. You review a snapshot and select links before they are stored as ordinary bookmarks. Private tabs and unsupported browser pages are skipped. No browser-history API is used. Access can be removed in the session dialog or browser settings. Opening a saved folder creates background tabs on request, with confirmation above ten links and a limit of fifty.
+
 ## Permissions
 
 - `activeTab`: read a page’s title and URL when you explicitly capture it through the extension toolbar or shortcut.
 - `contextMenus`: offer Save to Oasis actions for pages and links. Capture opens an editable confirmation page before saving.
+- Optional `tabs`: preview the current window for explicit session saving. Tabs are not observed in the background.
 - Optional `scripting`: read page details only after an explicit toolbar-capture action, using temporary `activeTab` access. Remove access in capture or browser extension settings; saved local images remain until removed.
 - Optional Open-Meteo host access: city lookup and forecasts after you explicitly enable weather.
 

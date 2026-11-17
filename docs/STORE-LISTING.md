@@ -26,6 +26,7 @@ Permission justifications:
 
 - activeTab: prefill the explicit quick-capture form with the selected page’s title and URL.
 - contextMenus: show user-invoked page and link capture actions.
+- Optional tabs: read a current-window snapshot only after an explicit session-saving action, with review before local bookmark creation and an in-app revoke control.
 - Optional scripting: read page details only through an explicit toolbar-capture action and temporary activeTab access. Same-origin raster copies are saved locally; access can be revoked in capture or browser settings.
 - Optional host permissions for api.open-meteo.com and geocoding-api.open-meteo.com: user-enabled city search and weather forecasts. Core features do not need those hosts.
 - New-tab override: display the user’s local dashboard and bookmark access.

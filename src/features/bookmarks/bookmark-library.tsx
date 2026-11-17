@@ -1,3 +1,4 @@
+import { SessionDialog } from '@/features/sessions/session-dialog';
 import { useUndo } from '@/features/settings/undo';
 import type { SettingsPage } from '@/features/settings/settings';
 import type { SavedSearch } from '@/database/saved-searches';
@@ -89,6 +90,7 @@ export function BookmarkLibrary({
   const [bulkEditor, setBulkEditor] = useState<'move' | 'tags'>();
   const [bulkBusy, setBulkBusy] = useState(false);
   const [notesFor, setNotesFor] = useState<Bookmark>();
+  const [sessionOpen, setSessionOpen] = useState(false);
   const [statisticsOpen, setStatisticsOpen] = useState(false);
   const [duplicatesOpen, setDuplicatesOpen] = useState(false);
   const [organizationOpen, setOrganizationOpen] = useState(false);
@@ -395,6 +397,13 @@ export function BookmarkLibrary({
               }}
             >
               <div className="flex flex-col gap-2">
+                <Button
+                  variant="outline"
+                  disabled={!library || !!loadError}
+                  onClick={() => setSessionOpen(true)}
+                >
+                  Sessions and tabs
+                </Button>
                 <Button
                   variant="outline"
                   disabled={!library || !!loadError}
@@ -958,6 +967,13 @@ export function BookmarkLibrary({
               document.getElementById('bookmark-selection-toggle')?.focus(),
             );
           }}
+        />
+      )}
+      {sessionOpen && library && (
+        <SessionDialog
+          bookmarks={library.bookmarks}
+          folders={library.folders}
+          onClose={() => setSessionOpen(false)}
         />
       )}
       {statisticsOpen && library && (

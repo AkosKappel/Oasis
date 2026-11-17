@@ -28,7 +28,7 @@ export default defineConfig({
     },
     action: { default_icon: { 16: 'icon/16.png', 32: 'icon/32.png' } },
     permissions: ['activeTab', 'contextMenus'],
-    optional_permissions: ['scripting'],
+    optional_permissions: ['scripting', 'tabs'],
     optional_host_permissions: [
       'https://api.open-meteo.com/*',
       'https://geocoding-api.open-meteo.com/*',

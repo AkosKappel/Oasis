@@ -78,3 +78,5 @@ Browser commitments, CI coverage and promotion gates are tracked in [Browser sup
 - [Privacy policy](https://github.com/AkosKappel/Oasis/blob/main/PRIVACY.md)
 
 The repository and issue tracker are public. These links are available for owner review in store forms; they do not imply store approval or publication. A separate website is optional.
+
+Session saving native gate: grant, deny and revoke optional tabs access through Sessions and tabs; verify the current-window preview, deselection, duplicate skipping and folder save against a copied test profile. Confirm that opening a folder works without tabs access, large batches ask for confirmation, and stopping preserves already opened tabs.

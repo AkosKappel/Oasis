@@ -19,7 +19,7 @@ test('verifies packaged assets and captures store previews with sample data', as
   );
   expect(manifest.manifest_version).toBe(3);
   expect(manifest.permissions.sort()).toEqual(['activeTab', 'contextMenus']);
-  expect(manifest.optional_permissions).toEqual(['scripting']);
+  expect(manifest.optional_permissions).toEqual(['scripting', 'tabs']);
   expect(manifest.host_permissions ?? []).toEqual([]);
   expect(manifest.optional_host_permissions.sort()).toEqual([
     'https://api.open-meteo.com/*',
