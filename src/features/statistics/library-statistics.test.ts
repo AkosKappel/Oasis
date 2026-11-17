@@ -71,3 +71,61 @@ it('handles empty libraries, invalid dates and dates outside the rolling year', 
     libraryStatistics({ bookmarks: [], folders: [], tags: [] }).hosts,
   ).toEqual([]);
 });
+it('ranks tag usage and bookmarks per folder by full path, ignoring deleted records', () => {
+  const folders = [
+    { id: 'p', spaceId: 'default', name: 'Work', createdAt: 1, updatedAt: 1 },
+    {
+      id: 'c',
+      spaceId: 'default',
+      name: 'Docs',
+      parentId: 'p',
+      createdAt: 1,
+      updatedAt: 1,
+    },
+    {
+      id: 'gone',
+      spaceId: 'default',
+      name: 'Old',
+      createdAt: 1,
+      updatedAt: 1,
+      deletedAt: 2,
+    },
+  ];
+  const tags = [
+    {
+      id: 't1',
+      spaceId: 'default',
+      name: 'Read',
+      color: '#000000',
+      createdAt: 1,
+      updatedAt: 1,
+    },
+    {
+      id: 't2',
+      spaceId: 'default',
+      name: 'Tool',
+      color: '#000000',
+      createdAt: 1,
+      updatedAt: 1,
+    },
+  ];
+  const stats = libraryStatistics({
+    bookmarks: [
+      { ...base, id: '1', tags: ['t1', 't2'], folderId: 'c' },
+      { ...base, id: '2', tags: ['t1'], folderId: 'c' },
+      { ...base, id: '3', tags: ['t1'], folderId: 'p' },
+      { ...base, id: '4', tags: ['t2'], folderId: 'gone' },
+      { ...base, id: '5', tags: ['t2'], deletedAt: 3 },
+    ],
+    folders: folders.map((folder) => ({ ...folder, sortOrder: 0 })),
+    tags,
+  });
+  expect(stats.tagUsage).toEqual([
+    ['Read', 3],
+    ['Tool', 2],
+  ]);
+  expect(stats.folderUsage).toEqual([
+    ['Work / Docs', 2],
+    ['Work', 1],
+  ]);
+});

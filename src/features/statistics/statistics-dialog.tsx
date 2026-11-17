@@ -66,8 +66,8 @@ export function StatisticsDialog({
       </dl>
       <p className="mt-3 text-xs text-muted-foreground">
         {tracking
-          ? 'Open counting is enabled in Library.'
-          : 'Open counting is off. Earlier saved counts remain until you clear them in Library.'}{' '}
+          ? 'Open counting is on in Settings → Privacy.'
+          : 'Open counting is off. Earlier saved counts remain until you clear them in Settings → Privacy.'}{' '}
         These totals count opens made from Oasis, not general browsing activity.
       </p>
       <div className="mt-6 grid gap-6 sm:grid-cols-2">
@@ -120,6 +120,42 @@ export function StatisticsDialog({
             </p>
           )}
         </section>
+      </div>
+      <div className="mt-6 grid gap-6 sm:grid-cols-2">
+        {(
+          [
+            [
+              'tags',
+              'Tag usage',
+              stats.tagUsage,
+              'Tag a bookmark to see it here.',
+            ],
+            [
+              'folders',
+              'Bookmarks per folder',
+              stats.folderUsage,
+              'Move a bookmark into a folder to see it here.',
+            ],
+          ] as const
+        ).map(([id, title, rows, empty]) => (
+          <section key={id} aria-labelledby={`${id}-usage-title`}>
+            <h3 id={`${id}-usage-title`} className="font-semibold">
+              {title}
+            </h3>
+            {rows.length ? (
+              <ol className="mt-3 space-y-2">
+                {rows.map(([name, count]) => (
+                  <li key={name} className="flex justify-between gap-3 text-sm">
+                    <span className="min-w-0 break-words">{name}</span>
+                    <span>{count}</span>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="mt-3 text-sm text-muted-foreground">{empty}</p>
+            )}
+          </section>
+        ))}
       </div>
       <section className="mt-6" aria-labelledby="frequent-title">
         <h3 id="frequent-title" className="font-semibold">
