@@ -31,7 +31,7 @@ export function BookmarkSections({
                 6,
               ),
               empty:
-                'Enable open counting in Library, then open a bookmark from Oasis.',
+                'Enable open counting in Settings → Privacy, then open a bookmark from Oasis.',
             },
           ]
         : []),

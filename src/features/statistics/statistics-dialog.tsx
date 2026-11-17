@@ -148,8 +148,8 @@ export function StatisticsDialog({
           </ol>
         ) : (
           <p className="mt-3 text-sm text-muted-foreground">
-            Enable open counting in Library and open a saved bookmark to build
-            this list.
+            Enable open counting in Settings → Privacy and open a saved bookmark
+            to build this list.
           </p>
         )}
       </section>
