@@ -104,3 +104,14 @@ it('rejects writes to missing spaces and updates to missing records', async () =
   );
   expect(await database.bookmarks.count()).toBe(0);
 });
+
+it('saves, preserves and clears bounded custom icons without requiring remote media', async () => {
+  const id = await repository.save({ ...input, customIcon: '  👩‍💻  ' });
+  expect((await repository.list())[0]?.customIcon).toBe('👩‍💻');
+  await repository.save({ ...input, title: 'Updated' }, id);
+  expect((await repository.list())[0]?.customIcon).toBe('👩‍💻');
+  await repository.save({ ...input, customIcon: '' }, id);
+  expect((await repository.list())[0]?.customIcon).toBeUndefined();
+  for (const customIcon of ['a'.repeat(17), 'a\nb', '\u202ebad'])
+    expect(() => validateBookmark({ ...input, customIcon })).toThrow('icon');
+});

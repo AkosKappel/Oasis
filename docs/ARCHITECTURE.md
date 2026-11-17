@@ -68,7 +68,7 @@ Dexie v5 adds `libraryPreferences`. Its repository merges partial updates atomic
 
 ## Home links
 
-Home's Links control opens a native nonmodal auto popover, rendered through a body portal. Dexie v8 adds the preferred side and desktop pinning to appearance settings. Pinned Links uses a nonmodal complementary panel with direct folder navigation; narrow screens retain the popover. It shares bookmark matching and descendant folder filtering with Library. Dexie v6 makes the old favorites row opt-in while preserving the rest of appearance settings. The panel uses normal app colors even over photo backgrounds.
+Home's Links control opens a native nonmodal auto popover, rendered through a body portal. Dexie v8 adds the preferred side and desktop pinning to appearance settings. Pinned Links uses a nonmodal complementary panel with collapsible full-path folder groups; narrow screens retain the popover. It shares bookmark matching and manual ordering with Library. Quick collections include all, favorites, recent/frequent opens and unorganized links. Compact rows show local icons and tags with full hover details; folder sections render in batches of 50. Custom icons use the existing bookmark field, validated by the bookmark repository, with cached-favicon and title-initial fallbacks. Dexie v6 makes the old favorites row opt-in while preserving the rest of appearance settings. The panel uses normal app colors even over photo backgrounds.
 
 Custom appearance colors are optional in Dexie v7. `colors.ts` handles normalization and contrast, while `apply-appearance.ts` resolves presets/custom fills and readable semantic tokens. The app owns a temporary preview; the appearance hook applies it locally and only persists explicit saves.
 

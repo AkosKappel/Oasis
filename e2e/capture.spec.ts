@@ -73,6 +73,11 @@ test('captures a page into the shared library with folders and tags', async ({
   await expect(card).toBeVisible();
   await page.getByRole('link', { name: 'Oasis home' }).click();
   await page.getByRole('button', { name: 'Links', exact: true }).click();
+  await page
+    .getByRole('dialog', { name: 'Links', exact: true })
+    .locator('summary')
+    .filter({ hasText: 'Reading' })
+    .click();
   await expect(
     page
       .getByRole('dialog', { name: 'Links', exact: true })

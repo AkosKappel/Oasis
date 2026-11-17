@@ -379,3 +379,9 @@ Focus mode can opt into repeating focus and break phases. Each elapsed phase wai
 ## 2026-11-16: Use system outlines in forced-colors mode
 
 Shared buttons use a shadow focus ring in regular themes. Forced-colors mode removes that shadow, leaving no visible keyboard focus. Add a system-color outline, button borders and an inset pressed-state marker only within the forced-colors media query. Restore native select appearance so browsers without the custom picker keep their arrow when gradients disappear. Extend the shared engine suite with preference and enlarged-text/reflow checks; keep native Windows high contrast, browser zoom and assistive-technology verification as release gates.
+
+## 2026-11-17: Home Links uses grouped icon lists
+
+Home Links shows compact rows, quick collections and collapsible full-path folder groups. Manual ordering shares Library ranks, with drag handles and keyboard move buttons. Recent/frequent collections retain usage ordering and use existing opt-in open counts. Search runs before the 50-link history limit. Folder lists render 50 links at a time with an explicit expansion control.
+
+Bookmark icons prefer an optional emoji or short label, then an existing validated cached favicon, then the title initial. Custom labels are limited to 16 UTF-16 code units and reject control and bidirectional formatting characters. No schema, dependencies, permissions or network requests are added. Full titles, URLs and tag names remain available in native hover details and accessible link text while visible text truncates.

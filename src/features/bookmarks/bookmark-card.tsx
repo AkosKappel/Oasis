@@ -1,5 +1,6 @@
 import { useMemo, type DragEvent } from 'react';
 import { safeBookmarkMedia } from '@/database/bookmark-media';
+import { BookmarkIcon } from './bookmark-icon';
 import { TrackedBookmarkLink } from '@/features/bookmarks/tracked-bookmark-link';
 import { FileText, Pencil, Star, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -40,10 +41,6 @@ export function BookmarkCard({
   onNotes,
   onDelete,
 }: BookmarkCardProps) {
-  const favicon = useMemo(
-    () => safeBookmarkMedia(bookmark.favicon, 'icon'),
-    [bookmark.favicon],
-  );
   const preview = useMemo(
     () => safeBookmarkMedia(bookmark.image, 'preview'),
     [bookmark.image],
@@ -97,18 +94,7 @@ export function BookmarkCard({
           className={`${compact ? 'hidden sm:flex' : 'flex'} relative size-10 items-center justify-center rounded-lg bg-secondary font-semibold text-secondary-foreground`}
           aria-hidden="true"
         >
-          {bookmark.title.slice(0, 1).toUpperCase()}
-          {favicon && (
-            <img
-              key={favicon}
-              src={favicon}
-              alt=""
-              className="absolute inset-0 size-10 rounded-lg object-contain"
-              onError={(event) => {
-                event.currentTarget.hidden = true;
-              }}
-            />
-          )}
+          <BookmarkIcon bookmark={bookmark} large />
         </span>
         {bookmark.isFavorite && (
           <Star

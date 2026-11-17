@@ -1,11 +1,13 @@
 import { useLibraryPreferences } from '@/features/bookmarks/use-library-preferences';
-import { TrackedBookmarkLink } from '@/features/bookmarks/tracked-bookmark-link';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link as LinkIcon } from 'lucide-react';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
-import { filterBookmarks } from '@/features/bookmarks/filter-bookmarks';
-import { folderOptions } from '@/features/organization/folder-tree';
+import { linkGroups } from './link-groups';
+import { LinkList, LinkFolder } from './link-list';
+import type { SmartCollection } from '@/features/bookmarks/smart-collections';
+import { useSpaceRepositories } from '@/features/spaces/space-context';
+import { reportStorageError } from '@/database/storage-health';
 
 export function LinksMenu({
   side,
@@ -50,26 +52,48 @@ export function LinksMenu({
   const search = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [selection, setSelection] = useState('favorites');
-  const selectedFolder = selection.startsWith('folder:')
-    ? selection.slice(7)
-    : '';
-  const filter =
-    selectedFolder && !folders.some((folder) => folder.id === selectedFolder)
-      ? 'all'
-      : selection;
-  const matches = bookmarks
-    ? filterBookmarks(bookmarks, folders, tags, {
-        query,
-        favoritesOnly: filter === 'favorites',
-        folderId: filter.startsWith('folder:')
-          ? filter.slice(7)
-          : filter === 'unorganized'
-            ? 'unorganized'
-            : '',
-        tagId: '',
-      })
-    : [];
+  const [selection, setSelection] = useState<SmartCollection>('all');
+  const [organizing, setOrganizing] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [orderError, setOrderError] = useState<string>();
+  const { personalBookmarks } = useSpaceRepositories();
+  const historical =
+    selection === 'recently-opened' || selection === 'frequently-opened';
+  const groups = linkGroups(
+    bookmarks ?? [],
+    folders,
+    tags,
+    selection,
+    query,
+    preferences.folderOrder === 'manual',
+  );
+  const count = groups.reduce(
+    (total, group) => total + group.bookmarks.length,
+    0,
+  );
+  async function move(id: string, before: string | null) {
+    if (busy) return;
+    setBusy(true);
+    setOrderError(undefined);
+    try {
+      await personalBookmarks.reorder(id, before);
+    } catch (cause) {
+      reportStorageError(cause);
+      setOrderError('Link order could not be saved. Try again.');
+    } finally {
+      setBusy(false);
+    }
+  }
+  function closePanel() {
+    if (panel.current?.hasAttribute('popover')) panel.current.hidePopover();
+  }
+  const listProps = {
+    tags,
+    organizing: organizing && !historical,
+    busy,
+    onMove: move,
+    onOpen: closePanel,
+  };
   return (
     <>
       <button
@@ -95,7 +119,7 @@ export function LinksMenu({
           role={docked ? 'complementary' : 'dialog'}
           aria-modal={docked ? undefined : false}
           aria-labelledby="links-title"
-          className="links-panel rounded-xl border border-border bg-background p-5 text-foreground shadow-xl"
+          className="links-panel rounded-xl border border-border bg-background p-3 text-foreground shadow-xl"
           onToggle={(event) => {
             const expanded = event.newState === 'open';
             setOpen(expanded);
@@ -103,7 +127,12 @@ export function LinksMenu({
           }}
           onKeyDown={(event) => {
             const target = event.target as HTMLElement;
-            if (target instanceof HTMLSelectElement) return;
+            if (
+              target instanceof HTMLSelectElement ||
+              target instanceof HTMLButtonElement ||
+              target.tagName === 'SUMMARY'
+            )
+              return;
             const links = Array.from(
               panel.current?.querySelectorAll<HTMLAnchorElement>(
                 'a[data-bookmark]',
@@ -168,45 +197,62 @@ export function LinksMenu({
             />
           </label>
           <nav
-            aria-label="Link folders"
-            className="mt-4 max-h-48 overflow-auto border-b border-border pb-3"
+            aria-label="Link collections"
+            className="mt-3 flex flex-wrap gap-1 border-b border-border pb-3"
           >
-            <div className="mb-2 flex flex-wrap gap-1">
-              {[
-                ['favorites', 'Favorites'],
+            {(
+              [
                 ['all', 'All bookmarks'],
+                ['favorites', 'Favorites'],
+                ['recently-opened', 'Recently visited'],
+                ['frequently-opened', 'Often used'],
                 ['unorganized', 'Unorganized'],
-              ].map(([value, label]) => (
-                <button
-                  type="button"
-                  key={value}
-                  aria-pressed={filter === value}
-                  onClick={() => setSelection(value!)}
-                  className={`rounded px-2 py-1 text-xs ${filter === value ? 'bg-secondary text-secondary-foreground' : 'text-muted-foreground hover:bg-secondary hover:text-secondary-foreground'}`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            {!!folders.length && (
-              <p className="mb-1 px-2 text-xs font-medium text-muted-foreground">
-                Folders
-              </p>
-            )}
-            {folderOptions(folders, preferences.folderOrder === 'manual').map(
-              (folder) => (
-                <button
-                  type="button"
-                  key={folder.id}
-                  aria-pressed={filter === `folder:${folder.id}`}
-                  onClick={() => setSelection(`folder:${folder.id}`)}
-                  className={`block w-full truncate rounded px-2 py-1.5 text-left text-sm ${filter === `folder:${folder.id}` ? 'bg-secondary text-secondary-foreground' : 'hover:bg-secondary hover:text-secondary-foreground'}`}
-                >
-                  {folder.path}
-                </button>
-              ),
-            )}
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                type="button"
+                key={value}
+                aria-pressed={selection === value}
+                onClick={() => {
+                  setSelection(value);
+                  setOrganizing(false);
+                }}
+                className={`rounded px-2 py-1 text-xs ${selection === value ? 'bg-secondary text-secondary-foreground' : 'text-muted-foreground hover:bg-secondary hover:text-secondary-foreground'}`}
+              >
+                {label}
+              </button>
+            ))}
           </nav>
+          {historical && !preferences.trackOpens && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              Open counting is off. Enable it in Settings → Privacy to build
+              these collections.
+            </p>
+          )}
+          {!historical && !!count && (
+            <div className="mt-2 flex justify-end">
+              <button
+                type="button"
+                disabled={busy}
+                aria-pressed={organizing}
+                className="rounded px-2 py-1 text-xs text-muted-foreground underline"
+                onClick={() => setOrganizing(!organizing)}
+              >
+                {organizing ? 'Done reordering' : 'Reorder links'}
+              </button>
+            </div>
+          )}
+          {organizing && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Drag links within a section or use the arrows. Order is shared
+              with Library.
+            </p>
+          )}
+          {orderError && (
+            <p role="alert" className="mt-2 text-sm text-danger">
+              {orderError}
+            </p>
+          )}
           {error && (
             <p role="alert" className="mt-4 text-sm text-danger">
               {error}
@@ -217,47 +263,40 @@ export function LinksMenu({
               Loading links…
             </p>
           )}
-          {bookmarks && !matches.length && (
+          {bookmarks && !count && (
             <p role="status" className="mt-4 text-sm text-muted-foreground">
               {bookmarks.length
                 ? 'No matching links. Try another search or selection.'
                 : 'Save bookmarks in Library to see them here.'}
             </p>
           )}
-          <ul aria-label="Saved links" className="mt-4 flex flex-col gap-1">
-            {matches.slice(0, 50).map((bookmark) => (
-              <li key={bookmark.id}>
-                <TrackedBookmarkLink
-                  bookmarkId={bookmark.id}
-                  data-bookmark
-                  href={bookmark.url}
-                  onClick={() =>
-                    panel.current?.hasAttribute('popover') &&
-                    panel.current.hidePopover()
-                  }
-                  className="group/link block min-w-0 rounded-md px-3 py-2 hover:bg-secondary hover:text-secondary-foreground"
-                >
-                  <span className="block truncate text-sm font-medium">
-                    {bookmark.title}
-                  </span>
-                  <span className="block truncate text-xs text-muted-foreground group-hover/link:text-secondary-foreground">
-                    {new URL(bookmark.url).hostname}
-                  </span>
-                </TrackedBookmarkLink>
-              </li>
-            ))}
-          </ul>
-          {matches.length > 50 && (
-            <p className="mt-3 text-xs text-muted-foreground">
-              Showing the first 50 matches. Refine your search or open Library.
-            </p>
-          )}
+          <div className="mt-2 min-w-0 space-y-1" aria-busy={busy}>
+            {groups.map((group) =>
+              group.id ? (
+                <LinkFolder
+                  key={`${group.id}:${query ? 'search' : 'browse'}`}
+                  name={group.name}
+                  bookmarks={group.bookmarks}
+                  query={query}
+                  {...listProps}
+                />
+              ) : group.bookmarks.length ? (
+                <div key="ungrouped">
+                  {!historical &&
+                    folders.length > 0 &&
+                    selection !== 'unorganized' && (
+                      <h3 className="px-2 py-2 text-xs text-muted-foreground">
+                        Unorganized
+                      </h3>
+                    )}
+                  <LinkList bookmarks={group.bookmarks} {...listProps} />
+                </div>
+              ) : null,
+            )}
+          </div>
           <a
             href="#library"
-            onClick={() =>
-              panel.current?.hasAttribute('popover') &&
-              panel.current.hidePopover()
-            }
+            onClick={closePanel}
             className="mt-4 inline-block rounded text-sm text-primary-content underline underline-offset-4"
           >
             Open Library

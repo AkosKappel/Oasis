@@ -148,6 +148,7 @@ export function BookmarkEditor({
                   : {}),
               }
             : {}),
+          customIcon: String(data.get('customIcon') ?? ''),
           title: String(data.get('title') ?? ''),
           url: String(data.get('url') ?? ''),
           description: String(data.get('description') ?? ''),
@@ -193,6 +194,23 @@ export function BookmarkEditor({
             placeholder="A name to remember"
           />
         </label>
+        <div className="field">
+          <label htmlFor="bookmark-custom-icon">Custom icon</label>
+          <input
+            id="bookmark-custom-icon"
+            name="customIcon"
+            maxLength={16}
+            defaultValue={bookmark?.customIcon}
+            placeholder="Emoji or short label"
+            aria-describedby="custom-icon-help"
+          />
+          <span
+            id="custom-icon-help"
+            className="text-xs font-normal text-muted-foreground"
+          >
+            Optional. Leave blank to use the saved favicon or title initial.
+          </span>
+        </div>
         <div className="field">
           <label htmlFor="bookmark-url">URL</label>
           <input

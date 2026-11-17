@@ -10,6 +10,7 @@ import type { Bookmark } from '@/types/entities';
 import { requireOwnedRecord, requireSpace } from './records';
 
 export interface BookmarkInput {
+  customIcon?: string;
   favicon?: string;
   image?: string;
   title: string;
@@ -40,7 +41,17 @@ export function validateBookmark(input: BookmarkInput): BookmarkInput {
   if (url.username || url.password) {
     throw new Error('Remove the username and password from the URL.');
   }
+  const customIcon = input.customIcon?.trim() || undefined;
+  if (
+    customIcon &&
+    (customIcon.length > 16 ||
+      /\p{Cc}|[\u202a-\u202e\u2066-\u2069]/u.test(customIcon))
+  )
+    throw new Error(
+      'Use an emoji or a short icon label (up to 16 characters).',
+    );
   return {
+    ...('customIcon' in input ? { customIcon } : {}),
     ...('favicon' in input
       ? { favicon: validateBookmarkMedia(input.favicon, 'icon') }
       : {}),
