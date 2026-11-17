@@ -53,6 +53,7 @@ export const SPACE_TABLES = [
   'widgetTasks',
   'desktopItems',
   'pageTexts',
+  'contentProviders',
 ] as const;
 type TableName = (typeof SPACE_TABLES)[number];
 type Row = {
@@ -138,7 +139,9 @@ export function validateSpaceBackup(value: unknown): SpaceBackup {
     // Backups from before Dexie v26 have no desktop table.
     const rows =
       tables[name] ??
-      (name === 'desktopItems' || name === 'pageTexts' ? [] : undefined);
+      (['desktopItems', 'pageTexts', 'contentProviders'].includes(name)
+        ? []
+        : undefined);
     if (!Array.isArray(rows) || rows.length > 100000)
       throw new Error(
         'The space backup contains a missing or oversized table.',
@@ -186,6 +189,7 @@ export function validateSpaceBackup(value: unknown): SpaceBackup {
     'focusSessions',
     'weatherSettings',
     'dashboardLayouts',
+    'contentProviders',
   ];
   for (const name of singleton)
     if (normalized[name].length > 1)
@@ -326,6 +330,12 @@ export function validateSpaceBackup(value: unknown): SpaceBackup {
       normalized.desktopItems.length
   )
     throw new Error('The space backup contains overlapping desktop items.');
+  // Cached provider items and fetch claims are not part of a backup.
+  normalized.contentProviders = normalized.contentProviders.map((r) => ({
+    ...metadata(r),
+    picture: bool(r.picture),
+    quote: bool(r.quote),
+  }));
   normalized.pageTexts = normalized.pageTexts.map((r) => {
     const content = normalizePageText(text(r.text, MAX_PAGE_TEXT));
     if (!bookmarkIds.has(String(r.bookmarkId)) || r.id !== r.bookmarkId)
@@ -524,6 +534,7 @@ export function createSpaceBackupRepository(
           libraryPreferences: 'library',
           dashboardLayouts: 'layout',
           weatherSettings: 'weather',
+          contentProviders: 'providers',
           focusSessions: 'focus-session',
         };
         for (const table of SPACE_TABLES) {
@@ -575,6 +586,8 @@ export function createSpaceBackupRepository(
               row.id = JSON.stringify([target, row.kind, row.itemId]);
             }
             if (table === 'weatherSettings') row.enabled = false;
+            // Quote access is a browser grant; the user re-enables it after restore.
+            if (table === 'contentProviders') row.quote = false;
             if (table === 'libraryPreferences') row.trackOpens = false;
             if (table === 'focusSessions') {
               const remaining = focusRemaining(

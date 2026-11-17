@@ -14,6 +14,7 @@ import { focusRemaining } from '@/database/focus-session';
 import { HomeWidgets } from '@/features/widgets/home-widgets';
 import { DailyFocus } from '@/features/focus/daily-focus';
 import { localDay } from '@/database/daily-focus';
+import { useContentProviders } from '@/features/content/use-content-providers';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Library, Search, Settings2 } from 'lucide-react';
 import { LinksMenu } from '@/features/links/links-menu';
@@ -106,6 +107,25 @@ export function Home({
   const { session, error: focusError } = useFocusSession();
   const { data: quotes } = useQuotes();
   const { data: albums } = useAlbums();
+  const [today, setToday] = useState(() => localDay(new Date()));
+  const providers = useContentProviders(today);
+  const [loadedPicture, setLoadedPicture] = useState<string>();
+  useEffect(() => {
+    const url = providers.picture?.url;
+    if (!url) return;
+    // Show the picture only once it loads, so offline Home keeps the album image.
+    const image = new Image();
+    image.onload = () => setLoadedPicture(url);
+    image.src = url;
+    return () => {
+      image.onload = null;
+    };
+  }, [providers.picture?.url]);
+  const webPicture =
+    providers.picture && loadedPicture === providers.picture.url
+      ? providers.picture
+      : undefined;
+  const webQuote = providers.quote;
   const [nextChoices, setNextChoices] = useState<
     Partial<Record<ContentKind, { scope: string; id: string; seen: string[] }>>
   >({});
@@ -235,7 +255,11 @@ export function Home({
     items.some((item) => item.id !== currentId && !dislikes[kind].has(item.id));
   const { library, error } = useLibrary();
   useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    const timer = window.setInterval(() => {
+      const next = new Date();
+      setNow(next);
+      setToday(localDay(next));
+    }, 1000);
     return () => window.clearInterval(timer);
   }, []);
   const favorites = library?.bookmarks
@@ -376,7 +400,28 @@ export function Home({
     ),
     quote: (
       <>
-        {dailyQuote && (
+        {webQuote && (
+          <figure
+            aria-label="Quote of the day"
+            className="relative mt-10 w-full min-w-0 text-center"
+          >
+            <blockquote className="whitespace-pre-line break-words text-base leading-relaxed">
+              {webQuote.text}
+            </blockquote>
+            <figcaption className="mt-3 max-w-full break-words text-sm text-muted-foreground">
+              {webQuote.author} ·{' '}
+              <a
+                href="https://zenquotes.io/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                Quote from ZenQuotes
+              </a>
+            </figcaption>
+          </figure>
+        )}
+        {!webQuote && dailyQuote && (
           <figure
             aria-label="Daily quote"
             className="content-feedback-target relative mt-10 w-full min-w-0 text-center"
@@ -408,6 +453,7 @@ export function Home({
           </figure>
         )}
         {storedFeedback &&
+          !webQuote &&
           quotes?.settings?.visible &&
           !dailyQuote &&
           quotes.quotes.some(
@@ -423,15 +469,17 @@ export function Home({
   };
   return (
     <main
-      className={`home min-h-dvh px-6 py-6 sm:px-10 sm:py-8 ${backgroundImage ? 'home-photo' : ''}`}
+      className={`home min-h-dvh px-6 py-6 sm:px-10 sm:py-8 ${backgroundImage || webPicture ? 'home-photo' : ''}`}
       data-links-pinned={
         !focusing && appearance.linksPinned ? appearance.linksSide : undefined
       }
-      data-background-image={backgroundImage?.id}
+      data-background-image={
+        webPicture ? `wikimedia:${webPicture.day}` : backgroundImage?.id
+      }
       style={
-        backgroundImage
+        webPicture || backgroundImage
           ? {
-              backgroundImage: `linear-gradient(rgb(0 0 0 / ${albums?.background?.dimming ?? 0.6}), rgb(0 0 0 / ${albums?.background?.dimming ?? 0.6})), url("${backgroundImage.dataUrl}")`,
+              backgroundImage: `linear-gradient(rgb(0 0 0 / ${albums?.background?.dimming ?? 0.6}), rgb(0 0 0 / ${albums?.background?.dimming ?? 0.6})), url(${JSON.stringify(webPicture?.url ?? backgroundImage!.dataUrl)})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }
@@ -526,7 +574,34 @@ export function Home({
               </p>
             )}
           <footer className="content-feedback-target flex flex-wrap items-center justify-end gap-3">
-            {backgroundImage && (
+            {webPicture && (
+              <p className="mr-auto max-w-full min-w-0 truncate text-xs text-muted-foreground">
+                <a
+                  href={webPicture.filePage}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                  title={`${webPicture.title}, ${webPicture.artist}, ${webPicture.license}`}
+                >
+                  Picture of the day: {webPicture.title}
+                </a>{' '}
+                · {webPicture.artist} ·{' '}
+                {webPicture.licenseUrl ? (
+                  <a
+                    href={webPicture.licenseUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline"
+                  >
+                    {webPicture.license}
+                  </a>
+                ) : (
+                  webPicture.license
+                )}{' '}
+                · Wikimedia Commons
+              </p>
+            )}
+            {!webPicture && backgroundImage && (
               <div className="mr-auto flex items-center">
                 <ContentRating
                   kind="image"

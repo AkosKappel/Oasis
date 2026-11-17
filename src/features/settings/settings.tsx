@@ -1,3 +1,4 @@
+import { ProviderSettings } from '@/features/content/provider-settings';
 import { TrashPanel } from './trash-panel';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -138,8 +139,18 @@ export function Settings({
             />
           )}
           {page === 'layout' && <LayoutManager embedded onClose={onClose} />}
-          {page === 'albums' && <AlbumManager embedded onClose={onClose} />}
-          {page === 'quotes' && <QuoteManager embedded onClose={onClose} />}
+          {page === 'albums' && (
+            <>
+              <AlbumManager embedded onClose={onClose} />
+              <ProviderSettings kind="picture" />
+            </>
+          )}
+          {page === 'quotes' && (
+            <>
+              <QuoteManager embedded onClose={onClose} />
+              <ProviderSettings kind="quote" />
+            </>
+          )}
           {page === 'feedback' && (
             <ContentPreferences embedded onClose={onClose} />
           )}

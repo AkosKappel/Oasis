@@ -16,6 +16,8 @@ Core bookmark and dashboard features work offline. Tag suggestions use only exis
 
 If you enable weather and grant optional host access, city searches go to `geocoding-api.open-meteo.com` and forecasts for the coordinates of your selected city go to `api.open-meteo.com`. Requests also expose ordinary connection information such as your IP address to the provider. Oasis does not request device geolocation. Weather is cached locally and refreshed while used, not through a background crawl. Disabling weather stops its forecast requests in that space; you can also revoke host access in browser extension settings. See [Open-Meteo’s terms and privacy information](https://open-meteo.com/en/terms).
 
+Daily web content is off by default. If you turn on the picture of the day (Settings → Image albums), Oasis requests today’s featured content from `en.wikipedia.org` once a day and loads the picture from Wikimedia servers; no site access is needed because Wikipedia allows these requests. If you turn on the quote of the day (Settings → Quote collections) and allow access to `zenquotes.io`, Oasis requests today’s quote there once a day. Both providers receive ordinary connection information such as your IP address; no cookies or referrer are sent. Only today’s title, author, license and link (or the quote and its author) are stored, and they are forgotten when you turn the source off. See [Wikimedia’s privacy policy](https://foundation.wikimedia.org/wiki/Policy:Privacy_policy) and [ZenQuotes](https://zenquotes.io/).
+
 Home search defaults to your local bookmarks. If you choose Google, DuckDuckGo, Bing or Brave, submitting a query navigates to that provider with the query in the URL. Oasis does not send suggestions or queries while you type. Opening a saved bookmark similarly connects you to the destination site. Each destination applies its own privacy policy.
 
 Read page details also reads the visible text of the page’s main content. It is kept only if you tick Keep a text copy of this page before saving. Saved text and your highlights and highlight notes stay in this browser, appear in complete space backups, and are searchable in Library. Remove a copy with Remove text copy in the Page text dialog; deleting a space clears its copies.
@@ -32,6 +34,7 @@ Choosing Check links in Library lets you select URLs, grant access to their site
 - Optional `scripting`: read page details only after an explicit toolbar-capture action, using temporary `activeTab` access. Remove access in capture or browser extension settings; saved local images remain until removed.
 - Optional HTTP(S) host access: the manifest permits requesting site-specific grants for reviewed link checks. Oasis requests only the selected scheme and site names, not an all-sites runtime grant. Browser grants cover all paths and ports for those site names; actual checks use only selected URLs. No host access is required at installation.
 - Optional Open-Meteo host access: city lookup and forecasts after you explicitly enable weather.
+- Optional `zenquotes.io` access: the quote of the day after you turn it on. Turning it off removes this access.
 
 Oasis replaces the new-tab page. It does not request browsing-history or geolocation access, and it does not load remotely hosted executable code.
 

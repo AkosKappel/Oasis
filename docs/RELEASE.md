@@ -81,4 +81,6 @@ The repository and issue tracker are public. These links are available for owner
 
 Session saving native gate: grant, deny and revoke optional tabs access through Sessions and tabs; verify the current-window preview, deselection, duplicate skipping and folder save against a copied test profile. Confirm that opening a folder works without tabs access, large batches ask for confirmation, and stopping preserves already opened tabs.
 
+Daily content native gate: confirm the picture of the day works without any host permission and the quote of the day requests only zenquotes.io, in Chrome, Edge and experimental Firefox. Check attribution links and offline fallback.
+
 Link-check native gate: verify host access starts absent; allow/deny/revoke selected site grants in Chrome, Edge and experimental Firefox. Confirm weather still requests only its two precise hosts under the optional HTTP(S) declarations. Test manual redirects, cookie/referrer omission, timeout/cancel, login walls and rate limiting. Permission removal is shared browser state and may affect weather if its host is selected. The fifty-link foreground check is not a background audit or proof that every inconclusive URL is broken.

@@ -21,6 +21,7 @@ import { createLibraryPreferencesRepository } from './library-preferences';
 import { createFocusSessionRepository } from './focus-session';
 import { createDesktopRepository } from './desktop';
 import { createPageTextRepository } from './page-texts';
+import { createContentProviderRepository } from './content-providers';
 const database = new OasisDatabase('complete-space-backup');
 afterEach(() => database.delete());
 async function seed() {
@@ -345,4 +346,23 @@ it('restores saved page text with highlights under the new bookmark IDs', async 
   };
   delete legacy.tables.pageTexts;
   expect(parseSpaceBackup(JSON.stringify(legacy)).tables.pageTexts).toEqual([]);
+});
+
+it('restores content source switches without cached items and with the quote off', async () => {
+  await seed();
+  const providers = createContentProviderRepository('default', database);
+  await providers.setEnabled('picture', true);
+  await providers.setEnabled('quote', true);
+  await providers.storeQuote({ day: 'd', text: 'Cached', author: 'A' });
+  const repo = createSpaceBackupRepository('default', database);
+  const archive = parseSpaceBackup(serializeSpaceBackup(await repo.export()));
+  expect(archive.tables.contentProviders[0]).not.toHaveProperty('dailyQuote');
+  const restored = await repo.restore(archive, 'Sources copy');
+  expect(
+    await createContentProviderRepository(restored, database).get(),
+  ).toMatchObject({ picture: true, quote: false });
+  expect(
+    (await createContentProviderRepository(restored, database).get())
+      .dailyQuote,
+  ).toBeUndefined();
 });

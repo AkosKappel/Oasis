@@ -603,3 +603,19 @@ it('adds an empty page text table to v26 databases without touching bookmarks', 
   expect(await database.pageTexts.count()).toBe(0);
   expect(await database.bookmarks.get('b1')).toEqual(bookmark);
 });
+it('adds content provider settings to v27 databases as an empty table', async () => {
+  const { default: Dexie } = await import('dexie');
+  const legacy = new Dexie('oasis-test');
+  legacy.version(27).stores({
+    spaces: 'id, name, updatedAt',
+    pageTexts: 'id, spaceId',
+  });
+  await legacy.open();
+  await legacy
+    .table('spaces')
+    .add({ id: 'default', name: 'Personal', createdAt: 1, updatedAt: 1 });
+  legacy.close();
+  await database.open();
+  expect(database.verno).toBe(SCHEMA_VERSION);
+  expect(await database.contentProviders.count()).toBe(0);
+});

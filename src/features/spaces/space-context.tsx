@@ -1,5 +1,6 @@
 import { createDesktopRepository } from '@/database/desktop';
 import { createPageTextRepository } from '@/database/page-texts';
+import { createContentProviderRepository } from '@/database/content-providers';
 import { createOnboardingRepository } from '@/database/onboarding';
 import { createTrashRepository } from '@/database/trash';
 import { createSpaceBackupRepository } from '@/database/space-backup';
@@ -118,6 +119,7 @@ export function useSpaceRepositories() {
       widgetTasks: createWidgetTaskRepository(spaceId),
       desktop: createDesktopRepository(spaceId),
       pageTexts: createPageTextRepository(spaceId),
+      contentProviders: createContentProviderRepository(spaceId),
       savedSearches: createSavedSearchRepository(spaceId),
       contentFeedback: createContentFeedbackRepository(spaceId),
       spaceTransfers: createSpaceTransferRepository(spaceId),

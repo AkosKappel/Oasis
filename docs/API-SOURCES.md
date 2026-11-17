@@ -11,6 +11,11 @@ Research checked 2026-11-14. Open-Meteo powers optional weather with manual city
 | Quotes  | [ZenQuotes](https://docs.zenquotes.io/zenquotes-documentation/) | Free access is limited to five requests per 30 seconds per IP and requires attribution. Its docs require a key or registered IP for ordinary web CORS headers. Extension-page requests can instead be evaluated with optional host access. |
 | Quotes  | [Quotable](https://github.com/lukePeavey/quotable)              | Free open-source API; README lists 180 requests/minute/IP. Evaluate hosted availability, provenance and content rights before relying on it.                                                                                               |
 
+## Connected providers (2026-11-17)
+
+- Picture of the day: the Wikipedia featured feed (`https://en.wikipedia.org/api/rest_v1/feed/featured/YYYY/MM/DD`) returns Wikimedia Commons' picture with author, license and file page, needs no key and sends `Access-Control-Allow-Origin: *`, so no host permission is required. Oasis uses the 1920 pixel thumbnail (Wikimedia serves fixed widths; 2560 returned an error when checked) and shows title, author, license and a Commons link. Requests send an `Api-User-Agent` header as Wikimedia asks of API clients.
+- Quote of the day: ZenQuotes `https://zenquotes.io/api/today` needs no key but sends no CORS header, so Oasis requests optional access to `zenquotes.io`. The free tier requires a visible link back to zenquotes.io; Home shows "Quote from ZenQuotes". Rate-limit answers arrive as a pseudo-quote mentioning zenquotes.io and are ignored. Commercial-use terms were not confirmed on the official site; recheck before any commercial distribution.
+
 ## Integration direction
 
 - Open-Meteo is the current personal/non-commercial weather provider; WeatherAPI remains an alternative when its key-based plan fits distribution.

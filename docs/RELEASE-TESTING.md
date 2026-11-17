@@ -63,6 +63,8 @@ Paths use the visible labels. "Settings" is the gear button on Home (bottom righ
 - [ ] Settings → Image albums: use a built-in album, create your own album, upload JPEG/PNG/WebP images, set Background dimming, use a fixed image, then Use plain background.
 - [ ] On Home, Like, Dislike and Next image under the background. Next only previews in this tab; Dislike removes the image from rotation.
 - [ ] Settings → Quote collections: create a collection, add and edit quotes, Show daily on Home. Like, Dislike and Next quote work on Home.
+- [ ] Settings → Image albums → Picture of the day: turn it on. Home shows the Wikimedia picture with title, author, license and a Commons link; no permission prompt appears. Go offline and open a new tab: the album background returns.
+- [ ] Settings → Quote collections → Quote of the day: deny the zenquotes.io prompt once, then allow it. Home shows the quote with "Quote from ZenQuotes". Turn it off and confirm the site access is removed.
 - [ ] Settings → Content preferences: find, filter and clear likes and dislikes.
 - [ ] Download album backup and quote backup, then restore them in a new profile.
 
