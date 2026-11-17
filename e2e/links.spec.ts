@@ -197,6 +197,7 @@ test('browses a compact nested Links tree with optional sections, tags and order
   await page
     .getByRole('button', { name: 'Save settings', exact: true })
     .click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.reload();
   await trigger.click();
   for (const name of ['Favorites', 'Recently used', 'Frequently used'])
