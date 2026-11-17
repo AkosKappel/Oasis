@@ -39,6 +39,14 @@ Paths use the visible labels. "Settings" is the gear button on Home (bottom righ
 - [ ] Custom icons: edit a bookmark in Library, set Custom icon to an emoji or short label, and check it appears in Links. Clear it and the favicon or first letter returns.
 - [ ] Arrow Up and Down move between links; Escape closes the panel and returns focus to Links.
 
+## Links desktop (Settings → Home layout → Show Links desktop)
+
+- [ ] Turn the section on and save. An empty desktop offers Arrange desktop.
+- [ ] Arrange desktop: find and add links and folders, drag them to any place, and use the arrow buttons to move them with the keyboard. Moving onto another item swaps them.
+- [ ] Done arranging, then reload: every item keeps its place. Folder tiles open a window with their links.
+- [ ] A narrow window lists the items in reading order and explains that arranging needs a wider window.
+- [ ] Delete a placed bookmark in Library: it disappears from the desktop and returns when restored from Trash.
+
 ## Focus mode (Home → Focus mode)
 
 - [ ] Start a short session (1 minute). Home hides everything but the timer. Pause, resume and End focus work.
@@ -46,6 +54,7 @@ Paths use the visible labels. "Settings" is the gear button on Home (bottom righ
 - [ ] Reload while running and while paused: no time is lost or gained.
 - [ ] Alternate focus and breaks: after each phase you must choose Start break or Start next focus. Leaving the tab for a while never starts the next phase.
 - [ ] Take a long break after every 4 focus sessions: after the fourth focus, the button reads Start long break and uses your long-break length.
+- [ ] Start the next phase automatically: the next phase starts on time while the tab is open. Sleep the computer or close all Oasis tabs past a deadline; on return the cycle waits for you.
 - [ ] There is no sound or system notification when a timer ends. Decide if that is acceptable for release.
 
 ## Daily content
@@ -88,6 +97,8 @@ These prompts only exist in a real browser. Test allow, deny and remove for each
 
 - [ ] Toolbar popup (click the Oasis icon on a normal web page): the form is prefilled with the page title and URL. Save it and check it in Library.
 - [ ] Popup → Read page details: a browser prompt asks for page access. Deny (you can still save), then allow and check the description and small images. Remove page-detail access works.
+- [ ] After Read page details, tick Keep a text copy of this page and save. In Library, the card's Page text button opens the copy. Add highlights (type a phrase or Use selected text), add notes, reload, then Remove text copy.
+- [ ] Search Library for a word that appears only in a saved page text: the bookmark is listed after the regular matches.
 - [ ] Popup on a browser page such as `chrome://settings`: it explains the page cannot be saved.
 - [ ] Right-click a page → Save page to Oasis, and right-click a link → Save link to Oasis. A save tab opens; Close closes it after saving.
 - [ ] Alt+Shift+O saves the current page. If another extension already uses it, change it in `chrome://extensions/shortcuts`.
