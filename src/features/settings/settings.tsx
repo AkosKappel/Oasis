@@ -1,4 +1,5 @@
 import { ProviderSettings } from '@/features/content/provider-settings';
+import { CaptureFolderSettings } from '@/features/capture/capture-folder-settings';
 import { TrashPanel } from './trash-panel';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -138,6 +139,7 @@ export function Settings({
               onClose={onClose}
             />
           )}
+          {page === 'general' && <CaptureFolderSettings />}
           {page === 'layout' && <LayoutManager embedded onClose={onClose} />}
           {page === 'albums' && (
             <>

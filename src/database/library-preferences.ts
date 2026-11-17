@@ -5,6 +5,7 @@ export interface LibraryPreferences {
   folderOrder?: 'name' | 'manual';
   view: 'grid' | 'list';
   linksView?: 'list' | 'tiles';
+  captureFolderId?: string;
   trackOpens?: boolean;
   sort: 'relevance' | 'name-asc' | 'name-desc' | 'newest' | 'oldest' | 'manual';
 }
@@ -27,6 +28,10 @@ export function validateLibraryPreferences(
     !['grid', 'list'].includes(input.view) ||
     (input.linksView !== undefined &&
       !['list', 'tiles'].includes(input.linksView)) ||
+    (input.captureFolderId !== undefined &&
+      (typeof input.captureFolderId !== 'string' ||
+        !input.captureFolderId ||
+        input.captureFolderId.length > 200)) ||
     ![
       'relevance',
       'name-asc',
@@ -43,6 +48,9 @@ export function validateLibraryPreferences(
       : {}),
     view: input.view,
     ...(input.linksView !== undefined ? { linksView: input.linksView } : {}),
+    ...(input.captureFolderId !== undefined
+      ? { captureFolderId: input.captureFolderId }
+      : {}),
     sort: input.sort,
     trackOpens: input.trackOpens ?? false,
   };
@@ -73,12 +81,26 @@ export function createLibraryPreferencesRepository(
       );
     },
     async save(patch: Partial<LibraryPreferences>) {
+      // Folders join the transaction only when needed, so callers that save
+      // inside their own transaction (manual ordering) need not include them.
       await database.transaction(
         'rw',
-        database.spaces,
-        database.libraryPreferences,
+        [
+          database.spaces,
+          database.libraryPreferences,
+          ...(patch.captureFolderId ? [database.folders] : []),
+        ],
         async () => {
           await requireSpace(database, spaceId);
+          if (patch.captureFolderId) {
+            const folder = await database.folders.get(patch.captureFolderId);
+            if (
+              !folder ||
+              folder.spaceId !== spaceId ||
+              folder.deletedAt !== undefined
+            )
+              throw new Error('Choose a folder from this space.');
+          }
           const current = await existing();
           const values = validateLibraryPreferences({
             ...defaultLibraryPreferences,

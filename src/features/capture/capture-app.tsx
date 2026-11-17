@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { BookmarkEditor } from '@/features/bookmarks/bookmark-editor';
 import { useLibrary } from '@/features/bookmarks/use-library';
+import { useLibraryPreferences } from '@/features/bookmarks/use-library-preferences';
 import { captureTab } from './capture-tab';
 import type { BookmarkInput } from '@/database/bookmarks';
 
@@ -21,6 +22,7 @@ function CaptureContent({
   initialError?: string;
 }) {
   const { list, spaceId } = useSpace();
+  const { preferences } = useLibraryPreferences();
   useAppearance();
   const { library, error: libraryError } = useLibrary();
   const [request] = useState<{ values?: BookmarkInput; error?: string }>(() => {
@@ -147,7 +149,16 @@ function CaptureContent({
         </p>
       ) : initialValues && library ? (
         <BookmarkEditor
+          // Preferences load after the library; remount so a saved capture folder applies.
+          key={preferences.captureFolderId ?? 'unorganized'}
           embedded
+          defaultFolderId={
+            library.folders.some(
+              (folder) => folder.id === preferences.captureFolderId,
+            )
+              ? preferences.captureFolderId
+              : undefined
+          }
           onReadDetails={
             !fullPage && sourceTabId !== undefined ? readDetails : undefined
           }

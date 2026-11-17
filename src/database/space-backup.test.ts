@@ -366,3 +366,28 @@ it('restores content source switches without cached items and with the quote off
       .dailyQuote,
   ).toBeUndefined();
 });
+
+it('restores the capture folder under its new ID', async () => {
+  await seed();
+  const folder = (await database.folders.toArray())[0]!;
+  await createLibraryPreferencesRepository('default', database).save({
+    captureFolderId: folder.id,
+  });
+  const repo = createSpaceBackupRepository('default', database);
+  const archive = parseSpaceBackup(serializeSpaceBackup(await repo.export()));
+  const restored = await repo.restore(archive, 'Capture copy');
+  const preferences = await createLibraryPreferencesRepository(
+    restored,
+    database,
+  ).get();
+  const target = await database.folders.get(preferences.captureFolderId!);
+  expect(target?.spaceId).toBe(restored);
+  expect(target?.name).toBe(folder.name);
+  const orphan = structuredClone(archive);
+  Object.assign(orphan.tables.libraryPreferences[0]!, {
+    captureFolderId: 'missing',
+  });
+  expect(
+    parseSpaceBackup(JSON.stringify(orphan)).tables.libraryPreferences[0],
+  ).not.toHaveProperty('captureFolderId');
+});

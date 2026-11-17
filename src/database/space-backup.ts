@@ -198,10 +198,16 @@ export function validateSpaceBackup(value: unknown): SpaceBackup {
     ...metadata(r),
     ...validateAppearance(r as unknown as Appearance),
   }));
-  normalized.libraryPreferences = normalized.libraryPreferences.map((r) => ({
-    ...metadata(r),
-    ...validateLibraryPreferences(r as unknown as LibraryPreferences),
-  }));
+  const backupFolders = new Set(normalized.folders.map((r) => r.id));
+  normalized.libraryPreferences = normalized.libraryPreferences.map((r) => {
+    const values = validateLibraryPreferences(
+      r as unknown as LibraryPreferences,
+    );
+    // A capture folder that is not in the backup falls back to Unorganized.
+    if (values.captureFolderId && !backupFolders.has(values.captureFolderId))
+      delete values.captureFolderId;
+    return { ...metadata(r), ...values };
+  });
   normalized.dashboardLayouts = normalized.dashboardLayouts.map((r) => ({
     ...metadata(r),
     items: validateDashboardItems(r.items as DashboardItem[]),
@@ -588,7 +594,13 @@ export function createSpaceBackupRepository(
             if (table === 'weatherSettings') row.enabled = false;
             // Quote access is a browser grant; the user re-enables it after restore.
             if (table === 'contentProviders') row.quote = false;
-            if (table === 'libraryPreferences') row.trackOpens = false;
+            if (table === 'libraryPreferences') {
+              row.trackOpens = false;
+              row.captureFolderId = reference(
+                'folders',
+                source.captureFolderId,
+              );
+            }
             if (table === 'focusSessions') {
               const remaining = focusRemaining(
                 source as unknown as FocusSession,
