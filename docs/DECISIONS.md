@@ -409,3 +409,7 @@ References: [Chrome network requests](https://developer.chrome.com/docs/extensio
 ## 2026-11-17: Long breaks are optional and follow a fixed rhythm
 
 Focus cycles can add a long break after every fourth focus session, the common Pomodoro rhythm. Only the long break length is configurable; the interval stays fixed to keep the dialog short. The break type is derived from the completed focus count instead of a stored flag, so older cycles and backups need no migration and an unindexed optional field needs no new Dexie version. Phases still start only on request; automatic starts remain out of scope because they would consume time while the user is away.
+
+## 2026-11-17: Links tiles reuse the shared order before free placement
+
+The owner asked for a tiles view of Links, possibly growing into a desktop where links and folders sit at chosen positions. The first version is a toggle inside the existing Links panel: folders open in place like a file explorer, and tile order is the same manual order used by the list and Library. Free grid coordinates would need a new per-item position model, collision handling and a Home surface that conflicts with the minimal-home default, so that step is tracked separately (D-15d) until the owner confirms the direction.

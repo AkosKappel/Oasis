@@ -4,6 +4,7 @@ import type { RecordMetadata } from '@/types/entities';
 export interface LibraryPreferences {
   folderOrder?: 'name' | 'manual';
   view: 'grid' | 'list';
+  linksView?: 'list' | 'tiles';
   trackOpens?: boolean;
   sort: 'relevance' | 'name-asc' | 'name-desc' | 'newest' | 'oldest' | 'manual';
 }
@@ -24,6 +25,8 @@ export function validateLibraryPreferences(
     (input.folderOrder !== undefined &&
       !['name', 'manual'].includes(input.folderOrder)) ||
     !['grid', 'list'].includes(input.view) ||
+    (input.linksView !== undefined &&
+      !['list', 'tiles'].includes(input.linksView)) ||
     ![
       'relevance',
       'name-asc',
@@ -39,6 +42,7 @@ export function validateLibraryPreferences(
       ? { folderOrder: input.folderOrder }
       : {}),
     view: input.view,
+    ...(input.linksView !== undefined ? { linksView: input.linksView } : {}),
     sort: input.sort,
     trackOpens: input.trackOpens ?? false,
   };

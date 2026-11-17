@@ -67,7 +67,8 @@ export function linkGroups(
     );
   }
   const unorganized: Bookmark[] = [];
-  for (const bookmark of sortBookmarks(matches, 'manual')) {
+  const ordered = sortBookmarks(matches, 'manual');
+  for (const bookmark of ordered) {
     const folder = bookmark.folderId ? nodes.get(bookmark.folderId) : undefined;
     (folder ? folder.bookmarks : unorganized).push(bookmark);
   }
@@ -90,6 +91,7 @@ export function linkGroups(
   return {
     folders: roots.filter((node) => !filtering || node.count > 0),
     unorganized,
+    ordered,
     count: matches.length,
     favorites: smartCollection(matches, 'favorites'),
     recent: smartCollection(matches, 'recently-opened'),

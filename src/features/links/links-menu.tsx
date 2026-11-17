@@ -1,10 +1,18 @@
 import { useLibraryPreferences } from '@/features/bookmarks/use-library-preferences';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Link as LinkIcon, Pin, PinOff, X, ArrowUpDown } from 'lucide-react';
+import {
+  Link as LinkIcon,
+  Pin,
+  PinOff,
+  X,
+  ArrowUpDown,
+  LayoutGrid,
+} from 'lucide-react';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
 import { linkGroups } from './link-groups';
 import { LinkList } from './link-list';
+import { LinkTiles } from './link-tiles';
 import { LinkFolder, LinkSection } from './link-section';
 import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { reportStorageError } from '@/database/storage-health';
@@ -29,6 +37,7 @@ export function LinksMenu({
   error?: string;
 }) {
   const { preferences } = useLibraryPreferences();
+  const tiles = preferences.linksView === 'tiles';
   const trigger = useRef<HTMLButtonElement>(null);
   const [wide, setWide] = useState(
     () => window.matchMedia('(min-width: 1024px)').matches,
@@ -60,7 +69,8 @@ export function LinksMenu({
   const [organizing, setOrganizing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [orderError, setOrderError] = useState<string>();
-  const { personalBookmarks } = useSpaceRepositories();
+  const { personalBookmarks, personalLibraryPreferences } =
+    useSpaceRepositories();
   const groups = linkGroups(
     bookmarks ?? [],
     folders,
@@ -81,6 +91,17 @@ export function LinksMenu({
       setOrderError('Link order could not be saved. Try again.');
     } finally {
       setBusy(false);
+    }
+  }
+  async function changeView() {
+    setOrderError(undefined);
+    try {
+      await personalLibraryPreferences.save({
+        linksView: tiles ? 'list' : 'tiles',
+      });
+    } catch (cause) {
+      reportStorageError(cause);
+      setOrderError('Links view could not be saved. Try again.');
     }
   }
   function closePanel() {
@@ -223,6 +244,16 @@ export function LinksMenu({
                   ))}
               </select>
             </label>
+            <button
+              type="button"
+              aria-label="Show links as tiles"
+              title="Show links as tiles"
+              aria-pressed={tiles}
+              className="shrink-0 rounded p-1.5 hover:bg-secondary hover:text-secondary-foreground"
+              onClick={() => void changeView()}
+            >
+              <LayoutGrid className="size-3.5" aria-hidden="true" />
+            </button>
             {!!count && (
               <button
                 type="button"
@@ -265,53 +296,74 @@ export function LinksMenu({
                 : 'Save bookmarks in Library to see them here.'}
             </p>
           )}
-          <div className="min-w-0" aria-busy={busy}>
-            {(
-              [
-                ['favorites', 'Favorites', groups.favorites],
-                ['recent', 'Recently used', groups.recent],
-                ['frequent', 'Frequently used', groups.frequent],
-              ] as const
-            ).map(
-              ([id, name, records]) =>
-                sections[id] && (
-                  <LinkSection
-                    key={`${id}:${filtering}`}
-                    name={name}
-                    icon={id}
-                    count={records.length}
-                    expanded={filtering}
-                  >
-                    <div className="ml-3 border-l border-border/40 pl-1">
-                      <LinkList
-                        {...listProps}
-                        organizing={false}
-                        bookmarks={[...records]}
-                      />
-                      {!records.length && (
-                        <p className="px-2 py-1.5 text-xs text-muted-foreground">
-                          {id !== 'favorites' && !preferences.trackOpens
-                            ? 'Enable open counting in Settings → Privacy.'
-                            : 'No matching links in this section.'}
-                        </p>
-                      )}
-                    </div>
-                  </LinkSection>
-                ),
-            )}
-            {(sections.favorites || sections.recent || sections.frequent) && (
-              <div className="mx-2 my-2 border-t border-border/60" />
-            )}
-            {groups.folders.map((node) => (
-              <LinkFolder
-                key={`${node.id}:${filtering}`}
-                node={node}
-                filtering={filtering}
+          {tiles && !!count && (
+            <div className="min-w-0" aria-busy={busy}>
+              <LinkTiles
                 {...listProps}
+                folders={groups.folders}
+                unorganized={groups.unorganized}
+                results={filtering ? groups.ordered : undefined}
+                sections={(
+                  [
+                    ['favorites', 'Favorites', groups.favorites],
+                    ['recent', 'Recently used', groups.recent],
+                    ['frequent', 'Frequently used', groups.frequent],
+                  ] as const
+                ).flatMap(([id, name, records]) =>
+                  sections[id] ? [{ id, name, bookmarks: [...records] }] : [],
+                )}
               />
-            ))}
-            <LinkList {...listProps} bookmarks={groups.unorganized} />
-          </div>
+            </div>
+          )}
+          {!tiles && (
+            <div className="min-w-0" aria-busy={busy}>
+              {(
+                [
+                  ['favorites', 'Favorites', groups.favorites],
+                  ['recent', 'Recently used', groups.recent],
+                  ['frequent', 'Frequently used', groups.frequent],
+                ] as const
+              ).map(
+                ([id, name, records]) =>
+                  sections[id] && (
+                    <LinkSection
+                      key={`${id}:${filtering}`}
+                      name={name}
+                      icon={id}
+                      count={records.length}
+                      expanded={filtering}
+                    >
+                      <div className="ml-3 border-l border-border/40 pl-1">
+                        <LinkList
+                          {...listProps}
+                          organizing={false}
+                          bookmarks={[...records]}
+                        />
+                        {!records.length && (
+                          <p className="px-2 py-1.5 text-xs text-muted-foreground">
+                            {id !== 'favorites' && !preferences.trackOpens
+                              ? 'Enable open counting in Settings → Privacy.'
+                              : 'No matching links in this section.'}
+                          </p>
+                        )}
+                      </div>
+                    </LinkSection>
+                  ),
+              )}
+              {(sections.favorites || sections.recent || sections.frequent) && (
+                <div className="mx-2 my-2 border-t border-border/60" />
+              )}
+              {groups.folders.map((node) => (
+                <LinkFolder
+                  key={`${node.id}:${filtering}`}
+                  node={node}
+                  filtering={filtering}
+                  {...listProps}
+                />
+              ))}
+              <LinkList {...listProps} bookmarks={groups.unorganized} />
+            </div>
+          )}
           <a
             href="#library"
             onClick={closePanel}

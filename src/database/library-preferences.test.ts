@@ -47,3 +47,16 @@ it('rejects unavailable spaces and foreign preference records', async () => {
     createLibraryPreferencesRepository('missing', database).get(),
   ).rejects.toThrow('space');
 });
+
+it('keeps the Links view optional and rejects unknown views', async () => {
+  expect((await repository.get()).linksView).toBeUndefined();
+  await repository.save({ linksView: 'tiles' });
+  expect(await repository.get()).toMatchObject({
+    view: 'grid',
+    linksView: 'tiles',
+  });
+  await expect(
+    repository.save({ linksView: 'desktop' as 'tiles' }),
+  ).rejects.toThrow('valid');
+  expect((await repository.get()).linksView).toBe('tiles');
+});
