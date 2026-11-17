@@ -1,4 +1,4 @@
-import { openSettingsPage } from './fixtures';
+import { openSettingsPage, settleTransitions } from './fixtures';
 import { openLibraryTool } from './fixtures';
 import type { Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
@@ -13,16 +13,7 @@ test('core pages and dialogs have no detected WCAG A/AA violations', async ({
   await page.emulateMedia({ colorScheme: 'light' });
   await page.goto('chrome://newtab/');
   async function scan(name: string, target: Page = page) {
-    // A theme switch animates button colors; axe must not sample mid-transition.
-    await target.waitForFunction(() =>
-      document
-        .getAnimations()
-        .every(
-          (animation) =>
-            !(animation instanceof CSSTransition) ||
-            animation.playState !== 'running',
-        ),
-    );
+    await settleTransitions(target);
     const result = await new AxeBuilder({ page: target })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
       .analyze();

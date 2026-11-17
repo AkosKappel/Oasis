@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { readFile } from 'node:fs/promises';
-import { openSettingsPage, test, expect } from './fixtures';
+import { openSettingsPage, settleTransitions, test, expect } from './fixtures';
 
 const feed = {
   image: {
@@ -91,6 +91,7 @@ test('shows opt-in daily web content with attribution and fetches it once a day'
   await expect(quote).toHaveAttribute('aria-pressed', 'false');
   await quote.click();
   await expect(quote).toHaveAttribute('aria-pressed', 'true');
+  await settleTransitions(page);
   expect(
     (
       await new AxeBuilder({ page })

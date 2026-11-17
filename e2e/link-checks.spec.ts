@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { openLibraryTool, test, expect } from './fixtures';
+import { openLibraryTool, test, expect, settleTransitions } from './fixtures';
 test('checks only selected sites on demand and distinguishes HTTP outcomes without following redirects', async ({
   page,
   context,
@@ -180,6 +180,7 @@ test('checks only selected sites on demand and distinguishes HTTP outcomes witho
     ),
   ).toBe(true);
   expect(redirects).toBe(0);
+  await settleTransitions(page);
   expect(
     (await new AxeBuilder({ page }).include('dialog').analyze()).violations,
   ).toEqual([]);

@@ -1,5 +1,11 @@
 import AxeBuilder from '@axe-core/playwright';
-import { openLibraryTool, openSettingsPage, test, expect } from './fixtures';
+import {
+  openLibraryTool,
+  openSettingsPage,
+  test,
+  expect,
+  settleTransitions,
+} from './fixtures';
 
 test('places links and folders on an opt-in Home desktop and keeps their positions', async ({
   page,
@@ -88,6 +94,7 @@ test('places links and folders on an opt-in Home desktop and keeps their positio
   await page.screenshot({
     path: testInfo.outputPath('desktop-arranging.png'),
   });
+  await settleTransitions(page);
   expect(
     (
       await new AxeBuilder({ page })

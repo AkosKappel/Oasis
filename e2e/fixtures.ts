@@ -73,3 +73,16 @@ export async function openSettingsPage(page: Page, name: string) {
       .getByRole('button', { name, exact: true })
       .click();
 }
+
+/** Color transitions (for example a toggled button) must finish before axe samples contrast. */
+export async function settleTransitions(page: Page) {
+  await page.waitForFunction(() =>
+    document
+      .getAnimations()
+      .every(
+        (animation) =>
+          !(animation instanceof CSSTransition) ||
+          animation.playState !== 'running',
+      ),
+  );
+}

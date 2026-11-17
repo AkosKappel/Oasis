@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { openLibraryTool, test, expect } from './fixtures';
+import { openLibraryTool, test, expect, settleTransitions } from './fixtures';
 
 test('switches Links to tiles, browses folders, reorders and keeps the choice', async ({
   page,
@@ -110,6 +110,7 @@ test('switches Links to tiles, browses folders, reorders and keeps the choice', 
   await expect(matches.getByRole('button')).toHaveCount(0);
   await panel.getByRole('searchbox', { name: 'Search links' }).fill('');
 
+  await settleTransitions(page);
   expect(
     (await new AxeBuilder({ page }).include('#home-links').analyze())
       .violations,

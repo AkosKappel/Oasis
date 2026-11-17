@@ -1,5 +1,11 @@
 import AxeBuilder from '@axe-core/playwright';
-import { openLibraryTool, openSettingsPage, test, expect } from './fixtures';
+import {
+  openLibraryTool,
+  openSettingsPage,
+  test,
+  expect,
+  settleTransitions,
+} from './fixtures';
 
 test('saves a pasted URL, suggests its folder and reports tag, folder and unopened bookmarks', async ({
   page,
@@ -81,6 +87,7 @@ test('saves a pasted URL, suggests its folder and reports tag, folder and unopen
   await expect(editor.getByRole('combobox', { name: 'Folder' })).toHaveValue(
     'docs',
   );
+  await settleTransitions(page);
   expect(
     (await new AxeBuilder({ page }).include('dialog').analyze()).violations,
   ).toEqual([]);
