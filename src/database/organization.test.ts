@@ -252,3 +252,16 @@ it('rejects cycles and deleted or other-space parents without partial changes', 
     organization.saveFolder('New', undefined, child),
   ).rejects.toThrow('parent folder');
 });
+it('sets, keeps and clears folder icons with the shared icon rules', async () => {
+  await database.open();
+  const organization = createOrganizationRepository('default', database);
+  const id = await organization.saveFolder('Reading', undefined, '', '📚');
+  expect((await database.folders.get(id))?.icon).toBe('📚');
+  await organization.saveFolder('Reading list', id);
+  expect((await database.folders.get(id))?.icon).toBe('📚');
+  await expect(
+    organization.saveFolder('Reading list', id, undefined, 'x'.repeat(17)),
+  ).rejects.toThrow('16 characters');
+  await organization.saveFolder('Reading list', id, undefined, '');
+  expect((await database.folders.get(id))?.icon).toBeUndefined();
+});

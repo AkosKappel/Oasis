@@ -165,7 +165,13 @@ export function LinkTiles({
             key={folder.id}
             name={folder.name}
             count={folder.count}
-            icon={<Folder className="size-7" aria-hidden="true" />}
+            icon={
+              folder.icon ? (
+                <span className="text-2xl">{folder.icon}</span>
+              ) : (
+                <Folder className="size-7" aria-hidden="true" />
+              )
+            }
             onOpen={() => enter(folder.id)}
           />
         ))}

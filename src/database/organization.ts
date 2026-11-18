@@ -1,3 +1,4 @@
+import { validateIcon } from './bookmarks';
 import { moveBefore } from './manual-order';
 import { createLibraryPreferencesRepository } from './library-preferences';
 import { db, type OasisDatabase } from './schema';
@@ -37,8 +38,16 @@ export function createOrganizationRepository(
       ]);
       return { folders, tags };
     },
-    async saveFolder(name: string, id?: string, parentId?: string) {
+    async saveFolder(
+      name: string,
+      id?: string,
+      parentId?: string,
+      iconInput?: string,
+    ) {
       const value = validateName(name);
+      // Undefined keeps the current icon; an empty string clears it.
+      const icon =
+        iconInput === undefined ? undefined : { icon: validateIcon(iconInput) };
       return database.transaction(
         'rw',
         database.spaces,
@@ -89,6 +98,7 @@ export function createOrganizationRepository(
             await database.folders.update(id, {
               name: value,
               parentId: parent,
+              ...icon,
               updatedAt: now,
             });
             return id;
@@ -99,6 +109,7 @@ export function createOrganizationRepository(
             spaceId,
             name: value,
             parentId: parent,
+            ...(icon?.icon ? { icon: icon.icon } : {}),
             sortOrder: now,
             createdAt: now,
             updatedAt: now,

@@ -26,6 +26,18 @@ export type BulkBookmarkAction =
   | { kind: 'tags'; tags: string[]; mode: 'add' | 'remove' }
   | { kind: 'delete' };
 
+/** Emoji or short label for bookmarks, folders and spaces; blank clears it. */
+export function validateIcon(value: string | undefined) {
+  const icon = value?.trim() || undefined;
+  if (
+    icon &&
+    (icon.length > 16 || /\p{Cc}|[\u202a-\u202e\u2066-\u2069]/u.test(icon))
+  )
+    throw new Error(
+      'Use an emoji or a short icon label (up to 16 characters).',
+    );
+  return icon;
+}
 export function validateBookmark(input: BookmarkInput): BookmarkInput {
   const title = input.title.trim();
   if (!title) throw new Error('Enter a title for your bookmark.');
@@ -41,15 +53,7 @@ export function validateBookmark(input: BookmarkInput): BookmarkInput {
   if (url.username || url.password) {
     throw new Error('Remove the username and password from the URL.');
   }
-  const customIcon = input.customIcon?.trim() || undefined;
-  if (
-    customIcon &&
-    (customIcon.length > 16 ||
-      /\p{Cc}|[\u202a-\u202e\u2066-\u2069]/u.test(customIcon))
-  )
-    throw new Error(
-      'Use an emoji or a short icon label (up to 16 characters).',
-    );
+  const customIcon = validateIcon(input.customIcon);
   return {
     ...('customIcon' in input ? { customIcon } : {}),
     ...('favicon' in input

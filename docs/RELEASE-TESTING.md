@@ -130,6 +130,9 @@ These prompts only exist in a real browser. Test allow, deny and remove for each
 - [ ] Settings → Appearance: theme, accents, custom Primary and Secondary colors with Reset colors. Cancel undoes the live preview.
 - [ ] Settings → Appearance → Home background: try Solid color and Gradient with light and dark colors; Home text stays readable, and a selected background image still takes precedence.
 - [ ] Settings → General → Folder for new captures: pick a folder, then save a page from the toolbar, a right-click menu and Alt+Shift+O; each starts in that folder.
+- [ ] Settings → Appearance: try each Font and Text size, and Blur background images with an album image.
+- [ ] Library → Compact cards: cards get denser and hide previews and descriptions; the choice stays after reload.
+- [ ] Manage spaces…: give a space an icon and tick Open new tabs in this space; new tabs open there while open tabs keep their space. In Folders and tags, give a folder an icon and find it in Links, tiles and the folder filter.
 - [ ] Change a setting in one tab and watch a second tab follow without a reload.
 - [ ] Settings → Privacy: open counting is off by default. Turn it on, open bookmarks from Oasis, then Clear open history.
 - [ ] Offline (disconnect the network): Home, Library, search and backups keep working. Only weather, web search and link checks need the network.

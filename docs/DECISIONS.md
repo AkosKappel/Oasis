@@ -441,3 +441,7 @@ Blueprint gaps (paste a URL into search, folder suggestions, unused bookmarks, t
 ## 2026-11-17: Custom Home colors are dimmed for readability
 
 Solid and gradient Home backgrounds reuse the photo text style (white text) instead of choosing text color per background, because gradients can span light and dark colors. Oasis applies the smallest black overlay that keeps white text at 4.5:1 on every chosen color; very light choices therefore look muted. Images keep precedence over colors.
+
+## 2026-11-18: System fonts, an explicit default space and shared icon rules
+
+Font choices use system stacks only, so no font files are bundled or fetched. While adding them we found that Chrome injects its own font stylesheet into extension pages, which had been overriding Oasis's intended system-ui default; an unlayered body rule now lets the chosen font apply. The default space is a flag on one space record rather than a device setting, so it follows the existing space repository and transactions; per-tab choices still win so open tabs never jump between spaces. Folder and space icons reuse the bookmark custom-icon validation instead of adding an icon picker or icon library.

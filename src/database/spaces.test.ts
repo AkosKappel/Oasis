@@ -144,3 +144,13 @@ it('keeps at most one space that opens by default', async () => {
   expect(await flagged()).toEqual([]);
   await expect(spaces.setOpensByDefault('missing')).rejects.toThrow();
 });
+it('saves an optional space icon and keeps it on rename', async () => {
+  await database.open();
+  const work = await spaces.save('Work', undefined, '💼');
+  expect((await database.spaces.get(work))?.icon).toBe('💼');
+  await spaces.save('Office', work);
+  expect((await database.spaces.get(work))?.icon).toBe('💼');
+  await spaces.save('Office', work, ' ');
+  expect((await database.spaces.get(work))?.icon).toBeUndefined();
+  await expect(spaces.save('Bad', undefined, '‮')).rejects.toThrow('icon');
+});

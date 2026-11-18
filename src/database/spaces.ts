@@ -1,5 +1,6 @@
 import { db, type OasisDatabase } from './schema';
 import { requireSpace } from './records';
+import { validateIcon } from './bookmarks';
 
 function nameFor(input: string) {
   if (typeof input !== 'string' || !input.trim() || input.trim().length > 80)
@@ -13,8 +14,11 @@ export function createSpaceRepository(database: OasisDatabase = db) {
         .filter((record) => record.deletedAt === undefined)
         .sortBy('createdAt');
     },
-    async save(input: string, id?: string) {
+    async save(input: string, id?: string, iconInput?: string) {
       const name = nameFor(input);
+      // Undefined keeps the current icon; an empty string clears it.
+      const icon =
+        iconInput === undefined ? undefined : { icon: validateIcon(iconInput) };
       return database.transaction('rw', database.spaces, async () => {
         if (id) await requireSpace(database, id);
         const duplicate = await database.spaces
@@ -29,13 +33,14 @@ export function createSpaceRepository(database: OasisDatabase = db) {
           throw new Error('A space with this name already exists.');
         const now = Date.now();
         if (id) {
-          await database.spaces.update(id, { name, updatedAt: now });
+          await database.spaces.update(id, { name, ...icon, updatedAt: now });
           return id;
         }
         const created = crypto.randomUUID();
         await database.spaces.add({
           id: created,
           name,
+          ...(icon?.icon ? { icon: icon.icon } : {}),
           createdAt: now,
           updatedAt: now,
         });
@@ -43,6 +48,14 @@ export function createSpaceRepository(database: OasisDatabase = db) {
       });
     },
     /** New tabs without a remembered space open in this one; 'default' clears the choice. */
+    /** New tabs without a remembered space open in this one; 'default' clears the choice. */
+    async setIcon(id: string, value: string) {
+      const icon = validateIcon(value);
+      await database.transaction('rw', database.spaces, async () => {
+        await requireSpace(database, id);
+        await database.spaces.update(id, { icon, updatedAt: Date.now() });
+      });
+    },
     async setOpensByDefault(id: string) {
       await database.transaction('rw', database.spaces, async () => {
         await requireSpace(database, id);

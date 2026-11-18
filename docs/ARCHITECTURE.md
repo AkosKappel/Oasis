@@ -226,3 +226,11 @@ The card action "Find related bookmarks" switches Library results to the bookmar
 - Appearance can set an optional Home background (`homeBackground` with `backgroundFrom`/`backgroundTo` hex values) used when no image is shown. Home reuses the light-on-photo text style and adds the smallest black overlay (`whiteTextOverlay`) that keeps white text at 4.5:1 on every chosen color.
 - Library preferences may hold `captureFolderId`, checked for ownership on save. Toolbar, menu and shortcut capture start with that folder. Complete-space backups remap it and drop it when the folder is not in the backup.
 - Statistics include a 26-week grid of bookmarks saved per local day from creation dates, summarized in one sentence for screen readers.
+
+## Display preferences, default space and icons
+
+- Appearance may set `font` (system, serif, rounded or monospace system stacks; nothing is downloaded) and `textSize` (87.5% or 112.5% of the browser's base size). The font is set on the root element; an unlayered `body { font-family: inherit }` overrides the font stylesheet Chrome injects into extension pages.
+- `blurBackground` blurs Home background images with a `::before` backdrop-filter layer inside Home, so content stays sharp.
+- Library preferences may set `density: 'compact'`: tighter cards without previews or descriptions and denser grid columns.
+- One space may carry `opensByDefault`. A tab without a remembered space opens there; tabs keep their own choice. Complete-space backups do not carry the flag.
+- Folders and spaces take an optional `icon` using the bookmark custom-icon rules (16 characters, no control or direction-override characters). Folder icons appear in Folders and tags, the Library folder filter, the Links tree and tiles, and desktop folders; space icons appear in the space switcher.

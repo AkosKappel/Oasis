@@ -7,10 +7,12 @@ export function LinkSection({
   name,
   count,
   icon = 'folder',
+  emoji,
   expanded = false,
   children,
 }: {
   name: string;
+  emoji?: string;
   count: number;
   icon?: 'folder' | 'recent' | 'frequent' | 'favorites';
   expanded?: boolean;
@@ -39,7 +41,13 @@ export function LinkSection({
           aria-hidden="true"
           className={`size-3 shrink-0 ${open ? 'rotate-90' : ''}`}
         />
-        <Icon aria-hidden="true" className="size-4 shrink-0" />
+        {emoji ? (
+          <span aria-hidden="true" className="w-4 shrink-0 text-center text-sm">
+            {emoji}
+          </span>
+        ) : (
+          <Icon aria-hidden="true" className="size-4 shrink-0" />
+        )}
         <span className="min-w-0 flex-1 truncate">{name}</span>
         <span className="shrink-0 text-xs opacity-70">{count}</span>
       </summary>
@@ -59,7 +67,12 @@ export function LinkFolder({
   depth?: number;
 }) {
   return (
-    <LinkSection name={node.name} count={node.count} expanded={filtering}>
+    <LinkSection
+      name={node.name}
+      emoji={node.icon}
+      count={node.count}
+      expanded={filtering}
+    >
       <div className={depth < 5 ? 'ml-3 border-l border-border/40 pl-1' : ''}>
         {node.children.map((child) => (
           <LinkFolder

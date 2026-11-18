@@ -53,6 +53,7 @@ export function OrganizationFilters({
           <option value="unorganized">Unorganized ({unorganized})</option>
           {folderOptions(folders, manualOrder).map((folder) => (
             <option key={folder.id} value={folder.id}>
+              {folder.icon ? `${folder.icon} ` : ''}
               {folder.path} ({folderCounts.get(folder.id) ?? 0})
             </option>
           ))}

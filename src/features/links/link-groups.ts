@@ -6,6 +6,7 @@ import { sortBookmarks } from '@/features/bookmarks/sort-bookmarks';
 export interface LinkFolderNode {
   id: string;
   name: string;
+  icon?: string;
   bookmarks: Bookmark[];
   children: LinkFolderNode[];
   count: number;
@@ -35,6 +36,7 @@ export function linkGroups(
     nodes.set(folder.id, {
       id: folder.id,
       name: folder.name,
+      ...(folder.icon ? { icon: folder.icon } : {}),
       bookmarks: [],
       children: [],
       count: 0,

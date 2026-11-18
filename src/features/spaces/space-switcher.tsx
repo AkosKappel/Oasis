@@ -12,6 +12,7 @@ export function SpaceSwitcher() {
   const current = list.find((space) => space.id === spaceId);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
+  const [icon, setIcon] = useState('');
   const [renaming, setRenaming] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
@@ -60,7 +61,7 @@ export function SpaceSwitcher() {
           >
             {list.map((space) => (
               <option key={space.id} value={space.id}>
-                {space.name}
+                {space.icon ? `${space.icon} ${space.name}` : space.name}
               </option>
             ))}
             <option value="__manage">Manage spaces…</option>
@@ -74,8 +75,9 @@ export function SpaceSwitcher() {
           onSubmit={(event) => {
             event.preventDefault();
             void run(async () => {
-              await spaces.save(name, renaming ? spaceId : undefined);
+              await spaces.save(name, renaming ? spaceId : undefined, icon);
               setName('');
+              setIcon('');
               setRenaming(false);
             });
           }}
@@ -90,6 +92,18 @@ export function SpaceSwitcher() {
               onChange={(event) => setName(event.target.value)}
             />
           </label>
+          <label className="field">
+            Space icon{' '}
+            <span className="text-xs font-normal text-muted-foreground">
+              Optional emoji or short label
+            </span>
+            <input
+              maxLength={16}
+              disabled={busy}
+              value={icon}
+              onChange={(event) => setIcon(event.target.value)}
+            />
+          </label>
           <div className="flex flex-wrap gap-2">
             <Button disabled={busy}>
               {renaming ? 'Save space name' : 'Create space'}
@@ -101,6 +115,7 @@ export function SpaceSwitcher() {
               onClick={() => {
                 setRenaming(!renaming);
                 setName(renaming ? '' : (current?.name ?? ''));
+                setIcon(renaming ? '' : (current?.icon ?? ''));
               }}
             >
               {renaming ? 'Cancel rename' : 'Rename current space'}

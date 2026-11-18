@@ -198,7 +198,11 @@ export function LinksDesktop({
         onClick={() => !canArrange && setOpenFolder(folder!.id)}
       >
         <span className="flex size-10 items-center justify-center">
-          <FolderIcon className="size-8" aria-hidden="true" />
+          {folder!.icon ? (
+            <span className="text-3xl">{folder!.icon}</span>
+          ) : (
+            <FolderIcon className="size-8" aria-hidden="true" />
+          )}
         </span>
         <span className="line-clamp-2 w-full break-words">{folder!.name}</span>
       </button>

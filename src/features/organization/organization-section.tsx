@@ -9,6 +9,7 @@ interface OrganizationItem {
   name: string;
   color?: string;
   parentId?: string;
+  icon?: string;
 }
 interface OrganizationSectionProps {
   kind: 'folder' | 'tag';
@@ -18,6 +19,7 @@ interface OrganizationSectionProps {
     color: string,
     id?: string,
     parentId?: string,
+    icon?: string,
   ) => Promise<unknown>;
   onRemove: (id: string) => Promise<void>;
   onBusyChange: (busy: boolean) => void;
@@ -36,6 +38,7 @@ export function OrganizationSection({
   const [name, setName] = useState('');
   const [parentId, setParentId] = useState('');
   const [color, setColor] = useState('#286443');
+  const [icon, setIcon] = useState('');
   const [error, setError] = useState<string>();
   const options = folderOptions(items);
   const paths = new Map(options.map((folder) => [folder.id, folder.path]));
@@ -49,6 +52,7 @@ export function OrganizationSection({
     setName('');
     setParentId('');
     setColor('#286443');
+    setIcon('');
     setError(undefined);
   }
 
@@ -58,7 +62,7 @@ export function OrganizationSection({
     onBusyChange(true);
     setError(undefined);
     try {
-      await onSave(name, color, editingId, parentId);
+      await onSave(name, color, editingId, parentId, icon);
       reset();
     } catch (cause) {
       reportStorageError(cause);
@@ -122,6 +126,17 @@ export function OrganizationSection({
               placeholder={kind === 'folder' ? 'e.g. Reading' : 'e.g. Design'}
             />
           </label>
+          {kind === 'folder' && (
+            <label className="field w-24 shrink-0">
+              Folder icon
+              <input
+                value={icon}
+                maxLength={16}
+                onChange={(event) => setIcon(event.target.value)}
+                placeholder="📁"
+              />
+            </label>
+          )}
           {kind === 'tag' && (
             <label className="field">
               Tag color
@@ -193,6 +208,11 @@ export function OrganizationSection({
                   aria-hidden="true"
                 />
               )}
+              {item.icon && (
+                <span aria-hidden="true" className="shrink-0">
+                  {item.icon}
+                </span>
+              )}
               <span className="min-w-0 flex-1 break-words text-sm">
                 {kind === 'folder' ? paths.get(item.id) : item.name}
               </span>
@@ -207,6 +227,7 @@ export function OrganizationSection({
                   setName(item.name);
                   setParentId(item.parentId ?? '');
                   setColor(item.color ?? '#286443');
+                  setIcon(item.icon ?? '');
                   setError(undefined);
                 }}
               >
