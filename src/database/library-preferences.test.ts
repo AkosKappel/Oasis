@@ -75,3 +75,13 @@ it('keeps a capture folder only when it belongs to the space', async () => {
   await repository.save({ captureFolderId: undefined });
   expect((await repository.get()).captureFolderId).toBeUndefined();
 });
+
+it('stores compact density and treats comfortable as the default', async () => {
+  await repository.save({ density: 'compact' });
+  expect((await repository.get()).density).toBe('compact');
+  await repository.save({ density: 'comfortable' });
+  expect(await repository.get()).not.toHaveProperty('density');
+  await expect(
+    repository.save({ density: 'tiny' as 'compact' }),
+  ).rejects.toThrow('valid');
+});

@@ -737,6 +737,22 @@ export function BookmarkLibrary({
                 >
                   List view
                 </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={savingPreferences}
+                  aria-pressed={preferences.density === 'compact'}
+                  onClick={() =>
+                    void savePreferences({
+                      density:
+                        preferences.density === 'compact'
+                          ? 'comfortable'
+                          : 'compact',
+                    })
+                  }
+                >
+                  Compact cards
+                </Button>
               </div>
               <label className="field">
                 Sort by
@@ -970,8 +986,10 @@ export function BookmarkLibrary({
                 aria-label="Bookmarks"
                 className={
                   preferences.view === 'list'
-                    ? 'mt-5 flex flex-col gap-3'
-                    : 'mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3'
+                    ? `mt-5 flex flex-col ${preferences.density === 'compact' ? 'gap-1.5' : 'gap-3'}`
+                    : preferences.density === 'compact'
+                      ? 'mt-5 grid gap-2 sm:grid-cols-3 xl:grid-cols-4'
+                      : 'mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3'
                 }
               >
                 {displayed?.map((bookmark, index) => (
@@ -1024,6 +1042,7 @@ export function BookmarkLibrary({
                       selecting ? () => toggleSelection(bookmark.id) : undefined
                     }
                     compact={preferences.view === 'list'}
+                    dense={preferences.density === 'compact'}
                     bookmark={bookmark}
                     folder={folderMap.get(bookmark.folderId ?? '')}
                     tags={bookmark.tags.flatMap((id) => {

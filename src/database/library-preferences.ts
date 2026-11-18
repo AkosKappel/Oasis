@@ -6,6 +6,7 @@ export interface LibraryPreferences {
   view: 'grid' | 'list';
   linksView?: 'list' | 'tiles';
   captureFolderId?: string;
+  density?: 'comfortable' | 'compact';
   trackOpens?: boolean;
   sort: 'relevance' | 'name-asc' | 'name-desc' | 'newest' | 'oldest' | 'manual';
 }
@@ -28,6 +29,8 @@ export function validateLibraryPreferences(
     !['grid', 'list'].includes(input.view) ||
     (input.linksView !== undefined &&
       !['list', 'tiles'].includes(input.linksView)) ||
+    (input.density !== undefined &&
+      !['comfortable', 'compact'].includes(input.density)) ||
     (input.captureFolderId !== undefined &&
       (typeof input.captureFolderId !== 'string' ||
         !input.captureFolderId ||
@@ -48,6 +51,7 @@ export function validateLibraryPreferences(
       : {}),
     view: input.view,
     ...(input.linksView !== undefined ? { linksView: input.linksView } : {}),
+    ...(input.density === 'compact' ? { density: 'compact' as const } : {}),
     ...(input.captureFolderId !== undefined
       ? { captureFolderId: input.captureFolderId }
       : {}),

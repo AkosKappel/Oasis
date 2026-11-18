@@ -20,6 +20,7 @@ interface BookmarkCardProps {
   onMoveDown?: () => void;
   organizingBusy?: boolean;
   compact?: boolean;
+  dense?: boolean;
   selected?: boolean;
   onSelect?: () => void;
   bookmark: Bookmark;
@@ -41,6 +42,7 @@ export function BookmarkCard({
   organizingBusy,
   bookmark,
   compact = false,
+  dense = false,
   selected = false,
   onSelect,
   deleting,
@@ -65,15 +67,15 @@ export function BookmarkCard({
       onDrop={onDropBefore}
       className={
         compact
-          ? 'group flex min-w-0 items-center gap-3 rounded-lg border border-border bg-surface/65 p-3 sm:gap-4'
-          : 'group flex min-w-0 flex-col rounded-xl border border-border bg-surface/65 p-5'
+          ? `group flex min-w-0 items-center gap-3 rounded-lg border border-border bg-surface/65 sm:gap-4 ${dense ? 'px-3 py-1.5' : 'p-3'}`
+          : `group flex min-w-0 flex-col rounded-xl border border-border bg-surface/65 ${dense ? 'p-3' : 'p-5'}`
       }
     >
       <div
         className={
           compact
             ? 'flex shrink-0 flex-col items-center gap-2'
-            : 'mb-5 flex items-center justify-between'
+            : `${dense ? 'mb-2' : 'mb-5'} flex items-center justify-between`
         }
       >
         {onDragStart && (
@@ -129,7 +131,7 @@ export function BookmarkCard({
           </span>
           <span className="sr-only"> (opens in a new tab)</span>
         </TrackedBookmarkLink>
-        {!compact && preview && (
+        {!compact && !dense && preview && (
           <img
             key={preview}
             src={preview}
@@ -142,7 +144,7 @@ export function BookmarkCard({
             }}
           />
         )}
-        {!compact && bookmark.description && (
+        {!compact && !dense && bookmark.description && (
           <p className="mt-3 line-clamp-3 break-words text-sm leading-relaxed text-muted-foreground">
             {bookmark.description}
           </p>
