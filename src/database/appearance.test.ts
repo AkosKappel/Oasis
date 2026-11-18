@@ -161,3 +161,15 @@ it('stores optional font and text size, omitting defaults', async () => {
     repository.save({ ...defaultAppearance, font: 'comic' as 'serif' }),
   ).rejects.toThrow('font');
 });
+it('stores the background blur choice only when enabled', async () => {
+  await repository.save({ ...defaultAppearance, blurBackground: true });
+  expect((await repository.get()).blurBackground).toBe(true);
+  await repository.save({ ...defaultAppearance, blurBackground: false });
+  expect(await repository.get()).not.toHaveProperty('blurBackground');
+  await expect(
+    repository.save({
+      ...defaultAppearance,
+      blurBackground: 'yes' as unknown as boolean,
+    }),
+  ).rejects.toThrow('valid');
+});

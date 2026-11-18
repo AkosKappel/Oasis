@@ -346,9 +346,19 @@ export function AppearanceSettings({
                   )}
                 </div>
               )}
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={draft.blurBackground ?? false}
+                  onChange={(event) =>
+                    update({ blurBackground: event.target.checked })
+                  }
+                />
+                Blur background images
+              </label>
               <p className="text-xs text-muted-foreground">
-                Used when no background image is shown. Light colors are dimmed
-                so Home text stays readable.
+                Colors are used when no background image is shown. Light colors
+                are dimmed so Home text stays readable.
               </p>
             </fieldset>
             <label className="field">

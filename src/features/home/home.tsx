@@ -476,7 +476,7 @@ export function Home({
   };
   return (
     <main
-      className={`home min-h-dvh px-6 py-6 sm:px-10 sm:py-8 ${backgroundImage || webPicture || backgroundColors ? 'home-photo' : ''}`}
+      className={`home min-h-dvh px-6 py-6 sm:px-10 sm:py-8 ${backgroundImage || webPicture || backgroundColors ? 'home-photo' : ''} ${(backgroundImage || webPicture) && appearance.blurBackground ? 'home-blur' : ''}`}
       data-links-pinned={
         !focusing && appearance.linksPinned ? appearance.linksSide : undefined
       }

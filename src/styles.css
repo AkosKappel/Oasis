@@ -115,6 +115,18 @@
   color-scheme: dark;
   text-shadow: 0 1px 3px rgb(0 0 0 / 45%);
 }
+/* Blurs only Home's own background image: the layer sits above it and below the content. */
+.home-blur {
+  isolation: isolate;
+}
+.home-blur::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  backdrop-filter: blur(14px);
+  pointer-events: none;
+}
 .home-photo [data-slot='button'] {
   text-shadow: none;
 }

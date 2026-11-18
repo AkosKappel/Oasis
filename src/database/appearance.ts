@@ -23,6 +23,7 @@ export interface Appearance {
   secondaryColor?: string;
   homeBackground?: 'color' | 'gradient';
   font?: 'system' | 'serif' | 'rounded' | 'mono';
+  blurBackground?: boolean;
   textSize?: 'small' | 'normal' | 'large';
   backgroundFrom?: string;
   backgroundTo?: string;
@@ -83,7 +84,9 @@ export function validateAppearance(value: Appearance): Appearance {
     (value.font !== undefined &&
       !['system', 'serif', 'rounded', 'mono'].includes(value.font)) ||
     (value.textSize !== undefined &&
-      !['small', 'normal', 'large'].includes(value.textSize))
+      !['small', 'normal', 'large'].includes(value.textSize)) ||
+    (value.blurBackground !== undefined &&
+      typeof value.blurBackground !== 'boolean')
   )
     throw new Error('Choose a valid font and text size.');
   if (
@@ -128,6 +131,7 @@ export function validateAppearance(value: Appearance): Appearance {
     ...(secondaryColor ? { secondaryColor } : {}),
     ...(value.homeBackground ? { homeBackground: value.homeBackground } : {}),
     ...(value.font && value.font !== 'system' ? { font: value.font } : {}),
+    ...(value.blurBackground ? { blurBackground: true } : {}),
     ...(value.textSize && value.textSize !== 'normal'
       ? { textSize: value.textSize }
       : {}),
