@@ -149,9 +149,9 @@ test('browses a compact nested Links tree with optional sections, tags and order
     .last()
     .locator('a[data-bookmark]');
   await expect(rootLinks.first()).toContainText('Outlook');
-  await panel
-    .getByRole('link', { name: /Gmail/ })
-    .dragTo(panel.getByRole('link', { name: /Outlook/ }), {
+  await rootLinks
+    .filter({ hasText: 'Gmail' })
+    .dragTo(rootLinks.filter({ hasText: 'Outlook' }), {
       targetPosition: { x: 20, y: 2 },
     });
   await expect(rootLinks.first()).toContainText('Gmail');
