@@ -445,3 +445,11 @@ Solid and gradient Home backgrounds reuse the photo text style (white text) inst
 ## 2026-11-18: System fonts, an explicit default space and shared icon rules
 
 Font choices use system stacks only, so no font files are bundled or fetched. While adding them we found that Chrome injects its own font stylesheet into extension pages, which had been overriding Oasis's intended system-ui default; an unlayered body rule now lets the chosen font apply. The default space is a flag on one space record rather than a device setting, so it follows the existing space repository and transactions; per-tab choices still win so open tabs never jump between spaces. Folder and space icons reuse the bookmark custom-icon validation instead of adding an icon picker or icon library.
+
+## 2026-11-18: Links open state is a per-browser convenience
+
+Owner testing asked for Links to open on hover and to stay open in new tabs when left open. Whether the floating panel is open is remembered in localStorage rather than in the space's appearance record: it is a view state, not a setting worth backing up, syncing or restoring, and a write per open or close would churn the database. Pinning stays the durable, per-space choice. Hover only opens the panel and never moves focus; closing still uses Escape, the close button or a click outside.
+
+## 2026-11-18: Pasted link import reuses the bookmark HTML pipeline
+
+Batch import of pasted text and files (plain URLs, Markdown, CSV, TSV, OneTab-style lists, JSON exports, any HTML with links) parses into the same typed plan as bookmark HTML import, so validation, the 10,000 item limit, folder merging and duplicate skipping are shared. Format detection is heuristic (one link per line takes the rest of the line as its title) instead of asking the user to pick a format.

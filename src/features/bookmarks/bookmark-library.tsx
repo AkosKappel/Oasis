@@ -17,6 +17,7 @@ import {
   writeOrganizationDrag,
 } from '@/features/organization/drag-organization';
 import { StatisticsDialog } from '@/features/statistics/statistics-dialog';
+import { LinkImportDialog } from '@/features/transfer/link-import-dialog';
 import { smartCollection, type SmartCollection } from './smart-collections';
 import { SpaceSwitcher } from '@/features/spaces/space-switcher';
 import { useSpaceRepositories } from '@/features/spaces/space-context';
@@ -40,6 +41,7 @@ import {
   MoreHorizontal,
   Bookmark as BookmarkIcon,
   Leaf,
+  ArrowLeft,
   Plus,
   Search,
   Star,
@@ -108,6 +110,7 @@ export function BookmarkLibrary({
   });
   const [sessionOpen, setSessionOpen] = useState(false);
   const [statisticsOpen, setStatisticsOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [duplicatesOpen, setDuplicatesOpen] = useState(false);
   const [organizationOpen, setOrganizationOpen] = useState(false);
   const [folderFilter, setFolderFilter] = useState('');
@@ -405,8 +408,13 @@ export function BookmarkLibrary({
             <a
               href="#"
               aria-label="Oasis home"
-              className="flex items-center gap-3 text-xl font-semibold"
+              title="Back to Home"
+              className="group flex items-center gap-3 rounded-md py-1 pr-2 text-xl font-semibold"
             >
+              <ArrowLeft
+                className="size-4 text-muted-foreground transition-transform group-hover:-translate-x-0.5 group-hover:text-foreground"
+                aria-hidden="true"
+              />
               <Leaf
                 className="size-6 text-primary-content"
                 aria-hidden="true"
@@ -491,6 +499,13 @@ export function BookmarkLibrary({
                   onClick={() => setStatisticsOpen(true)}
                 >
                   Statistics
+                </Button>
+                <Button
+                  variant="outline"
+                  disabled={!library || !!loadError}
+                  onClick={() => setImportOpen(true)}
+                >
+                  Import links
                 </Button>
                 <Button variant="outline" onClick={() => onSettings('data')}>
                   Backup and restore
@@ -1121,6 +1136,7 @@ export function BookmarkLibrary({
           onClose={() => setSessionOpen(false)}
         />
       )}
+      {importOpen && <LinkImportDialog onClose={() => setImportOpen(false)} />}
       {statisticsOpen && library && (
         <StatisticsDialog
           library={library}
