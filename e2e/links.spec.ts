@@ -143,11 +143,17 @@ test('browses a compact nested Links tree with optional sections, tags and order
   await panel
     .getByRole('button', { name: 'Move Outlook up', exact: true })
     .click();
-  const rootLinks = panel.locator('a[data-bookmark]');
+  // Folders opened earlier stay open, so look at the links outside folders.
+  const rootLinks = panel
+    .getByRole('list', { name: 'Saved links' })
+    .last()
+    .locator('a[data-bookmark]');
   await expect(rootLinks.first()).toContainText('Outlook');
   await panel
-    .getByRole('img', { name: 'Drag Gmail', exact: true })
-    .dragTo(panel.getByRole('link', { name: /Outlook/ }));
+    .getByRole('link', { name: /Gmail/ })
+    .dragTo(panel.getByRole('link', { name: /Outlook/ }), {
+      targetPosition: { x: 20, y: 2 },
+    });
   await expect(rootLinks.first()).toContainText('Gmail');
   await panel
     .getByRole('button', { name: 'Done reordering', exact: true })
@@ -158,7 +164,7 @@ test('browses a compact nested Links tree with optional sections, tags and order
   await trigger.click();
   await expect(rootLinks.first()).toContainText('Gmail');
   await search.press('ArrowDown');
-  await expect(rootLinks.first()).toBeFocused();
+  await expect(panel.locator('a[data-bookmark]').first()).toBeFocused();
   await page.keyboard.press('Escape');
   await openSettingsPage(page, 'Appearance');
   await page
@@ -168,8 +174,7 @@ test('browses a compact nested Links tree with optional sections, tags and order
     .getByRole('button', { name: 'Save settings', exact: true })
     .click();
   await trigger.click();
-  await work.click();
-  await design.click();
+  // Work and Design were opened earlier and stay open.
   await expect(
     tree.getByRole('link', { name: /Design documentation/ }),
   ).toBeVisible();

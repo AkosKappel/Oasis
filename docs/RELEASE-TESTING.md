@@ -41,8 +41,11 @@ Paths use the visible labels. "Settings" is the gear button on Home (bottom righ
 - [ ] Arrow Up and Down move between links; Escape closes the panel and returns focus to Links.
 - [ ] Hover Links for a moment: the panel opens without taking focus; a click then keeps it open and focuses search. Leave it open and open a new tab: it is open there too. Close it and the next tab starts closed.
 - [ ] Add link (plus button in the panel header) opens the bookmark editor; the saved link appears in the panel. In the editor, type a New tag and press Enter or Add tag: it is created and ticked.
-- [ ] Drag a link onto a folder name (list) or folder tile (tiles view), or onto a link inside another folder: it moves there. Drag within a folder to change order.
-- [ ] Links without a chosen icon show the site's favicon in Chrome and Edge once you have visited the site; Firefox shows the title initial.
+- [ ] Drag a link onto a folder name (list) or folder tile (tiles view), or onto a link inside another folder: it moves there. A line shows where it lands. Hovering a closed folder while dragging opens it. Dropping on the empty space below the list moves the link out of its folder. Drag within a folder to change order.
+- [ ] Hover a link: the ⋯ button opens Open in new tab, Edit, Add to or Remove from favorites, Copy link and Delete (with Undo).
+- [ ] Open some folders and sections, reload or open a new tab: the same ones are open.
+- [ ] The pin button appears only while hovering the panel header (always on touch screens).
+- [ ] Links without a chosen icon show the site's favicon in Chrome and Edge (a generic globe for sites never visited); Firefox shows the title initial. After updating an unpacked build, click Reload in chrome://extensions so new permissions apply.
 - [ ] Icon pickers (bookmark editor, Folders and tags, Manage spaces) offer a fixed list plus Default or Site icon.
 - [ ] Pin Links: the clock and search stay at the center of the page; the panel overlays the left or right edge.
 

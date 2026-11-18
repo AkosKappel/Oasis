@@ -38,7 +38,7 @@ test('imports pasted links and adds a link from the Links panel', async ({
   await editor.getByLabel('Title', { exact: true }).fill('Gamma');
   await editor.getByRole('button', { name: 'Save bookmark' }).click();
   await expect(editor).toHaveCount(0);
-  await page.getByRole('button', { name: 'Links', exact: true }).click();
+  // The panel comes back after the editor closes.
   await expect(
     page.locator('#home-links').getByRole('link', { name: /Gamma/ }),
   ).toBeVisible();
@@ -126,4 +126,54 @@ test('creates tags in the editor, drags links into folders and keeps the clock c
   await expect(
     panel.locator('details', { has: page.locator('summary[title="Reading"]') }),
   ).toContainText('Article');
+});
+
+test('link rows offer a hover menu and the tree remembers open folders', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('chrome://newtab/');
+  await page.getByRole('link', { name: 'Library', exact: true }).click();
+  await openLibraryTool(page, 'Import links');
+  const dialog = page.getByRole('dialog', { name: 'Import links' });
+  await dialog
+    .getByLabel('Links', { exact: true })
+    .fill('https://one.example/ | One\nhttps://two.example/ | Two');
+  await dialog.getByLabel('Folder (optional)').fill('Docs');
+  await dialog.getByRole('button', { name: 'Import links' }).click();
+  await expect(
+    dialog.getByText('Added 2 links.', { exact: false }),
+  ).toBeVisible();
+  await dialog.getByRole('button', { name: 'Cancel' }).click();
+  await page.getByRole('link', { name: 'Oasis home', exact: true }).click();
+  await page.getByRole('button', { name: 'Links', exact: true }).click();
+  const panel = page.locator('#home-links');
+  await expect(panel.getByRole('link', { name: 'Open Library' })).toHaveCount(
+    0,
+  );
+  const docs = panel.locator('summary[title="Docs"]');
+  await docs.click();
+  await panel.getByRole('link', { name: /One/ }).hover();
+  await panel.getByRole('button', { name: 'More actions for One' }).click();
+  const menu = page.getByRole('menu', { name: 'Actions for One' });
+  await menu.getByRole('menuitem', { name: 'Add to favorites' }).click();
+  await expect(panel.locator('summary[title="Favorites"]')).toContainText('1');
+
+  // Drag a link out of its folder onto empty space below the tree.
+  await panel
+    .getByRole('link', { name: /Two/ })
+    .dragTo(panel.locator('[aria-busy]').last(), {
+      targetPosition: { x: 40, y: 2 },
+      force: true,
+    });
+
+  await page.reload();
+  await expect(panel).toBeVisible();
+  // Docs stayed open across the reload.
+  await expect(panel.getByRole('link', { name: /One/ })).toBeVisible();
+  await panel.getByRole('link', { name: /One/ }).hover();
+  await panel.getByRole('button', { name: 'More actions for One' }).click();
+  await page.getByRole('menuitem', { name: 'Delete' }).click();
+  await expect(panel.getByRole('link', { name: /One/ })).toHaveCount(0);
+  await expect(page.getByText('One moved to Trash.')).toBeVisible();
 });

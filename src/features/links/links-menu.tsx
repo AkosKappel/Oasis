@@ -13,7 +13,8 @@ import {
 import { BookmarkEditor } from '@/features/bookmarks/bookmark-editor';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
 import { linkGroups } from './link-groups';
-import { LinkList } from './link-list';
+import { LINK_DRAG_TYPE, LinkList } from './link-list';
+import { useUndo } from '@/features/settings/undo';
 import { LinkTiles } from './link-tiles';
 import { LinkFolder, LinkSection } from './link-section';
 import { useSpaceRepositories } from '@/features/spaces/space-context';
@@ -93,11 +94,40 @@ export function LinksMenu({
   const activeTag = tags.some((tag) => tag.id === tagId) ? tagId : '';
   const filtering = !!query.trim() || !!activeTag;
   const [organizing, setOrganizing] = useState(false);
-  const [adding, setAdding] = useState(false);
+  // An open editor: an empty object adds a link, a bookmark edits it.
+  const [editing, setEditing] = useState<{ bookmark?: Bookmark }>();
   const [busy, setBusy] = useState(false);
   const [orderError, setOrderError] = useState<string>();
   const { personalBookmarks, personalLibraryPreferences } =
     useSpaceRepositories();
+  const { offer } = useUndo();
+  // The panel closes while a modal editor is open and comes back afterwards.
+  const reopenAfterEditor = useRef(false);
+  function openEditor(value: { bookmark?: Bookmark }) {
+    reopenAfterEditor.current =
+      !!panel.current?.hasAttribute('popover') &&
+      panel.current.matches(':popover-open');
+    keepRemembered.current = true;
+    closePanel();
+    keepRemembered.current = false;
+    setEditing(value);
+  }
+  function closeEditor() {
+    setEditing(undefined);
+    if (reopenAfterEditor.current) {
+      reopenAfterEditor.current = false;
+      requestAnimationFrame(showQuietly);
+    }
+  }
+  async function act(action: () => Promise<void>, failure: string) {
+    setOrderError(undefined);
+    try {
+      await action();
+    } catch (cause) {
+      reportStorageError(cause);
+      setOrderError(failure);
+    }
+  }
   const groups = linkGroups(
     bookmarks ?? [],
     folders,
@@ -149,6 +179,24 @@ export function LinksMenu({
     busy,
     onMove: move,
     onOpen: openedLink,
+    onEdit: (bookmark: Bookmark) => openEditor({ bookmark }),
+    onDelete: (bookmark: Bookmark) =>
+      void act(async () => {
+        await personalBookmarks.remove(bookmark.id);
+        offer([{ id: bookmark.id, kind: 'bookmark' }], bookmark.title);
+      }, 'The link could not be deleted. Try again.'),
+    onFavorite: (bookmark: Bookmark) =>
+      void act(async () => {
+        await personalBookmarks.save(
+          {
+            title: bookmark.title,
+            url: bookmark.url,
+            description: bookmark.description ?? '',
+            isFavorite: !bookmark.isFavorite,
+          },
+          bookmark.id,
+        );
+      }, 'Favorites could not be updated. Try again.'),
   };
   return (
     <>
@@ -244,7 +292,7 @@ export function LinksMenu({
             }
           }}
         >
-          <div className="flex items-center justify-between gap-3 px-2 py-1">
+          <div className="group/header flex items-center justify-between gap-3 px-2 py-1">
             <h2 id="links-title" className="text-sm font-semibold">
               Links
             </h2>
@@ -252,10 +300,7 @@ export function LinksMenu({
               <button
                 type="button"
                 disabled={!bookmarks}
-                onClick={() => {
-                  closePanel();
-                  setAdding(true);
-                }}
+                onClick={() => openEditor({})}
                 aria-label="Add link"
                 title="Add link"
                 className="rounded p-1.5 text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"
@@ -267,7 +312,8 @@ export function LinksMenu({
                 onClick={() => void changePin(!pinned)}
                 aria-label={pinned ? 'Unpin Links' : 'Pin Links'}
                 title={pinned ? 'Unpin Links' : 'Pin Links'}
-                className="rounded p-1.5 text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"
+                // Shown on header hover or keyboard focus, always on touch screens.
+                className="rounded p-1.5 text-muted-foreground opacity-0 transition-opacity group-hover/header:opacity-100 group-focus-within/header:opacity-100 hover:bg-secondary hover:text-secondary-foreground focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
               >
                 {pinned ? (
                   <PinOff className="size-4" aria-hidden="true" />
@@ -395,7 +441,22 @@ export function LinksMenu({
             </div>
           )}
           {!tiles && (
-            <div className="min-w-0" aria-busy={busy}>
+            <div
+              className="min-w-0 pb-6"
+              aria-busy={busy}
+              // Dropping on empty space below the tree moves a link out of its folder.
+              onDragOver={(event) => {
+                if (!busy && event.dataTransfer.types.includes(LINK_DRAG_TYPE))
+                  event.preventDefault();
+              }}
+              onDrop={(event) => {
+                if (event.defaultPrevented) return;
+                const id = event.dataTransfer.getData(LINK_DRAG_TYPE);
+                if (!id) return;
+                event.preventDefault();
+                void move(id, null, null);
+              }}
+            >
               {(
                 [
                   ['favorites', 'Favorites', groups.favorites],
@@ -408,6 +469,7 @@ export function LinksMenu({
                     <LinkSection
                       key={`${id}:${filtering}`}
                       name={name}
+                      storageKey={id}
                       icon={id}
                       count={records.length}
                       expanded={filtering}
@@ -447,21 +509,15 @@ export function LinksMenu({
               />
             </div>
           )}
-          <a
-            href="#library"
-            onClick={openedLink}
-            className="mx-2 mt-3 inline-block rounded text-xs text-muted-foreground hover:text-foreground"
-          >
-            Open Library
-          </a>
         </div>,
         document.body,
       )}
-      {adding && (
+      {editing && (
         <BookmarkEditor
+          bookmark={editing.bookmark}
           folders={folders}
           tags={tags}
-          onClose={() => setAdding(false)}
+          onClose={closeEditor}
         />
       )}
     </>

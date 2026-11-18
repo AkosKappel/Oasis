@@ -1,7 +1,35 @@
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { ChevronRight, Folder, History, Star, TrendingUp } from 'lucide-react';
 import type { LinkFolderNode } from './link-groups';
 import { LINK_DRAG_TYPE, LinkList } from './link-list';
+
+const EXPANDED_KEY = 'oasis:links-expanded';
+
+/** Which sections and folders are open, remembered per browser like the panel itself. */
+function readExpanded() {
+  try {
+    const value: unknown = JSON.parse(
+      localStorage.getItem(EXPANDED_KEY) ?? '[]',
+    );
+    return new Set(
+      Array.isArray(value)
+        ? value.filter((item) => typeof item === 'string')
+        : [],
+    );
+  } catch {
+    return new Set<string>();
+  }
+}
+function saveExpanded(key: string, open: boolean) {
+  try {
+    const keys = readExpanded();
+    if (open) keys.add(key);
+    else keys.delete(key);
+    localStorage.setItem(EXPANDED_KEY, JSON.stringify([...keys]));
+  } catch {
+    // Storage blocked: sections start closed next time.
+  }
+}
 
 export function LinkSection({
   name,
@@ -11,8 +39,11 @@ export function LinkSection({
   expanded = false,
   children,
   onDropLink,
+  storageKey,
 }: {
   onDropLink?: (id: string) => void;
+  /** Remembers this section's open state; searches open everything without saving. */
+  storageKey?: string;
   name: string;
   emoji?: string;
   count: number;
@@ -20,8 +51,11 @@ export function LinkSection({
   expanded?: boolean;
   children: ReactNode;
 }) {
-  const [open, setOpen] = useState(expanded);
+  const [open, setOpen] = useState(
+    () => expanded || (!!storageKey && readExpanded().has(storageKey)),
+  );
   const [target, setTarget] = useState(false);
+  const expandTimer = useRef<number>(undefined);
   const Icon = {
     folder: Folder,
     recent: History,
@@ -32,8 +66,10 @@ export function LinkSection({
     <details
       open={open}
       onToggle={(event) => {
-        if (event.target === event.currentTarget)
-          setOpen(event.currentTarget.open);
+        if (event.target !== event.currentTarget) return;
+        setOpen(event.currentTarget.open);
+        if (storageKey && !expanded)
+          saveExpanded(storageKey, event.currentTarget.open);
       }}
     >
       <summary
@@ -44,10 +80,17 @@ export function LinkSection({
             return;
           event.preventDefault();
           event.dataTransfer.dropEffect = 'move';
+          if (!target && !open)
+            // Hovering a dragged link over a closed folder opens it to drop inside.
+            expandTimer.current = window.setTimeout(() => setOpen(true), 700);
           setTarget(true);
         }}
-        onDragLeave={() => setTarget(false)}
+        onDragLeave={() => {
+          window.clearTimeout(expandTimer.current);
+          setTarget(false);
+        }}
         onDrop={(event) => {
+          window.clearTimeout(expandTimer.current);
           setTarget(false);
           const id = event.dataTransfer.getData(LINK_DRAG_TYPE);
           if (!onDropLink || !id) return;
@@ -90,6 +133,7 @@ export function LinkFolder({
       emoji={node.icon}
       count={node.count}
       expanded={filtering}
+      storageKey={`folder:${node.id}`}
       onDropLink={
         props.busy ? undefined : (id) => void props.onMove(id, null, node.id)
       }
