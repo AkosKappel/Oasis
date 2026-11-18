@@ -86,3 +86,15 @@ export async function settleTransitions(page: Page) {
       ),
   );
 }
+
+/** Opens an icon picker by its label and picks a choice ('Default', 'Site icon' or an icon name). */
+export async function chooseIcon(page: Page, label: string, choice: string) {
+  await page
+    .getByRole('button', { name: new RegExp(`^${label}`) })
+    .first()
+    .click();
+  await page
+    .getByRole('dialog', { name: `Choose ${label.toLowerCase()}` })
+    .getByRole('button', { name: choice, exact: true })
+    .click();
+}

@@ -27,7 +27,11 @@ export default defineConfig({
       128: 'icon/128.png',
     },
     action: { default_icon: { 16: 'icon/16.png', 32: 'icon/32.png' } },
-    permissions: ['activeTab', 'contextMenus'],
+    permissions: [
+      'activeTab',
+      'contextMenus',
+      ...(browser === 'firefox' ? [] : ['favicon']),
+    ],
     optional_permissions: ['scripting', 'tabs'],
     optional_host_permissions: ['http://*/*', 'https://*/*'],
     commands: {

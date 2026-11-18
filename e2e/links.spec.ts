@@ -1,5 +1,11 @@
 import AxeBuilder from '@axe-core/playwright';
-import { openSettingsPage, openLibraryTool, test, expect } from './fixtures';
+import {
+  chooseIcon,
+  openSettingsPage,
+  openLibraryTool,
+  test,
+  expect,
+} from './fixtures';
 
 test('browses a compact nested Links tree with optional sections, tags and ordering', async ({
   page,
@@ -205,7 +211,7 @@ test('browses a compact nested Links tree with optional sections, tags and order
   await expect(work).toBeVisible();
 });
 
-test('edits a custom icon and falls back to the title initial after clearing it', async ({
+test('edits a custom icon and falls back to the site favicon after clearing it', async ({
   page,
 }) => {
   await page.goto('chrome://newtab/');
@@ -220,9 +226,7 @@ test('edits a custom icon and falls back to the title initial after clearing it'
   await page
     .getByRole('textbox', { name: 'URL', exact: true })
     .fill('https://example.com/icon');
-  await page
-    .getByRole('textbox', { name: 'Custom icon', exact: true })
-    .fill('🌿');
+  await chooseIcon(page, 'Icon', 'Plant');
   await page
     .getByRole('button', { name: 'Save bookmark', exact: true })
     .click();
@@ -231,24 +235,23 @@ test('edits a custom icon and falls back to the title initial after clearing it'
   await page.getByRole('button', { name: 'Links', exact: true }).click();
   const panel = page.getByRole('dialog', { name: 'Links', exact: true });
   const link = panel.getByRole('link', { name: /Icon example/ });
-  await expect(link).toContainText('🌿');
+  await expect(link).toContainText('🌱');
   await page.keyboard.press('Escape');
   await page.getByRole('link', { name: 'Library', exact: true }).click();
   await page
     .getByRole('button', { name: 'Edit Icon example', exact: true })
     .click();
   await expect(
-    page.getByRole('textbox', { name: 'Custom icon', exact: true }),
-  ).toHaveValue('🌿');
-  await page
-    .getByRole('textbox', { name: 'Custom icon', exact: true })
-    .fill('');
+    page.getByRole('button', { name: /^Icon/ }),
+  ).toHaveAccessibleName('Icon Plant');
+  await chooseIcon(page, 'Icon', 'Site icon');
   await page
     .getByRole('button', { name: 'Save bookmark', exact: true })
     .click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('link', { name: 'Oasis home' }).click();
   await page.getByRole('button', { name: 'Links', exact: true }).click();
-  await expect(link).not.toContainText('🌿');
-  await expect(link.locator('[aria-hidden="true"]').first()).toHaveText('I');
+  await expect(link).not.toContainText('🌱');
+  // Chromium falls back to the browser's cached favicon for the site.
+  await expect(link.locator('img')).toHaveAttribute('src', /_favicon/);
 });

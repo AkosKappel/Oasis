@@ -1,6 +1,25 @@
 import { useMemo, useState } from 'react';
+import { browser } from 'wxt/browser';
 import { safeBookmarkMedia } from '@/database/bookmark-media';
 import type { Bookmark } from '@/types/entities';
+
+/**
+ * Chromium serves favicons from its own local cache to extensions with the
+ * favicon permission; nothing is fetched from the site. Firefox has no such
+ * API, so it keeps the title initial.
+ */
+function browserFavicon(url: string) {
+  if (import.meta.env.FIREFOX) return;
+  try {
+    if (!/^https?:$/.test(new URL(url).protocol)) return;
+    const icon = new URL(browser.runtime.getURL('/_favicon/' as '/'));
+    icon.searchParams.set('pageUrl', url);
+    icon.searchParams.set('size', '32');
+    return icon.href;
+  } catch {
+    return undefined;
+  }
+}
 
 export function BookmarkIcon({
   bookmark,
@@ -10,8 +29,10 @@ export function BookmarkIcon({
   large?: boolean;
 }) {
   const favicon = useMemo(
-    () => safeBookmarkMedia(bookmark.favicon, 'icon'),
-    [bookmark.favicon],
+    () =>
+      safeBookmarkMedia(bookmark.favicon, 'icon') ??
+      browserFavicon(bookmark.url),
+    [bookmark.favicon, bookmark.url],
   );
   const [failed, setFailed] = useState<string>();
   const custom = bookmark.customIcon?.trim();

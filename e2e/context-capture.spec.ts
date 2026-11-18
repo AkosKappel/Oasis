@@ -39,6 +39,10 @@ test('opens the context-capture editor, scrubs its request and saves to Library'
       }
     ).chrome.runtime.getManifest(),
   );
-  expect(manifest.permissions).toEqual(['activeTab', 'contextMenus']);
+  expect(manifest.permissions).toEqual([
+    'activeTab',
+    'contextMenus',
+    'favicon',
+  ]);
   expect(manifest.commands).toHaveProperty('oasis-save-page');
 });

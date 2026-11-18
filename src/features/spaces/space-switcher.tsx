@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { X } from 'lucide-react';
+import { IconPicker } from '@/components/icon-picker';
 import { Button } from '@/components/ui/button';
 import { spaces } from '@/database/spaces';
 import {
@@ -126,18 +127,12 @@ export function SpaceSwitcher() {
               onChange={(event) => setName(event.target.value)}
             />
           </label>
-          <label className="field">
-            Space icon{' '}
-            <span className="text-xs font-normal text-muted-foreground">
-              Optional emoji or short label
-            </span>
-            <input
-              maxLength={16}
-              disabled={busy}
-              value={icon}
-              onChange={(event) => setIcon(event.target.value)}
-            />
-          </label>
+          <IconPicker
+            label="Space icon"
+            value={icon}
+            onChange={setIcon}
+            disabled={busy}
+          />
           <div className="flex flex-wrap gap-2">
             <Button disabled={busy}>
               {renaming ? 'Save space name' : 'Create space'}

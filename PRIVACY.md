@@ -30,6 +30,7 @@ Choosing Check links in Library lets you select URLs, grant access to their site
 
 - `activeTab`: read a page’s title and URL when you explicitly capture it through the extension toolbar or shortcut.
 - `contextMenus`: offer Save to Oasis actions for pages and links. Capture opens an editable confirmation page before saving.
+- `favicon` (Chrome and Edge): show a saved site's icon from the browser's local favicon cache. No request is sent to the site.
 - Optional `tabs`: preview the current window for explicit session saving. Tabs are not observed in the background.
 - Optional `scripting`: read page details only after an explicit toolbar-capture action, using temporary `activeTab` access. Remove access in capture or browser extension settings; saved local images remain until removed.
 - Optional HTTP(S) host access: the manifest permits requesting site-specific grants for reviewed link checks. Oasis requests only the selected scheme and site names, not an all-sites runtime grant. Browser grants cover all paths and ports for those site names; actual checks use only selected URLs. No host access is required at installation.

@@ -15,6 +15,17 @@ import { type BookmarkInput } from '@/database/bookmarks';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
 import { folderOptions } from '@/features/organization/folder-tree';
 import { Button } from '@/components/ui/button';
+import { IconPicker } from '@/components/icon-picker';
+
+const TAG_COLORS = [
+  '#286443',
+  '#2563eb',
+  '#9333ea',
+  '#c2410c',
+  '#be123c',
+  '#0f766e',
+  '#a16207',
+];
 
 interface BookmarkEditorProps {
   onReadDetails?: (url: string) => Promise<PageDetails>;
@@ -39,11 +50,56 @@ export function BookmarkEditor({
   defaultFolderId,
   onClose,
 }: BookmarkEditorProps) {
-  const { personalBookmarks, pageTexts } = useSpaceRepositories();
+  const { personalBookmarks, pageTexts, personalOrganization } =
+    useSpaceRepositories();
+  // Tags created here show at once, before the parent's tag list refreshes.
+  const [createdTags, setCreatedTags] = useState<Tag[]>([]);
+  const [newTag, setNewTag] = useState('');
+  const [tagError, setTagError] = useState<string>();
+  const [creatingTag, setCreatingTag] = useState(false);
+  const allTags = [
+    ...tags,
+    ...createdTags.filter((tag) => !tags.some((item) => item.id === tag.id)),
+  ];
+  async function createTag() {
+    const name = newTag.trim();
+    if (!name || creatingTag) return;
+    const existing = allTags.find(
+      (tag) => tag.name.toLowerCase() === name.toLowerCase(),
+    );
+    if (existing) {
+      setSelectedTags((value) => [...new Set([...value, existing.id])]);
+      setNewTag('');
+      return;
+    }
+    setCreatingTag(true);
+    setTagError(undefined);
+    try {
+      const color = TAG_COLORS[allTags.length % TAG_COLORS.length]!;
+      const id = await personalOrganization.saveTag({ name, color });
+      // Display-only record until the stored tag arrives through the parent's list.
+      setCreatedTags((value) => [
+        ...value,
+        { id, name, color, spaceId: '', createdAt: 0, updatedAt: 0 },
+      ]);
+      setSelectedTags((value) => [...new Set([...value, id])]);
+      setNewTag('');
+    } catch (cause) {
+      reportStorageError(cause);
+      setTagError(
+        cause instanceof Error
+          ? cause.message
+          : 'The tag could not be created.',
+      );
+    } finally {
+      setCreatingTag(false);
+    }
+  }
   const dialog = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState<string>();
   const formRef = useRef<HTMLFormElement>(null);
   const [suggesting, setSuggesting] = useState(false);
+  const [customIcon, setCustomIcon] = useState(bookmark?.customIcon ?? '');
   const [folderId, setFolderId] = useState(
     bookmark?.folderId ?? defaultFolderId ?? '',
   );
@@ -194,7 +250,7 @@ export function BookmarkEditor({
           description: String(data.get('description') ?? ''),
           isFavorite: data.get('isFavorite') === 'on',
           folderId: String(data.get('folderId') ?? ''),
-          tags: data.getAll('tags').map(String),
+          tags: selectedTags,
         },
         savedId,
       );
@@ -237,22 +293,18 @@ export function BookmarkEditor({
             placeholder="A name to remember"
           />
         </label>
-        <div className="field">
-          <label htmlFor="bookmark-custom-icon">Custom icon</label>
-          <input
-            id="bookmark-custom-icon"
+        <div>
+          <IconPicker
+            label="Icon"
             name="customIcon"
-            maxLength={16}
-            defaultValue={bookmark?.customIcon}
-            placeholder="Emoji or short label"
-            aria-describedby="custom-icon-help"
+            noneLabel="Site icon"
+            value={customIcon}
+            onChange={setCustomIcon}
           />
-          <span
-            id="custom-icon-help"
-            className="text-xs font-normal text-muted-foreground"
-          >
-            Optional. Leave blank to use the saved favicon or title initial.
-          </span>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Site icon uses the website’s favicon, or the title initial when it
+            has none.
+          </p>
         </div>
         <div className="field">
           <label htmlFor="bookmark-url">URL</label>
@@ -444,9 +496,9 @@ export function BookmarkEditor({
         )}
         <fieldset className="rounded-lg border border-border p-3">
           <legend className="px-1 text-sm font-medium">Tags</legend>
-          {tags.length ? (
+          {allTags.length > 0 && (
             <div className="flex flex-wrap gap-x-4 gap-y-3">
-              {tags.map((tag) => (
+              {allTags.map((tag) => (
                 <label
                   key={tag.id}
                   className="flex min-w-0 items-center gap-2 text-sm"
@@ -474,9 +526,39 @@ export function BookmarkEditor({
                 </label>
               ))}
             </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Create tags in “Folders and tags” to organize your bookmarks.
+          )}
+          <div className={`flex gap-2 ${allTags.length ? 'mt-3' : ''}`}>
+            <label className="min-w-0 flex-1">
+              <span className="sr-only">New tag</span>
+              <input
+                value={newTag}
+                maxLength={80}
+                disabled={creatingTag}
+                placeholder="New tag"
+                onChange={(event) => setNewTag(event.target.value)}
+                onKeyDown={(event) => {
+                  // Enter adds the tag instead of saving the bookmark.
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    void createTag();
+                  }
+                }}
+                className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm"
+              />
+            </label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={!newTag.trim() || creatingTag}
+              onClick={() => void createTag()}
+            >
+              Add tag
+            </Button>
+          </div>
+          {tagError && (
+            <p role="alert" className="mt-2 text-sm text-danger">
+              {tagError}
             </p>
           )}
           {tags.length > 0 && (

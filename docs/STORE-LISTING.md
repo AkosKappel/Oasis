@@ -26,6 +26,7 @@ Permission justifications:
 
 - activeTab: prefill the explicit quick-capture form with the selected page’s title and URL.
 - contextMenus: show user-invoked page and link capture actions.
+- favicon (Chrome and Edge): show the browser's cached site icon next to saved links. Icons come from the browser's local cache; no site is contacted.
 - Optional tabs: read a current-window snapshot only after an explicit session-saving action, with review before local bookmark creation and an in-app revoke control.
 - Optional scripting: read page details only through an explicit toolbar-capture action and temporary activeTab access. Same-origin raster copies are saved locally; access can be revoked in capture or browser settings.
 - Optional HTTP(S) host declarations: enable narrow runtime requests for the sites selected in explicit link checks. Requests use HEAD without cookies/referrer or redirects; no all-sites runtime request or background crawl is used. Grants can be revoked, and check results are temporary. The same declaration lets the user grant zenquotes.io for the optional quote of the day.

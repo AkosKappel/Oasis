@@ -1,4 +1,4 @@
-import { openLibraryTool, test, expect } from './fixtures';
+import { chooseIcon, openLibraryTool, test, expect } from './fixtures';
 
 test('shows folder and space icons where they are listed', async ({ page }) => {
   await page.goto('chrome://newtab/');
@@ -8,15 +8,15 @@ test('shows folder and space icons where they are listed', async ({ page }) => {
   await manager
     .getByRole('textbox', { name: 'New folder name' })
     .fill('Reading');
-  await manager.getByRole('textbox', { name: 'Folder icon' }).fill('📚');
+  await chooseIcon(page, 'Folder icon', 'Books');
   await manager.getByRole('button', { name: 'Create folder' }).click();
   await expect(
     manager.getByRole('listitem').filter({ hasText: 'Reading' }),
   ).toContainText('📚');
   await manager.getByRole('button', { name: 'Edit folder Reading' }).click();
   await expect(
-    manager.getByRole('textbox', { name: 'Folder icon' }),
-  ).toHaveValue('📚');
+    manager.getByRole('button', { name: /^Folder icon/ }),
+  ).toHaveAccessibleName('Folder icon Books');
   await manager.getByRole('button', { name: 'Cancel rename' }).click();
   await manager.getByRole('button', { name: 'Done' }).click();
   await expect(
@@ -28,7 +28,7 @@ test('shows folder and space icons where they are listed', async ({ page }) => {
   await page
     .getByRole('textbox', { name: 'New space name', exact: true })
     .fill('Work');
-  await page.getByRole('textbox', { name: /Space icon/ }).fill('💼');
+  await chooseIcon(page, 'Space icon', 'Work');
   await page.getByRole('button', { name: 'Create space', exact: true }).click();
   await expect(
     selector.getByRole('option', { name: '💼 Work', exact: true }),

@@ -12,10 +12,13 @@ const root = resolve(`.output/${target}-mv3`);
 const read = (name) => readFile(resolve(root, name));
 const manifest = JSON.parse(await read('manifest.json'));
 assert.equal(manifest.manifest_version, 3);
-assert.deepEqual(manifest.permissions.toSorted(), [
-  'activeTab',
-  'contextMenus',
-]);
+// Chromium reads favicons from its local cache; Firefox has no favicon permission.
+assert.deepEqual(
+  manifest.permissions.toSorted(),
+  target === 'firefox'
+    ? ['activeTab', 'contextMenus']
+    : ['activeTab', 'contextMenus', 'favicon'],
+);
 assert.deepEqual(manifest.optional_permissions, ['scripting', 'tabs']);
 assert.deepEqual(manifest.host_permissions ?? [], []);
 assert.deepEqual(manifest.optional_host_permissions.toSorted(), [

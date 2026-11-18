@@ -1,4 +1,5 @@
 import { reportStorageError } from '@/database/storage-health';
+import { IconPicker } from '@/components/icon-picker';
 import { useState, type SubmitEvent } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import { descendantFolderIds, folderOptions } from './folder-tree';
@@ -127,15 +128,9 @@ export function OrganizationSection({
             />
           </label>
           {kind === 'folder' && (
-            <label className="field w-24 shrink-0">
-              Folder icon
-              <input
-                value={icon}
-                maxLength={16}
-                onChange={(event) => setIcon(event.target.value)}
-                placeholder="📁"
-              />
-            </label>
+            <div className="w-40 shrink-0">
+              <IconPicker label="Folder icon" value={icon} onChange={setIcon} />
+            </div>
           )}
           {kind === 'tag' && (
             <label className="field">
