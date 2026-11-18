@@ -39,6 +39,9 @@ Paths use the visible labels. "Settings" is the gear button on Home (bottom righ
 - [ ] Settings → Appearance → Links sections: hide each section independently.
 - [ ] Custom icons: edit a bookmark in Library, set Custom icon to an emoji or short label, and check it appears in Links. Clear it and the favicon or first letter returns.
 - [ ] Arrow Up and Down move between links; Escape closes the panel and returns focus to Links.
+- [ ] Hover Links for a moment: the panel opens without taking focus; a click then keeps it open and focuses search. Leave it open and open a new tab: it is open there too. Close it and the next tab starts closed.
+- [ ] Add link (plus button in the panel header) opens the bookmark editor; the saved link appears in the panel.
+- [ ] Pin Links on a window 1280 px or wider: the clock stays at the center of the page.
 
 ## Links desktop (Settings → Home layout → Show Links desktop)
 
@@ -81,6 +84,8 @@ Paths use the visible labels. "Settings" is the gear button on Home (bottom righ
 ## Library (Home → Library)
 
 - [ ] Add bookmark: save one with a title, URL, description, folder, tags and favorite. Try an invalid URL and a URL with a username: both are refused with a clear message.
+- [ ] More Library tools → Import links: paste plain URLs, Markdown links, CSV rows and a "url | title" list, or choose a .txt, .csv, .md, .json or .html file. The preview counts links before importing; an optional folder name collects them. Cancel closes without changes.
+- [ ] The arrow next to the Oasis logo returns to Home.
 - [ ] Suggest tags in the editor offers tags you already use on the same site. Suggest a folder offers folders that hold other links from that site.
 - [ ] With open counting on, Collections → Not opened in 90 days lists bookmarks you have not opened from Oasis recently.
 - [ ] Edit, then delete a bookmark. The Undo toast restores it. Later, restore it from Settings → Backup and restore → Trash.
@@ -114,7 +119,7 @@ These prompts only exist in a real browser. Test allow, deny and remove for each
 
 ## Spaces (Active space select on Home or Library)
 
-- [ ] Manage spaces…: create, rename and delete a space. The default Personal space cannot be deleted.
+- [ ] Manage spaces…: create, rename and delete a space. The default Personal space cannot be deleted. Cancel, the close button and Escape close the form without changes.
 - [ ] Each space has its own bookmarks, Home settings and widgets. Two tabs can show two different spaces.
 - [ ] Select bookmarks → Transfer to space: review, then copy or move to another space.
 
@@ -130,6 +135,7 @@ These prompts only exist in a real browser. Test allow, deny and remove for each
 - [ ] Settings → Appearance: theme, accents, custom Primary and Secondary colors with Reset colors. Cancel undoes the live preview.
 - [ ] Settings → Appearance → Home background: try Solid color and Gradient with light and dark colors; Home text stays readable, and a selected background image still takes precedence.
 - [ ] Settings → General → Folder for new captures: pick a folder, then save a page from the toolbar, a right-click menu and Alt+Shift+O; each starts in that folder.
+- [ ] Settings: switching sections does not resize or flash the dialog, the section list (with icons) stays visible while you scroll a long section.
 - [ ] Settings → Appearance: try each Font and Text size, and Blur background images with an album image.
 - [ ] Library → Compact cards: cards get denser and hide previews and descriptions; the choice stays after reload.
 - [ ] Manage spaces…: give a space an icon and tick Open new tabs in this space; new tabs open there while open tabs keep their space. In Folders and tags, give a folder an icon and find it in Links, tiles and the folder filter.

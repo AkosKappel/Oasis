@@ -14,6 +14,18 @@ import { BackupManager } from '@/features/backup/backup-manager';
 import { useLibraryPreferences } from '@/features/bookmarks/use-library-preferences';
 import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { reportStorageError } from '@/database/storage-health';
+import {
+  ArchiveRestore,
+  Blocks,
+  Images,
+  LayoutDashboard,
+  Palette,
+  Quote,
+  ShieldCheck,
+  SlidersHorizontal,
+  ThumbsUp,
+  X,
+} from 'lucide-react';
 const pages = {
   general: 'General',
   appearance: 'Appearance',
@@ -25,6 +37,17 @@ const pages = {
   privacy: 'Privacy',
   data: 'Backup and restore',
 };
+const icons = {
+  general: SlidersHorizontal,
+  appearance: Palette,
+  layout: LayoutDashboard,
+  albums: Images,
+  quotes: Quote,
+  feedback: ThumbsUp,
+  widgets: Blocks,
+  privacy: ShieldCheck,
+  data: ArchiveRestore,
+} satisfies Record<keyof typeof pages, unknown>;
 export type SettingsPage = keyof typeof pages;
 export function Settings({
   initialPage = 'general',
@@ -80,7 +103,8 @@ export function Settings({
   return (
     <dialog
       ref={ref}
-      className="editor !max-w-5xl"
+      // A fixed height keeps the dialog from jumping as sections of different length load.
+      className="editor !max-w-5xl md:h-[90dvh]"
       aria-label={taskPanel?.title ?? pages[page]}
       onClose={onClose}
       onCancel={(event) => {
@@ -93,6 +117,7 @@ export function Settings({
       <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="text-xl font-semibold">Settings</h1>
         <Button variant="outline" disabled={busy} onClick={close}>
+          <X className="size-4" aria-hidden="true" />
           Close settings
         </Button>
       </div>
@@ -110,23 +135,27 @@ export function Settings({
           ))}
         </select>
       </label>
-      <div className="grid gap-6 md:grid-cols-[11rem_minmax(0,1fr)]">
+      <div className="grid gap-6 md:grid-cols-[13rem_minmax(0,1fr)]">
         <nav
           aria-label="Settings sections"
-          className="hidden flex-col gap-1 md:flex"
+          className="hidden flex-col gap-1 self-start md:sticky md:top-0 md:flex"
         >
-          {Object.entries(pages).map(([key, label]) => (
-            <Button
-              key={key}
-              variant={page === key ? 'default' : 'outline'}
-              disabled={busy}
-              aria-current={page === key ? 'page' : undefined}
-              className="justify-start"
-              onClick={() => navigate(key as SettingsPage)}
-            >
-              {label}
-            </Button>
-          ))}
+          {Object.entries(pages).map(([key, label]) => {
+            const Icon = icons[key as SettingsPage];
+            return (
+              <Button
+                key={key}
+                variant={page === key ? 'default' : 'ghost'}
+                disabled={busy}
+                aria-current={page === key ? 'page' : undefined}
+                className="h-auto min-h-10 justify-start text-left"
+                onClick={() => navigate(key as SettingsPage)}
+              >
+                <Icon className="size-4 shrink-0" aria-hidden="true" />
+                {label}
+              </Button>
+            );
+          })}
         </nav>
         <div key={page} className="min-w-0">
           {(page === 'general' || page === 'appearance') && (

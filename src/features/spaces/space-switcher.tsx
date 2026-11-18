@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { spaces } from '@/database/spaces';
 import {
@@ -17,6 +18,16 @@ export function SpaceSwitcher() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
   const [pendingDefault, setPendingDefault] = useState<boolean>();
+  const selectRef = useRef<HTMLSelectElement>(null);
+  function closeManagement() {
+    if (busy) return;
+    setOpen(false);
+    setName('');
+    setIcon('');
+    setRenaming(false);
+    setError(undefined);
+    selectRef.current?.focus();
+  }
   async function run(action: () => Promise<void>) {
     setBusy(true);
     setError(undefined);
@@ -44,8 +55,9 @@ export function SpaceSwitcher() {
         <label className="field min-w-0">
           <span className="sr-only">Space</span>
           <select
+            ref={selectRef}
             aria-label="Active space"
-            className="max-w-48"
+            className="max-w-48 border-transparent bg-transparent py-1.5 text-muted-foreground transition-colors hover:border-border hover:text-foreground focus-visible:text-foreground"
             value={spaceId}
             disabled={busy}
             onChange={(event) => {
@@ -71,7 +83,14 @@ export function SpaceSwitcher() {
       {open && (
         <form
           id="space-management"
-          className="fixed right-4 top-20 z-20 flex w-80 max-w-[90vw] flex-col gap-3 rounded-lg border border-border bg-background p-3"
+          aria-labelledby="space-management-title"
+          className="glass-panel fixed right-4 top-20 z-20 flex w-80 max-w-[90vw] flex-col gap-3 rounded-lg border border-border bg-background p-3 text-left text-foreground"
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') {
+              event.preventDefault();
+              closeManagement();
+            }
+          }}
           onSubmit={(event) => {
             event.preventDefault();
             void run(async () => {
@@ -82,6 +101,21 @@ export function SpaceSwitcher() {
             });
           }}
         >
+          <div className="flex items-center justify-between gap-2">
+            <h2 id="space-management-title" className="text-sm font-semibold">
+              Manage spaces
+            </h2>
+            <button
+              type="button"
+              aria-label="Close"
+              title="Close"
+              disabled={busy}
+              onClick={closeManagement}
+              className="rounded p-1.5 text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"
+            >
+              <X className="size-4" aria-hidden="true" />
+            </button>
+          </div>
           <label className="field">
             {renaming ? 'Rename space' : 'New space name'}
             <input
@@ -120,6 +154,16 @@ export function SpaceSwitcher() {
             >
               {renaming ? 'Cancel rename' : 'Rename current space'}
             </Button>
+            {!renaming && (
+              <Button
+                variant="ghost"
+                type="button"
+                disabled={busy}
+                onClick={closeManagement}
+              >
+                Cancel
+              </Button>
+            )}
           </div>
           <label className="flex items-center gap-2 text-sm">
             <input
