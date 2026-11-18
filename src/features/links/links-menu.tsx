@@ -196,7 +196,12 @@ export function LinksMenu({
             if (expanded && !docked && !quiet.current) search.current?.focus();
             quiet.current = false;
             if (!expanded) hoverOpened.current = false;
-            if (!docked && (expanded || !keepRemembered.current))
+          }}
+          // beforetoggle fires synchronously, so the state is saved before a quick reload or tab close.
+          onBeforeToggle={(event) => {
+            if (event.target !== event.currentTarget || docked) return;
+            const expanded = event.newState === 'open';
+            if (expanded || !keepRemembered.current)
               try {
                 localStorage.setItem(LINKS_OPEN_KEY, String(expanded));
               } catch {
