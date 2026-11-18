@@ -4,10 +4,11 @@ const presets = {
   forest: { light: ['#286443', '#e4eee7'], dark: ['#85c9a4', '#273f34'] },
   ocean: { light: ['#225d88', '#e3edf6'], dark: ['#8ebde5', '#263b50'] },
   plum: { light: ['#75457e', '#f1e5f2'], dark: ['#d7a5df', '#44324a'] },
+  graphite: { light: ['#3f4450', '#e9eaec'], dark: ['#c9ccd3', '#2b2d31'] },
 };
 export const themeSurfaces = {
-  light: ['#f5f9f6', '#ffffff'],
-  dark: ['#111b17', '#1c2822'],
+  light: ['#f6f7f8', '#ffffff'],
+  dark: ['#131416', '#1c1d20'],
 };
 export function appearanceColors(appearance: Appearance, dark: boolean) {
   const palette = presets[appearance.accent][dark ? 'dark' : 'light'];

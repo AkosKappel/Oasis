@@ -453,3 +453,7 @@ Owner testing asked for Links to open on hover and to stay open in new tabs when
 ## 2026-11-18: Pasted link import reuses the bookmark HTML pipeline
 
 Batch import of pasted text and files (plain URLs, Markdown, CSV, TSV, OneTab-style lists, JSON exports, any HTML with links) parses into the same typed plan as bookmark HTML import, so validation, the 10,000 item limit, folder merging and duplicate skipping are shared. Format detection is heuristic (one link per line takes the rest of the line as its title) instead of asking the user to pick a format.
+
+## 2026-11-18: Neutral surfaces, picked icons and cached favicons
+
+Owner feedback found the whole interface tinted green. Backgrounds, text and borders are now neutral grays in both themes, and the accent (Forest by default, or the new neutral Graphite) only colors primary actions, focus and highlights. Pinned Links no longer shifts Home content: the panel overlays the page edge so the clock stays centered, as in comparable new-tab dashboards. Free-text icons rendered as clipped labels, so links, folders and spaces now pick from a fixed emoji list; emoji keep working inside native select options where icon components cannot render, and older stored labels still display. Link icons fall back to Chromium's cached favicon through the `favicon` permission, which reads the browser's local cache and has no install warning; Firefox lacks the API and keeps title initials.

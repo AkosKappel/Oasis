@@ -212,6 +212,7 @@ export function AppearanceSettings({
                 <option value="forest">Forest</option>
                 <option value="ocean">Ocean</option>
                 <option value="plum">Plum</option>
+                <option value="graphite">Graphite</option>
               </select>
             </label>
             <div className="grid min-w-0 gap-4 sm:grid-cols-2">

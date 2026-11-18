@@ -40,8 +40,11 @@ Paths use the visible labels. "Settings" is the gear button on Home (bottom righ
 - [ ] Custom icons: edit a bookmark in Library, set Custom icon to an emoji or short label, and check it appears in Links. Clear it and the favicon or first letter returns.
 - [ ] Arrow Up and Down move between links; Escape closes the panel and returns focus to Links.
 - [ ] Hover Links for a moment: the panel opens without taking focus; a click then keeps it open and focuses search. Leave it open and open a new tab: it is open there too. Close it and the next tab starts closed.
-- [ ] Add link (plus button in the panel header) opens the bookmark editor; the saved link appears in the panel.
-- [ ] Pin Links on a window 1280 px or wider: the clock stays at the center of the page.
+- [ ] Add link (plus button in the panel header) opens the bookmark editor; the saved link appears in the panel. In the editor, type a New tag and press Enter or Add tag: it is created and ticked.
+- [ ] Drag a link onto a folder name (list) or folder tile (tiles view), or onto a link inside another folder: it moves there. Drag within a folder to change order.
+- [ ] Links without a chosen icon show the site's favicon in Chrome and Edge once you have visited the site; Firefox shows the title initial.
+- [ ] Icon pickers (bookmark editor, Folders and tags, Manage spaces) offer a fixed list plus Default or Site icon.
+- [ ] Pin Links: the clock and search stay at the center of the page; the panel overlays the left or right edge.
 
 ## Links desktop (Settings → Home layout → Show Links desktop)
 
@@ -132,7 +135,7 @@ These prompts only exist in a real browser. Test allow, deny and remove for each
 
 ## Settings, privacy and storage
 
-- [ ] Settings → Appearance: theme, accents, custom Primary and Secondary colors with Reset colors. Cancel undoes the live preview.
+- [ ] Settings → Appearance: theme, accents (including neutral Graphite), custom Primary and Secondary colors with Reset colors. Cancel undoes the live preview.
 - [ ] Settings → Appearance → Home background: try Solid color and Gradient with light and dark colors; Home text stays readable, and a selected background image still takes precedence.
 - [ ] Settings → General → Folder for new captures: pick a folder, then save a page from the toolbar, a right-click menu and Alt+Shift+O; each starts in that folder.
 - [ ] Settings: switching sections does not resize or flash the dialog, the section list (with icons) stays visible while you scroll a long section.

@@ -62,7 +62,7 @@ it('chooses readable foregrounds and focus/link colors for extreme custom colors
   }
 });
 it('keeps all preset foregrounds and link colors readable in both themes', () => {
-  for (const accent of ['forest', 'ocean', 'plum'] as const)
+  for (const accent of ['forest', 'ocean', 'plum', 'graphite'] as const)
     for (const dark of [false, true]) {
       const colors = appearanceColors({ ...defaultAppearance, accent }, dark);
       expect(

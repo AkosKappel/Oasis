@@ -15,17 +15,17 @@
 }
 :root {
   --surface: #ffffff;
-  --secondary: #e4eee7;
+  --secondary: #e9eaec;
   --secondary-foreground: #000000;
   --danger: oklch(0.48 0.18 25);
   --accent-hue: 155;
   color-scheme: light;
-  --background: #f5f9f6;
-  --foreground: oklch(0.25 0.025 155);
+  --background: #f6f7f8;
+  --foreground: oklch(0.24 0.005 260);
   --primary: oklch(0.43 0.08 var(--accent-hue));
   --primary-foreground: oklch(0.99 0 0);
-  --muted-foreground: oklch(0.48 0.025 155);
-  --border: oklch(0.89 0.015 155);
+  --muted-foreground: oklch(0.47 0.008 260);
+  --border: oklch(0.89 0.004 260);
 }
 @layer base {
   body {
@@ -57,7 +57,7 @@
     @apply fixed inset-0 m-auto w-[calc(100%-2rem)] max-w-lg max-h-[90dvh] overflow-y-auto rounded-2xl border border-border bg-background p-6 text-foreground shadow-xl sm:p-8;
   }
   .editor::backdrop {
-    background: rgb(10 30 20 / 35%);
+    background: rgb(10 12 16 / 35%);
     backdrop-filter: blur(4px);
   }
   .field {
@@ -75,7 +75,7 @@
   flex-direction: column;
   background: radial-gradient(
     ellipse at 50% 38%,
-    var(--home-glow, oklch(0.97 0.025 var(--accent-hue))),
+    var(--home-glow, oklch(0.975 0.012 var(--accent-hue))),
     transparent 70%
   );
 }
@@ -86,31 +86,34 @@
 :root[data-accent='plum'] {
   --accent-hue: 310;
 }
+:root[data-accent='graphite'] {
+  --accent-hue: 260;
+}
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --background: #111b17;
-  --surface: #1c2822;
-  --secondary: #273f34;
+  --background: #131416;
+  --surface: #1c1d20;
+  --secondary: #2b2d31;
   --secondary-foreground: #ffffff;
-  --foreground: oklch(0.94 0.008 155);
-  --muted-foreground: oklch(0.73 0.015 155);
-  --border: oklch(0.39 0.015 155);
+  --foreground: oklch(0.94 0.003 260);
+  --muted-foreground: oklch(0.74 0.006 260);
+  --border: oklch(0.39 0.006 260);
   --primary: oklch(0.78 0.09 var(--accent-hue));
-  --primary-foreground: oklch(0.18 0.012 155);
+  --primary-foreground: oklch(0.18 0.005 260);
   --danger: oklch(0.78 0.12 25);
-  --home-glow: oklch(0.25 0.025 var(--accent-hue));
+  --home-glow: oklch(0.22 0.015 var(--accent-hue));
 }
 
 .home-photo {
-  --background: rgb(10 20 18 / 70%);
+  --background: rgb(14 15 17 / 70%);
   --foreground: white;
   --muted-foreground: white;
   --border: rgb(255 255 255 / 45%);
   --primary: white;
-  --primary-foreground: #0a1412;
+  --primary-foreground: #0e0f11;
   --primary-content: white;
   --ring: white;
-  --surface: rgb(10 20 18);
+  --surface: rgb(14 15 17);
   color: white;
   color-scheme: dark;
   text-shadow: 0 1px 3px rgb(0 0 0 / 45%);
@@ -236,28 +239,10 @@ select option {
     right: 2.5rem;
   }
 }
+/* A pinned panel overlays the page edge; Home content stays at the page center. */
 @media (min-width: 1024px) {
-  .home[data-links-pinned] > section {
-    max-width: min(36rem, calc(100% - 22rem));
-  }
-  .home[data-links-pinned='left'] > section {
-    translate: 11rem;
-  }
-  .home[data-links-pinned='right'] > section {
-    translate: -11rem;
-  }
   .home[data-links-pinned='right'] > footer {
     padding-right: 22rem;
-  }
-}
-/* Wide screens have room on both sides, so the clock stays at the page center. */
-@media (min-width: 80rem) {
-  .home[data-links-pinned] > section {
-    max-width: min(36rem, calc(100% - 44rem));
-  }
-  .home[data-links-pinned='left'] > section,
-  .home[data-links-pinned='right'] > section {
-    translate: none;
   }
 }
 

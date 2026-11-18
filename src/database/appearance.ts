@@ -6,7 +6,7 @@ import type { RecordMetadata } from '@/types/entities';
 
 export interface Appearance {
   theme: 'system' | 'light' | 'dark';
-  accent: 'forest' | 'ocean' | 'plum';
+  accent: 'forest' | 'ocean' | 'plum' | 'graphite';
   clock: 'system' | '12' | '24';
   showDate: boolean;
   showDailyFocus?: boolean;
@@ -43,7 +43,7 @@ export const defaultAppearance: Appearance = {
 export function validateAppearance(value: Appearance): Appearance {
   if (
     !['system', 'light', 'dark'].includes(value.theme) ||
-    !['forest', 'ocean', 'plum'].includes(value.accent) ||
+    !['forest', 'ocean', 'plum', 'graphite'].includes(value.accent) ||
     !['system', '12', '24'].includes(value.clock) ||
     typeof value.showDate !== 'boolean' ||
     (value.searchEngine !== undefined &&

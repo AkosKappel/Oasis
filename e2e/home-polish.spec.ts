@@ -82,3 +82,43 @@ test('space management can be cancelled with a button or Escape', async ({
   await page.keyboard.press('Escape');
   await expect(form).toHaveCount(0);
 });
+
+test('creates tags in the editor, drags links into folders and keeps the clock centered', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('chrome://newtab/');
+  await page.getByRole('link', { name: 'Library', exact: true }).click();
+  await openLibraryTool(page, 'Folders and tags');
+  const manager = page.getByRole('dialog', { name: 'Folders and tags' });
+  await manager
+    .getByRole('textbox', { name: 'New folder name' })
+    .fill('Reading');
+  await manager.getByRole('button', { name: 'Create folder' }).click();
+  await manager.getByRole('button', { name: 'Done' }).click();
+  await page.getByRole('button', { name: 'Add bookmark', exact: true }).click();
+  const editor = page.getByRole('dialog', { name: 'Save a bookmark' });
+  await editor.getByLabel('Title', { exact: true }).fill('Article');
+  await editor.getByLabel('URL', { exact: true }).fill('https://a.example/');
+  await editor.getByRole('textbox', { name: 'New tag' }).fill('later');
+  await editor.getByRole('textbox', { name: 'New tag' }).press('Enter');
+  await expect(editor.getByRole('checkbox', { name: 'later' })).toBeChecked();
+  await editor.getByRole('button', { name: 'Save bookmark' }).click();
+  await expect(editor).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Article' })).toBeVisible();
+
+  await page.getByRole('link', { name: 'Oasis home', exact: true }).click();
+  await page.getByRole('button', { name: 'Links', exact: true }).click();
+  const panel = page.locator('#home-links');
+  await panel.getByRole('button', { name: 'Pin Links' }).click();
+  const clock = await page.locator('time').first().boundingBox();
+  expect(Math.abs(clock!.x + clock!.width / 2 - 640)).toBeLessThan(2);
+  await expect(panel.getByRole('link', { name: /later/ })).toBeVisible();
+  await panel
+    .getByRole('link', { name: /Article/ })
+    .dragTo(panel.locator('summary[title="Reading"]'));
+  await panel.locator('summary[title="Reading"]').click();
+  await expect(
+    panel.locator('details', { has: page.locator('summary[title="Reading"]') }),
+  ).toContainText('Article');
+});
