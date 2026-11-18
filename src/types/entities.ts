@@ -7,6 +7,7 @@ export interface RecordMetadata {
 }
 export interface Space extends RecordMetadata {
   setupComplete?: boolean;
+  opensByDefault?: boolean;
   name: string;
   icon?: string;
   color?: string;

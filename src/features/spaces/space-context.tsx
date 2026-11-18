@@ -48,9 +48,9 @@ const SpaceContext = createContext<{
 const selectionKey = 'oasis:active-space';
 function storedSelection() {
   try {
-    return sessionStorage.getItem(selectionKey) ?? 'default';
+    return sessionStorage.getItem(selectionKey);
   } catch {
-    return 'default';
+    return null;
   }
 }
 export function SpaceProvider({ children }: { children: ReactNode }) {
@@ -71,9 +71,11 @@ export function SpaceProvider({ children }: { children: ReactNode }) {
     });
     return () => sub.unsubscribe();
   }, [retryVersion]);
-  const spaceId = list?.some((space) => space.id === selected)
-    ? selected
-    : 'default';
+  // A tab's own choice wins; otherwise new tabs open in the chosen default space.
+  const spaceId =
+    selected && list?.some((space) => space.id === selected)
+      ? selected
+      : (list?.find((space) => space.opensByDefault)?.id ?? 'default');
   function select(id: string) {
     if (!list?.some((space) => space.id === id)) return;
     try {

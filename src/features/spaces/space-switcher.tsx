@@ -15,6 +15,7 @@ export function SpaceSwitcher() {
   const [renaming, setRenaming] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
+  const [pendingDefault, setPendingDefault] = useState<boolean>();
   async function run(action: () => Promise<void>) {
     setBusy(true);
     setError(undefined);
@@ -105,6 +106,31 @@ export function SpaceSwitcher() {
               {renaming ? 'Cancel rename' : 'Rename current space'}
             </Button>
           </div>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              // Personal is the fallback; choose another space to change it.
+              disabled={
+                busy ||
+                (spaceId === 'default' &&
+                  !list.some((space) => space.opensByDefault))
+              }
+              checked={
+                pendingDefault ??
+                (spaceId === 'default'
+                  ? !list.some((space) => space.opensByDefault)
+                  : !!current?.opensByDefault)
+              }
+              onChange={(event) => {
+                const checked = event.target.checked;
+                setPendingDefault(checked);
+                void run(() =>
+                  spaces.setOpensByDefault(checked ? spaceId : 'default'),
+                ).finally(() => setPendingDefault(undefined));
+              }}
+            />
+            Open new tabs in this space
+          </label>
           {spaceId !== 'default' && (
             <Button
               variant="outline"

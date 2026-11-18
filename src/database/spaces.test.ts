@@ -128,3 +128,19 @@ it('keeps album and quote archives portable without exposing other spaces', asyn
   await albums.restore(await albums.export());
   await quotes.restore(await quotes.export());
 });
+it('keeps at most one space that opens by default', async () => {
+  await database.open();
+  const work = await spaces.save('Work');
+  const study = await spaces.save('Study');
+  await spaces.setOpensByDefault(work);
+  await spaces.setOpensByDefault(study);
+  const flagged = () =>
+    database.spaces
+      .filter((space) => !!space.opensByDefault)
+      .toArray()
+      .then((records) => records.map((space) => space.id));
+  expect(await flagged()).toEqual([study]);
+  await spaces.setOpensByDefault('default');
+  expect(await flagged()).toEqual([]);
+  await expect(spaces.setOpensByDefault('missing')).rejects.toThrow();
+});

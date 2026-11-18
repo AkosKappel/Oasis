@@ -42,6 +42,21 @@ export function createSpaceRepository(database: OasisDatabase = db) {
         return created;
       });
     },
+    /** New tabs without a remembered space open in this one; 'default' clears the choice. */
+    async setOpensByDefault(id: string) {
+      await database.transaction('rw', database.spaces, async () => {
+        await requireSpace(database, id);
+        const now = Date.now();
+        await database.spaces
+          .filter((record) => !!record.opensByDefault && record.id !== id)
+          .modify({ opensByDefault: undefined, updatedAt: now });
+        if (id !== 'default')
+          await database.spaces.update(id, {
+            opensByDefault: true,
+            updatedAt: now,
+          });
+      });
+    },
     async remove(id: string) {
       if (id === 'default')
         throw new Error('The default space cannot be deleted.');
