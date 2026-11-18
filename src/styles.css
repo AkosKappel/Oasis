@@ -30,6 +30,8 @@
 @layer base {
   body {
     @apply m-0 bg-background text-foreground antialiased;
+  }
+  html {
     font-family: system-ui, sans-serif;
   }
 }
@@ -340,4 +342,9 @@ body:has(dialog[open]) #global-undo {
 
 .links-folder::-webkit-details-marker {
   display: none;
+}
+
+/* Unlayered so it wins over the font stylesheet Chrome injects into extension pages. */
+body {
+  font-family: inherit;
 }

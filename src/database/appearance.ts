@@ -22,6 +22,8 @@ export interface Appearance {
   primaryColor?: string;
   secondaryColor?: string;
   homeBackground?: 'color' | 'gradient';
+  font?: 'system' | 'serif' | 'rounded' | 'mono';
+  textSize?: 'small' | 'normal' | 'large';
   backgroundFrom?: string;
   backgroundTo?: string;
 }
@@ -78,6 +80,13 @@ export function validateAppearance(value: Appearance): Appearance {
   const backgroundFrom = normalizeHex(value.backgroundFrom);
   const backgroundTo = normalizeHex(value.backgroundTo);
   if (
+    (value.font !== undefined &&
+      !['system', 'serif', 'rounded', 'mono'].includes(value.font)) ||
+    (value.textSize !== undefined &&
+      !['small', 'normal', 'large'].includes(value.textSize))
+  )
+    throw new Error('Choose a valid font and text size.');
+  if (
     (value.homeBackground !== undefined &&
       !['color', 'gradient'].includes(value.homeBackground)) ||
     (value.backgroundFrom !== undefined && !backgroundFrom) ||
@@ -118,6 +127,10 @@ export function validateAppearance(value: Appearance): Appearance {
     ...(primaryColor ? { primaryColor } : {}),
     ...(secondaryColor ? { secondaryColor } : {}),
     ...(value.homeBackground ? { homeBackground: value.homeBackground } : {}),
+    ...(value.font && value.font !== 'system' ? { font: value.font } : {}),
+    ...(value.textSize && value.textSize !== 'normal'
+      ? { textSize: value.textSize }
+      : {}),
     ...(backgroundFrom ? { backgroundFrom } : {}),
     ...(backgroundTo ? { backgroundTo } : {}),
   };

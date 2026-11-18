@@ -163,6 +163,37 @@ export function AppearanceSettings({
                 <option value="dark">Dark</option>
               </select>
             </label>
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+              <label className="field">
+                Font
+                <select
+                  value={draft.font ?? 'system'}
+                  onChange={(event) =>
+                    update({ font: event.target.value as Appearance['font'] })
+                  }
+                >
+                  <option value="system">System</option>
+                  <option value="serif">Serif</option>
+                  <option value="rounded">Rounded</option>
+                  <option value="mono">Monospace</option>
+                </select>
+              </label>
+              <label className="field">
+                Text size
+                <select
+                  value={draft.textSize ?? 'normal'}
+                  onChange={(event) =>
+                    update({
+                      textSize: event.target.value as Appearance['textSize'],
+                    })
+                  }
+                >
+                  <option value="small">Small</option>
+                  <option value="normal">Normal</option>
+                  <option value="large">Large</option>
+                </select>
+              </label>
+            </div>
             <label className="field">
               Accent
               <select

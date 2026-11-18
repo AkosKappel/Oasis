@@ -139,3 +139,25 @@ it('stores optional Home background colors and rejects incomplete ones', async (
       repository.save({ ...defaultAppearance, ...invalid }),
     ).rejects.toThrow('background');
 });
+it('stores optional font and text size, omitting defaults', async () => {
+  await repository.save({
+    ...defaultAppearance,
+    font: 'serif',
+    textSize: 'large',
+  });
+  expect(await repository.get()).toMatchObject({
+    font: 'serif',
+    textSize: 'large',
+  });
+  await repository.save({
+    ...defaultAppearance,
+    font: 'system',
+    textSize: 'normal',
+  });
+  const saved = await repository.get();
+  expect(saved).not.toHaveProperty('font');
+  expect(saved).not.toHaveProperty('textSize');
+  await expect(
+    repository.save({ ...defaultAppearance, font: 'comic' as 'serif' }),
+  ).rejects.toThrow('font');
+});

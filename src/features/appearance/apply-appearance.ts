@@ -25,6 +25,16 @@ export function appearanceColors(appearance: Appearance, dark: boolean) {
     ),
   };
 }
+// System font stacks only: nothing is downloaded and every platform has a match.
+export const fontStacks = {
+  system: 'system-ui, sans-serif',
+  serif: "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif",
+  rounded:
+    "ui-rounded, 'Hiragino Maru Gothic ProN', Quicksand, Comfortaa, Manjari, 'Arial Rounded MT', system-ui, sans-serif",
+  mono: "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace",
+} as const;
+// Percentages keep the browser's own text size as the base.
+const textSizes = { small: '87.5%', normal: '', large: '112.5%' } as const;
 export function applyAppearance(appearance: Appearance, systemDark: boolean) {
   const dark =
     appearance.theme === 'system' ? systemDark : appearance.theme === 'dark';
@@ -41,4 +51,6 @@ export function applyAppearance(appearance: Appearance, systemDark: boolean) {
     '--ring': colors.primaryContent,
   }))
     root.style.setProperty(key, value);
+  root.style.fontFamily = fontStacks[appearance.font ?? 'system'];
+  root.style.fontSize = textSizes[appearance.textSize ?? 'normal'];
 }
