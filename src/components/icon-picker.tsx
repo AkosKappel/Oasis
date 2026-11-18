@@ -1,48 +1,49 @@
-import { useId, useRef } from 'react';
+import { useId, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 /** A fixed set keeps icons legible everywhere, including inside native select options. */
-export const ICON_CHOICES: readonly (readonly [string, string])[] = [
-  ['📁', 'Folder'],
-  ['⭐', 'Star'],
-  ['❤️', 'Heart'],
-  ['🏠', 'Home'],
-  ['💼', 'Work'],
-  ['📚', 'Books'],
-  ['📰', 'News'],
-  ['📝', 'Notes'],
-  ['📅', 'Calendar'],
-  ['✉️', 'Mail'],
-  ['💬', 'Chat'],
-  ['🔖', 'Bookmark'],
-  ['💻', 'Computer'],
-  ['🛠️', 'Tools'],
-  ['🧪', 'Lab'],
-  ['☁️', 'Cloud'],
-  ['🔒', 'Lock'],
-  ['🌐', 'Web'],
-  ['🗺️', 'Map'],
-  ['✈️', 'Travel'],
-  ['🛒', 'Shopping'],
-  ['💰', 'Money'],
-  ['📈', 'Chart'],
-  ['🎓', 'School'],
-  ['💡', 'Idea'],
-  ['🎨', 'Design'],
-  ['📷', 'Photos'],
-  ['🎵', 'Music'],
-  ['🎬', 'Video'],
-  ['🎮', 'Games'],
-  ['⚽', 'Sport'],
-  ['🏃', 'Fitness'],
-  ['🩺', 'Health'],
-  ['🍳', 'Cooking'],
-  ['☕', 'Coffee'],
-  ['🌱', 'Plant'],
-  ['🐾', 'Pets'],
-  ['👶', 'Family'],
-  ['🎁', 'Gift'],
-  ['🚀', 'Rocket'],
+/** Each icon has a name and extra search words. */
+export const ICON_CHOICES: readonly (readonly [string, string, string])[] = [
+  ['📁', 'Folder', 'directory files'],
+  ['⭐', 'Star', 'favorite important'],
+  ['❤️', 'Heart', 'love like favorite'],
+  ['🏠', 'Home', 'house personal'],
+  ['💼', 'Work', 'job office business briefcase'],
+  ['📚', 'Books', 'read reading library learn'],
+  ['📰', 'News', 'newspaper articles blog'],
+  ['📝', 'Notes', 'write memo document todo'],
+  ['📅', 'Calendar', 'date schedule events'],
+  ['✉️', 'Mail', 'email inbox letter'],
+  ['💬', 'Chat', 'message social talk'],
+  ['🔖', 'Bookmark', 'saved later'],
+  ['💻', 'Computer', 'code dev laptop tech'],
+  ['🛠️', 'Tools', 'build settings fix utilities'],
+  ['🧪', 'Lab', 'science research test'],
+  ['☁️', 'Cloud', 'storage drive server'],
+  ['🔒', 'Lock', 'security password private'],
+  ['🌐', 'Web', 'internet globe world site'],
+  ['🗺️', 'Map', 'location places navigation'],
+  ['✈️', 'Travel', 'flight trip vacation plane'],
+  ['🛒', 'Shopping', 'cart store buy'],
+  ['💰', 'Money', 'finance bank budget'],
+  ['📈', 'Chart', 'stats analytics growth'],
+  ['🎓', 'School', 'education course university study'],
+  ['💡', 'Idea', 'inspiration light tips'],
+  ['🎨', 'Design', 'art paint creative'],
+  ['📷', 'Photos', 'camera pictures images'],
+  ['🎵', 'Music', 'audio songs'],
+  ['🎬', 'Video', 'movies film tv watch'],
+  ['🎮', 'Games', 'gaming play'],
+  ['⚽', 'Sport', 'football fitness'],
+  ['🏃', 'Fitness', 'run exercise workout'],
+  ['🩺', 'Health', 'doctor medical'],
+  ['🍳', 'Cooking', 'recipes food kitchen'],
+  ['☕', 'Coffee', 'cafe drink break'],
+  ['🌱', 'Plant', 'garden nature leaf green'],
+  ['🐾', 'Pets', 'animals dog cat'],
+  ['👶', 'Family', 'kids baby children'],
+  ['🎁', 'Gift', 'present birthday'],
+  ['🚀', 'Rocket', 'launch startup space projects'],
 ];
 
 /**
@@ -68,10 +69,18 @@ export function IconPicker({
   const id = useId();
   const popover = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
+  const search = useRef<HTMLInputElement>(null);
   const current = ICON_CHOICES.find(([icon]) => icon === value);
+  const [query, setQuery] = useState('');
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const matches = ICON_CHOICES.filter(([, iconLabel, extra]) => {
+    const text = `${iconLabel} ${extra}`.toLowerCase();
+    return words.every((word) => text.includes(word));
+  });
   function choose(icon: string) {
     onChange(icon);
     popover.current?.hidePopover();
+    setQuery('');
     trigger.current?.focus();
   }
   return (
@@ -109,6 +118,14 @@ export function IconPicker({
         ref={popover}
         id={`${id}-choices`}
         popover="auto"
+        onToggle={(event) => {
+          if (event.newState === 'open') search.current?.focus();
+          else setQuery('');
+        }}
+        // Escape closes only this list, not a surrounding form that also listens for it.
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') event.stopPropagation();
+        }}
         role="dialog"
         aria-label={`Choose ${label.toLowerCase()}`}
         className="glass-panel m-0 w-72 rounded-lg border border-border bg-background p-2 text-foreground shadow-xl"
@@ -122,8 +139,24 @@ export function IconPicker({
         >
           {noneLabel}
         </button>
+        <label className="mb-1 block">
+          <span className="sr-only">Search icons</span>
+          <input
+            ref={search}
+            type="search"
+            value={query}
+            placeholder="Search icons"
+            onChange={(event) => setQuery(event.target.value)}
+            className="w-full rounded-md border border-border bg-surface px-2 py-1.5 text-sm font-normal"
+          />
+        </label>
+        {!matches.length && (
+          <p className="px-2 py-1.5 text-sm font-normal text-muted-foreground">
+            No matching icons.
+          </p>
+        )}
         <div className="grid grid-cols-8 gap-0.5">
-          {ICON_CHOICES.map(([icon, iconLabel]) => (
+          {matches.map(([icon, iconLabel]) => (
             <button
               key={icon}
               type="button"

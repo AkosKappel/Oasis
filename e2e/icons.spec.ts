@@ -8,7 +8,13 @@ test('shows folder and space icons where they are listed', async ({ page }) => {
   await manager
     .getByRole('textbox', { name: 'New folder name' })
     .fill('Reading');
-  await chooseIcon(page, 'Folder icon', 'Books');
+  await manager.getByRole('button', { name: /^Folder icon/ }).click();
+  const choices = page.getByRole('dialog', { name: 'Choose folder icon' });
+  await expect(choices.getByRole('searchbox')).toBeFocused();
+  await page.keyboard.type('read');
+  await expect(choices.getByRole('button', { name: 'Books' })).toBeVisible();
+  await expect(choices.getByRole('button', { name: 'Music' })).toHaveCount(0);
+  await choices.getByRole('button', { name: 'Books' }).click();
   await manager.getByRole('button', { name: 'Create folder' }).click();
   await expect(
     manager.getByRole('listitem').filter({ hasText: 'Reading' }),
