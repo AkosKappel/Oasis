@@ -1,4 +1,6 @@
 import { useState, type DragEvent } from 'react';
+
+export const LINK_DRAG_TYPE = 'application/x-oasis-home-link';
 import { ArrowUp, ArrowDown, GripVertical } from 'lucide-react';
 import type { Bookmark, Tag } from '@/types/entities';
 import { BookmarkIcon } from '@/features/bookmarks/bookmark-icon';
@@ -11,25 +13,30 @@ export function LinkList({
   busy,
   onMove,
   onOpen,
+  folderId,
 }: {
   bookmarks: Bookmark[];
   tags: Tag[];
   organizing: boolean;
   busy: boolean;
-  onMove: (id: string, before: string | null) => Promise<void>;
+  onMove: (
+    id: string,
+    before: string | null,
+    folderId?: string | null,
+  ) => Promise<void>;
   onOpen: () => void;
+  /** Set for folder lists (null for links without a folder): links dragged from elsewhere move here. */
+  folderId?: string | null;
 }) {
+  const accepts = folderId !== undefined;
   const [limit, setLimit] = useState(50);
   const tagMap = new Map(tags.map((tag) => [tag.id, tag]));
   function drop(event: DragEvent, before: string) {
     event.preventDefault();
-    const id = event.dataTransfer.getData('application/x-oasis-home-link');
-    if (
-      !busy &&
-      organizing &&
-      id !== before &&
-      bookmarks.some((bookmark) => bookmark.id === id)
-    )
+    const id = event.dataTransfer.getData(LINK_DRAG_TYPE);
+    if (!id || busy || id === before) return;
+    if (accepts) void onMove(id, before, folderId);
+    else if (organizing && bookmarks.some((bookmark) => bookmark.id === id))
       void onMove(id, before);
   }
   if (!bookmarks.length) return null;
@@ -46,13 +53,13 @@ export function LinkList({
               className="flex min-w-0 items-center gap-1 rounded-md hover:bg-secondary hover:text-secondary-foreground"
               onDragOver={(event) => {
                 if (
-                  organizing &&
+                  (organizing || accepts) &&
                   !busy &&
-                  event.dataTransfer.types.includes(
-                    'application/x-oasis-home-link',
-                  )
-                )
+                  event.dataTransfer.types.includes(LINK_DRAG_TYPE)
+                ) {
                   event.preventDefault();
+                  event.dataTransfer.dropEffect = 'move';
+                }
               }}
               onDrop={(event) => drop(event, bookmark.id)}
             >
@@ -64,10 +71,7 @@ export function LinkList({
                   title="Drag before another link in this section"
                   className="cursor-grab p-1"
                   onDragStart={(event) => {
-                    event.dataTransfer.setData(
-                      'application/x-oasis-home-link',
-                      bookmark.id,
-                    );
+                    event.dataTransfer.setData(LINK_DRAG_TYPE, bookmark.id);
                     event.dataTransfer.effectAllowed = 'move';
                   }}
                 >
@@ -79,6 +83,12 @@ export function LinkList({
                 data-bookmark
                 href={bookmark.url}
                 onClick={onOpen}
+                onDragStart={(event) => {
+                  // The browser keeps the URL for dropping outside; Oasis adds the ID for moving.
+                  if (busy || !accepts) return;
+                  event.dataTransfer.setData(LINK_DRAG_TYPE, bookmark.id);
+                  event.dataTransfer.effectAllowed = 'copyMove';
+                }}
                 title={`${bookmark.title}\n${bookmark.url}${labels.length ? `\nTags: ${labels.join(', ')}` : ''}`}
                 className="flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-secondary hover:text-secondary-foreground"
               >

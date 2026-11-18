@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { ChevronRight, Folder, History, Star, TrendingUp } from 'lucide-react';
 import type { LinkFolderNode } from './link-groups';
-import { LinkList } from './link-list';
+import { LINK_DRAG_TYPE, LinkList } from './link-list';
 
 export function LinkSection({
   name,
@@ -10,7 +10,9 @@ export function LinkSection({
   emoji,
   expanded = false,
   children,
+  onDropLink,
 }: {
+  onDropLink?: (id: string) => void;
   name: string;
   emoji?: string;
   count: number;
@@ -19,6 +21,7 @@ export function LinkSection({
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(expanded);
+  const [target, setTarget] = useState(false);
   const Icon = {
     folder: Folder,
     recent: History,
@@ -34,8 +37,23 @@ export function LinkSection({
       }}
     >
       <summary
-        className="links-folder flex cursor-pointer list-none items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-secondary hover:text-secondary-foreground"
+        className={`links-folder flex cursor-pointer list-none items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-secondary hover:text-secondary-foreground ${target ? 'bg-secondary text-secondary-foreground outline-2 outline-dashed outline-ring' : ''}`}
         title={name}
+        onDragOver={(event) => {
+          if (!onDropLink || !event.dataTransfer.types.includes(LINK_DRAG_TYPE))
+            return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = 'move';
+          setTarget(true);
+        }}
+        onDragLeave={() => setTarget(false)}
+        onDrop={(event) => {
+          setTarget(false);
+          const id = event.dataTransfer.getData(LINK_DRAG_TYPE);
+          if (!onDropLink || !id) return;
+          event.preventDefault();
+          onDropLink(id);
+        }}
       >
         <ChevronRight
           aria-hidden="true"
@@ -72,6 +90,9 @@ export function LinkFolder({
       emoji={node.icon}
       count={node.count}
       expanded={filtering}
+      onDropLink={
+        props.busy ? undefined : (id) => void props.onMove(id, null, node.id)
+      }
     >
       <div className={depth < 5 ? 'ml-3 border-l border-border/40 pl-1' : ''}>
         {node.children.map((child) => (
@@ -83,7 +104,7 @@ export function LinkFolder({
             {...props}
           />
         ))}
-        <LinkList {...props} bookmarks={node.bookmarks} />
+        <LinkList {...props} bookmarks={node.bookmarks} folderId={node.id} />
         {!node.count && (
           <p className="px-2 py-1.5 text-xs text-muted-foreground">
             Empty folder

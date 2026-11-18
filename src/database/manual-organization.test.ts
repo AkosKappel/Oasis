@@ -46,6 +46,26 @@ it('reorders only owned active bookmarks and saves Manual order atomically', asy
     'unavailable',
   );
 });
+it('moves a bookmark into another folder while reordering', async () => {
+  const { repository, ids } = await seed();
+  const organization = createOrganizationRepository('default', database);
+  const folder = await organization.saveFolder('Work');
+  await repository.reorder(ids[2]!, ids[0]!, folder);
+  const moved = (await repository.list()).find((item) => item.id === ids[2]);
+  expect(moved?.folderId).toBe(folder);
+  expect(
+    sortBookmarks(await repository.list(), 'manual').map((item) => item.title),
+  ).toEqual(['C', 'A', 'B']);
+  await repository.reorder(ids[2]!, null, null);
+  expect(
+    (await repository.list()).find((item) => item.id === ids[2])?.folderId,
+  ).toBeUndefined();
+  const work = await createSpaceRepository(database).save('Work');
+  const foreign = await createOrganizationRepository(work, database).saveFolder(
+    'Elsewhere',
+  );
+  await expect(repository.reorder(ids[0]!, null, foreign)).rejects.toThrow();
+});
 it('moves folders without cycles, rejects cross-parent ordering and preserves ownership', async () => {
   await database.open();
   const repository = createOrganizationRepository('default', database);

@@ -107,12 +107,16 @@ export function LinksMenu({
     preferences.folderOrder === 'manual',
   );
   const count = groups.count;
-  async function move(id: string, before: string | null) {
+  async function move(
+    id: string,
+    before: string | null,
+    folderId?: string | null,
+  ) {
     if (busy) return;
     setBusy(true);
     setOrderError(undefined);
     try {
-      await personalBookmarks.reorder(id, before);
+      await personalBookmarks.reorder(id, before, folderId);
     } catch (cause) {
       reportStorageError(cause);
       setOrderError('Link order could not be saved. Try again.');
@@ -436,7 +440,11 @@ export function LinksMenu({
                   {...listProps}
                 />
               ))}
-              <LinkList {...listProps} bookmarks={groups.unorganized} />
+              <LinkList
+                {...listProps}
+                bookmarks={groups.unorganized}
+                folderId={null}
+              />
             </div>
           )}
           <a

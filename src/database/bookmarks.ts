@@ -281,14 +281,27 @@ export function createBookmarkRepository(
         },
       );
     },
-    async reorder(id: string, beforeId: string | null) {
+    /** Moves a bookmark before another; a folder ID (or null for none) also moves it there. */
+    async reorder(
+      id: string,
+      beforeId: string | null,
+      folderId?: string | null,
+    ) {
       await database.transaction(
         'rw',
         database.spaces,
         database.bookmarks,
+        database.folders,
         database.libraryPreferences,
         async () => {
           await requireSpace(database, spaceId);
+          if (folderId)
+            await requireOwnedRecord(
+              database.folders,
+              folderId,
+              spaceId,
+              'folder',
+            );
           const records = await database.bookmarks
             .where('spaceId')
             .equals(spaceId)
@@ -303,6 +316,11 @@ export function createBookmarkRepository(
               updatedAt: Date.now(),
             })),
           );
+          if (folderId !== undefined)
+            await database.bookmarks.update(id, {
+              folderId: folderId || undefined,
+              updatedAt: Date.now(),
+            });
           await createLibraryPreferencesRepository(spaceId, database).save({
             sort: 'manual',
           });

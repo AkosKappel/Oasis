@@ -12,6 +12,7 @@ import type { Bookmark, Tag } from '@/types/entities';
 import { BookmarkIcon } from '@/features/bookmarks/bookmark-icon';
 import { TrackedBookmarkLink } from '@/features/bookmarks/tracked-bookmark-link';
 import type { LinkFolderNode } from './link-groups';
+import { LINK_DRAG_TYPE } from './link-list';
 
 export interface TileSection {
   id: 'favorites' | 'recent' | 'frequent';
@@ -51,7 +52,11 @@ export function LinkTiles({
   tags: Tag[];
   organizing: boolean;
   busy: boolean;
-  onMove: (id: string, before: string | null) => Promise<void>;
+  onMove: (
+    id: string,
+    before: string | null,
+    folderId?: string | null,
+  ) => Promise<void>;
   onOpen: () => void;
 }) {
   const [path, setPath] = useState<string[]>([]);
@@ -86,6 +91,8 @@ export function LinkTiles({
     ? { ...root, folders: [], bookmarks: results }
     : trail.at(-1)!;
   const canOrder = organizing && !place.section;
+  // Links in a folder or the root can always be dragged onto a folder tile.
+  const canDrag = !place.section && !results && !busy;
   const links = place.bookmarks.slice(0, limit);
   function enter(id: string) {
     setPath(
@@ -173,6 +180,9 @@ export function LinkTiles({
               )
             }
             onOpen={() => enter(folder.id)}
+            onDropLink={
+              busy ? undefined : (id) => void onMove(id, null, folder.id)
+            }
           />
         ))}
         {links.map((bookmark, index) => {
@@ -187,18 +197,13 @@ export function LinkTiles({
                 if (
                   canOrder &&
                   !busy &&
-                  event.dataTransfer.types.includes(
-                    'application/x-oasis-home-link',
-                  )
+                  event.dataTransfer.types.includes(LINK_DRAG_TYPE)
                 )
                   event.preventDefault();
               }}
               onDrop={(event) => {
                 event.preventDefault();
-                drop(
-                  event.dataTransfer.getData('application/x-oasis-home-link'),
-                  bookmark.id,
-                );
+                drop(event.dataTransfer.getData(LINK_DRAG_TYPE), bookmark.id);
               }}
             >
               <TrackedBookmarkLink
@@ -206,13 +211,10 @@ export function LinkTiles({
                 data-bookmark
                 href={bookmark.url}
                 onClick={onOpen}
-                draggable={canOrder && !busy ? true : undefined}
+                draggable={canDrag ? true : undefined}
                 onDragStart={(event) => {
-                  if (!canOrder) return;
-                  event.dataTransfer.setData(
-                    'application/x-oasis-home-link',
-                    bookmark.id,
-                  );
+                  if (!canDrag) return;
+                  event.dataTransfer.setData(LINK_DRAG_TYPE, bookmark.id);
                   event.dataTransfer.effectAllowed = 'move';
                 }}
                 title={`${bookmark.title}\n${bookmark.url}${labels.length ? `\nTags: ${labels.join(', ')}` : ''}`}
@@ -283,19 +285,39 @@ function FolderTile({
   count,
   icon,
   onOpen,
+  onDropLink,
 }: {
   name: string;
   count: number;
   icon: ReactNode;
   onOpen: () => void;
+  onDropLink?: (id: string) => void;
 }) {
+  const [target, setTarget] = useState(false);
   return (
-    <li className="min-w-0">
+    <li
+      className="min-w-0"
+      onDragOver={(event) => {
+        if (!onDropLink || !event.dataTransfer.types.includes(LINK_DRAG_TYPE))
+          return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'move';
+        setTarget(true);
+      }}
+      onDragLeave={() => setTarget(false)}
+      onDrop={(event) => {
+        setTarget(false);
+        const id = event.dataTransfer.getData(LINK_DRAG_TYPE);
+        if (!onDropLink || !id) return;
+        event.preventDefault();
+        onDropLink(id);
+      }}
+    >
       <button
         type="button"
         title={name}
         aria-label={`Open ${name}, ${count} ${count === 1 ? 'link' : 'links'}`}
-        className={tileClass}
+        className={`${tileClass} ${target ? 'outline-2 outline-dashed outline-ring' : ''}`}
         onClick={onOpen}
       >
         <span className="flex size-10 items-center justify-center">{icon}</span>
