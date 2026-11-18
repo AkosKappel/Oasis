@@ -116,7 +116,8 @@ test('switches Links to tiles, browses folders, reorders and keeps the choice', 
       .violations,
   ).toEqual([]);
   await page.reload();
-  await page.getByRole('button', { name: 'Links', exact: true }).click();
+  // Left open before the reload, so the panel comes back open.
+  await expect(panel).toBeVisible();
   await expect(
     panel.getByRole('button', { name: 'Show links as tiles' }),
   ).toHaveAttribute('aria-pressed', 'true');

@@ -8,7 +8,9 @@ import {
   X,
   ArrowUpDown,
   LayoutGrid,
+  Plus,
 } from 'lucide-react';
+import { BookmarkEditor } from '@/features/bookmarks/bookmark-editor';
 import type { Bookmark, Folder, Tag } from '@/types/entities';
 import { linkGroups } from './link-groups';
 import { LinkList } from './link-list';
@@ -16,6 +18,8 @@ import { LinkTiles } from './link-tiles';
 import { LinkFolder, LinkSection } from './link-section';
 import { useSpaceRepositories } from '@/features/spaces/space-context';
 import { reportStorageError } from '@/database/storage-health';
+
+const LINKS_OPEN_KEY = 'oasis:links-open';
 
 export function LinksMenu({
   sections,
@@ -62,11 +66,34 @@ export function LinksMenu({
   const panel = useRef<HTMLDivElement>(null);
   const search = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
+  // Opened by hover or restored from the last tab: do not move focus into the panel.
+  const quiet = useRef(false);
+  // Closing because a link was opened keeps the panel remembered as open.
+  const keepRemembered = useRef(false);
+  const hoverTimer = useRef<number>(undefined);
+  // A click right after hover opened the panel keeps it open instead of toggling it shut.
+  const hoverOpened = useRef(false);
+  function showQuietly() {
+    const element = panel.current;
+    if (!element?.hasAttribute('popover') || element.matches(':popover-open'))
+      return;
+    quiet.current = true;
+    element.showPopover();
+  }
+  useEffect(() => {
+    if (docked) return;
+    try {
+      if (localStorage.getItem(LINKS_OPEN_KEY) === 'true') showQuietly();
+    } catch {
+      // Storage blocked: the panel starts closed.
+    }
+  }, [docked]);
   const [query, setQuery] = useState('');
   const [tagId, setTagId] = useState('');
   const activeTag = tags.some((tag) => tag.id === tagId) ? tagId : '';
   const filtering = !!query.trim() || !!activeTag;
   const [organizing, setOrganizing] = useState(false);
+  const [adding, setAdding] = useState(false);
   const [busy, setBusy] = useState(false);
   const [orderError, setOrderError] = useState<string>();
   const { personalBookmarks, personalLibraryPreferences } =
@@ -107,12 +134,17 @@ export function LinksMenu({
   function closePanel() {
     if (panel.current?.hasAttribute('popover')) panel.current.hidePopover();
   }
+  function openedLink() {
+    keepRemembered.current = true;
+    closePanel();
+    keepRemembered.current = false;
+  }
   const listProps = {
     tags,
     organizing,
     busy,
     onMove: move,
-    onOpen: closePanel,
+    onOpen: openedLink,
   };
   return (
     <>
@@ -121,9 +153,26 @@ export function LinksMenu({
         ref={trigger}
         popoverTarget={docked ? undefined : 'home-links'}
         onClick={docked ? () => void changePin(false) : undefined}
+
         aria-haspopup={docked ? undefined : 'dialog'}
         aria-expanded={docked || open}
         aria-controls="home-links"
+        onPointerEnter={(event) => {
+          if (docked || event.pointerType !== 'mouse') return;
+          hoverTimer.current = window.setTimeout(() => {
+            if (panel.current?.matches(':popover-open')) return;
+            showQuietly();
+            hoverOpened.current = true;
+          }, 200);
+        }}
+        onPointerLeave={() => window.clearTimeout(hoverTimer.current)}
+        onClickCapture={(event) => {
+          window.clearTimeout(hoverTimer.current);
+          if (!hoverOpened.current) return;
+          hoverOpened.current = false;
+          event.preventDefault();
+          search.current?.focus();
+        }}
         className="flex items-center gap-2 rounded-md px-3 py-2 text-muted-foreground hover:text-foreground"
       >
         <LinkIcon className="size-4" aria-hidden="true" />
@@ -144,7 +193,15 @@ export function LinksMenu({
             if (event.target !== event.currentTarget) return;
             const expanded = event.newState === 'open';
             setOpen(expanded);
-            if (expanded && !docked) search.current?.focus();
+            if (expanded && !docked && !quiet.current) search.current?.focus();
+            quiet.current = false;
+            if (!expanded) hoverOpened.current = false;
+            if (!docked && (expanded || !keepRemembered.current))
+              try {
+                localStorage.setItem(LINKS_OPEN_KEY, String(expanded));
+              } catch {
+                // Storage blocked: the panel is not remembered.
+              }
           }}
           onKeyDown={(event) => {
             const target = event.target as HTMLElement;
@@ -183,6 +240,19 @@ export function LinksMenu({
               Links
             </h2>
             <div className="flex gap-1">
+              <button
+                type="button"
+                disabled={!bookmarks}
+                onClick={() => {
+                  closePanel();
+                  setAdding(true);
+                }}
+                aria-label="Add link"
+                title="Add link"
+                className="rounded p-1.5 text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"
+              >
+                <Plus className="size-4" aria-hidden="true" />
+              </button>
               <button
                 type="button"
                 onClick={() => void changePin(!pinned)}
@@ -366,13 +436,20 @@ export function LinksMenu({
           )}
           <a
             href="#library"
-            onClick={closePanel}
+            onClick={openedLink}
             className="mx-2 mt-3 inline-block rounded text-xs text-muted-foreground hover:text-foreground"
           >
             Open Library
           </a>
         </div>,
         document.body,
+      )}
+      {adding && (
+        <BookmarkEditor
+          folders={folders}
+          tags={tags}
+          onClose={() => setAdding(false)}
+        />
       )}
     </>
   );
