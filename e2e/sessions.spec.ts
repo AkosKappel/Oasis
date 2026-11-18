@@ -1,5 +1,4 @@
-import AxeBuilder from '@axe-core/playwright';
-import { openLibraryTool, test, expect } from './fixtures';
+import { axe, openLibraryTool, test, expect } from './fixtures';
 test('reviews a window snapshot, skips duplicates and opens a saved folder', async ({
   page,
   context,
@@ -57,9 +56,7 @@ test('reviews a window snapshot, skips duplicates and opens a saved folder', asy
   await dialog
     .getByRole('textbox', { name: 'Session folder name' })
     .fill('Research session');
-  expect(
-    (await new AxeBuilder({ page }).include('dialog').analyze()).violations,
-  ).toEqual([]);
+  expect((await axe(page).include('dialog').analyze()).violations).toEqual([]);
   await page.screenshot({
     path:
       (process.env.OASIS_PREVIEW_DIR ?? '/tmp/oasis-previews') +

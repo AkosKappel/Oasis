@@ -1,6 +1,5 @@
-import { openSettingsPage } from './fixtures';
+import { axe, openSettingsPage } from './fixtures';
 import { readFile } from 'node:fs/promises';
-import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from './fixtures';
 test('keeps task lists optional, syncs completion and manages owned tasks with exports', async ({
   page,
@@ -97,7 +96,7 @@ test('keeps task lists optional, syncs completion and manages owned tasks with e
   ).toBeVisible();
   expect(
     (
-      await new AxeBuilder({ page })
+      await axe(page)
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
         .analyze()
     ).violations,

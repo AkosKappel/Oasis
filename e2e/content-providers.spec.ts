@@ -1,6 +1,11 @@
-import AxeBuilder from '@axe-core/playwright';
 import { readFile } from 'node:fs/promises';
-import { openSettingsPage, settleTransitions, test, expect } from './fixtures';
+import {
+  axe,
+  openSettingsPage,
+  settleTransitions,
+  test,
+  expect,
+} from './fixtures';
 
 const feed = {
   image: {
@@ -94,7 +99,7 @@ test('shows opt-in daily web content with attribution and fetches it once a day'
   await settleTransitions(page);
   expect(
     (
-      await new AxeBuilder({ page })
+      await axe(page)
         .include('[aria-labelledby="provider-quote-title"]')
         .analyze()
     ).violations,

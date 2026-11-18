@@ -1,5 +1,10 @@
-import AxeBuilder from '@axe-core/playwright';
-import { openLibraryTool, test, expect, settleTransitions } from './fixtures';
+import {
+  axe,
+  openLibraryTool,
+  test,
+  expect,
+  settleTransitions,
+} from './fixtures';
 
 test('imports pasted links and adds a link from the Links panel', async ({
   page,
@@ -16,7 +21,7 @@ test('imports pasted links and adds a link from the Links panel', async ({
   await dialog.getByLabel('Folder (optional)').fill('Imported');
   await expect(dialog.getByText('Ready: 2 links.')).toBeVisible();
   await settleTransitions(page);
-  const scan = await new AxeBuilder({ page }).include('dialog').analyze();
+  const scan = await axe(page).include('dialog').analyze();
   expect(scan.violations).toEqual([]);
   await dialog.getByRole('button', { name: 'Import links' }).click();
   await expect(

@@ -1,5 +1,5 @@
-import AxeBuilder from '@axe-core/playwright';
 import {
+  axe,
   openLibraryTool,
   openSettingsPage,
   settleTransitions,
@@ -29,10 +29,7 @@ test('uses a readable gradient background, a default capture folder and a saves 
   await settleTransitions(page);
   expect(
     (
-      await new AxeBuilder({ page })
-        .withTags(['wcag2a', 'wcag2aa'])
-        .include('main')
-        .analyze()
+      await axe(page).withTags(['wcag2a', 'wcag2aa']).include('main').analyze()
     ).violations.filter((violation) => violation.id === 'color-contrast'),
   ).toEqual([]);
   await page.screenshot({ path: testInfo.outputPath('gradient-home.png') });

@@ -1,5 +1,4 @@
-import AxeBuilder from '@axe-core/playwright';
-import { test, expect, openSettingsPage } from './fixtures';
+import { axe, test, expect, openSettingsPage } from './fixtures';
 test.use({ skipSetup: false });
 test('offers a skippable first-run setup with persistent clock choices', async ({
   page,
@@ -12,7 +11,7 @@ test('offers a skippable first-run setup with persistent clock choices', async (
     .selectOption('24');
   expect(
     (
-      await new AxeBuilder({ page })
+      await axe(page)
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
         .analyze()
     ).violations,

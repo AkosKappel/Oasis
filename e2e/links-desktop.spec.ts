@@ -1,5 +1,5 @@
-import AxeBuilder from '@axe-core/playwright';
 import {
+  axe,
   openLibraryTool,
   openSettingsPage,
   test,
@@ -96,11 +96,8 @@ test('places links and folders on an opt-in Home desktop and keeps their positio
   });
   await settleTransitions(page);
   expect(
-    (
-      await new AxeBuilder({ page })
-        .include('[data-home-section="desktop"]')
-        .analyze()
-    ).violations,
+    (await axe(page).include('[data-home-section="desktop"]').analyze())
+      .violations,
   ).toEqual([]);
   await section.getByRole('button', { name: 'Done arranging' }).click();
 

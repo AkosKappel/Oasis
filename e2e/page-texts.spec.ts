@@ -1,5 +1,4 @@
-import AxeBuilder from '@axe-core/playwright';
-import { test, expect, settleTransitions } from './fixtures';
+import { axe, test, expect, settleTransitions } from './fixtures';
 
 test('keeps an opt-in page text copy with highlights and finds it from Library search', async ({
   context,
@@ -110,9 +109,7 @@ test('keeps an opt-in page text copy with highlights and finds it from Library s
   await dialog.getByRole('button', { name: 'Add highlight' }).click();
   await expect(dialog.getByRole('alert')).toContainText('not found');
   await settleTransitions(page);
-  expect(
-    (await new AxeBuilder({ page }).include('dialog').analyze()).violations,
-  ).toEqual([]);
+  expect((await axe(page).include('dialog').analyze()).violations).toEqual([]);
   await page.screenshot({ path: testInfo.outputPath('page-text.png') });
 
   await page.reload();

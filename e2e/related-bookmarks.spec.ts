@@ -1,5 +1,10 @@
-import AxeBuilder from '@axe-core/playwright';
-import { openLibraryTool, test, expect, settleTransitions } from './fixtures';
+import {
+  axe,
+  openLibraryTool,
+  test,
+  expect,
+  settleTransitions,
+} from './fixtures';
 
 test('lists related bookmarks by shared words, tags and sites, then returns to all', async ({
   page,
@@ -72,9 +77,7 @@ test('lists related bookmarks by shared words, tags and sites, then returns to a
   ).toHaveCount(1);
   await expect(cards.filter({ hasText: 'Rye bread loaf' })).toHaveCount(1);
   await settleTransitions(page);
-  expect(
-    (await new AxeBuilder({ page }).include('main').analyze()).violations,
-  ).toEqual([]);
+  expect((await axe(page).include('main').analyze()).violations).toEqual([]);
   await page.screenshot({ path: testInfo.outputPath('related.png') });
   await page.setViewportSize({ width: 320, height: 740 });
   expect(

@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures';
+import { axe, test, expect } from './fixtures';
 test('hides distractions, pauses across tabs and finishes after reload without timer drift', async ({
   page,
   context,
@@ -110,13 +110,9 @@ test('waits between focus and break phases and preserves a paused break across r
   await page.screenshot({
     path: testInfo.outputPath('focus-cycle-break-desktop.png'),
   });
-  const { default: AxeBuilder } = await import('@axe-core/playwright');
   expect(
-    (
-      await new AxeBuilder({ page })
-        .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
-        .analyze()
-    ).violations,
+    (await axe(page).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze())
+      .violations,
   ).toEqual([]);
   await page.setViewportSize({ width: 375, height: 812 });
   await page.screenshot({

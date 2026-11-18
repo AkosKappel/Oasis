@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import { test as base, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 import { resolve } from 'node:path';
 
 export const test = base.extend<{ skipSetup: boolean }>({
@@ -85,6 +86,20 @@ export async function settleTransitions(page: Page) {
           animation.playState !== 'running',
       ),
   );
+}
+
+/**
+ * An axe scan that first waits for running CSS transitions, so fading panels
+ * and color changes are never measured mid-way.
+ */
+export function axe(page: Page) {
+  const builder = new AxeBuilder({ page });
+  const analyze = builder.analyze.bind(builder);
+  builder.analyze = async () => {
+    await settleTransitions(page);
+    return analyze();
+  };
+  return builder;
 }
 
 /** Opens an icon picker by its label and picks a choice ('Default', 'Site icon' or an icon name). */

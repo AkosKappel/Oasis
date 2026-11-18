@@ -1,5 +1,4 @@
-import AxeBuilder from '@axe-core/playwright';
-import { test, expect, openSettingsPage } from './fixtures';
+import { axe, test, expect, openSettingsPage } from './fixtures';
 test('keeps Home quiet and puts clock, privacy and content settings in one dialog', async ({
   page,
 }, testInfo) => {
@@ -39,7 +38,7 @@ test('keeps Home quiet and puts clock, privacy and content settings in one dialo
   await expect(
     page.getByRole('button', { name: 'Close settings' }),
   ).toBeEnabled();
-  const results = await new AxeBuilder({ page }).analyze();
+  const results = await axe(page).analyze();
   expect(results.violations).toEqual([]);
   await page.screenshot({ path: testInfo.outputPath('settings-desktop.png') });
   await page.keyboard.press('Escape');

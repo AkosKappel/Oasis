@@ -1,7 +1,6 @@
-import { openSettingsPage, settleTransitions } from './fixtures';
+import { axe, openSettingsPage, settleTransitions } from './fixtures';
 import { openLibraryTool } from './fixtures';
 import type { Page } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from './fixtures';
 
 test('core pages and dialogs have no detected WCAG A/AA violations', async ({
@@ -14,7 +13,7 @@ test('core pages and dialogs have no detected WCAG A/AA violations', async ({
   await page.goto('chrome://newtab/');
   async function scan(name: string, target: Page = page) {
     await settleTransitions(target);
-    const result = await new AxeBuilder({ page: target })
+    const result = await axe(target)
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
       .analyze();
     if (result.violations.length)

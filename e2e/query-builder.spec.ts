@@ -1,5 +1,10 @@
-import AxeBuilder from '@axe-core/playwright';
-import { test, expect, openLibraryTool, openLibraryFilters } from './fixtures';
+import {
+  axe,
+  test,
+  expect,
+  openLibraryTool,
+  openLibraryFilters,
+} from './fixtures';
 
 test('builds reviewed smart-collection queries without replacing advanced drafts automatically', async ({
   page,
@@ -102,7 +107,7 @@ test('builds reviewed smart-collection queries without replacing advanced drafts
   ).toHaveCount(0);
   expect(
     (
-      await new AxeBuilder({ page })
+      await axe(page)
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
         .analyze()
     ).violations,

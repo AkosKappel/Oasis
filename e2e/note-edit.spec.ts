@@ -1,5 +1,4 @@
-import AxeBuilder from '@axe-core/playwright';
-import { test, expect, openSettingsPage } from './fixtures';
+import { axe, test, expect, openSettingsPage } from './fixtures';
 test('edits a Home note directly and keeps conflict drafts without nested task dialogs', async ({
   page,
   context,
@@ -61,7 +60,7 @@ test('edits a Home note directly and keeps conflict drafts without nested task d
   ).toHaveValue('An unsaved draft.');
   expect(
     (
-      await new AxeBuilder({ page })
+      await axe(page)
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
         .analyze()
     ).violations,

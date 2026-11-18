@@ -1,7 +1,6 @@
-import { openSettingsPage } from './fixtures';
+import { axe, openSettingsPage } from './fixtures';
 import { openLibraryTool } from './fixtures';
 import { readFile } from 'node:fs/promises';
-import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from './fixtures';
 test('exports and reviews a complete space, restoring safely into a new space', async ({
   page,
@@ -69,7 +68,7 @@ test('exports and reviews a complete space, restoring safely into a new space', 
     .fill('Recovered sample');
   expect(
     (
-      await new AxeBuilder({ page })
+      await axe(page)
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
         .analyze()
     ).violations,

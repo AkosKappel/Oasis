@@ -1,5 +1,5 @@
-import AxeBuilder from '@axe-core/playwright';
 import {
+  axe,
   openLibraryTool,
   openSettingsPage,
   test,
@@ -88,9 +88,7 @@ test('saves a pasted URL, suggests its folder and reports tag, folder and unopen
     'docs',
   );
   await settleTransitions(page);
-  expect(
-    (await new AxeBuilder({ page }).include('dialog').analyze()).violations,
-  ).toEqual([]);
+  expect((await axe(page).include('dialog').analyze()).violations).toEqual([]);
   await editor
     .getByRole('button', { name: 'Save bookmark', exact: true })
     .click();

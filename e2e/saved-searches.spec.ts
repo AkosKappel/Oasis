@@ -1,5 +1,4 @@
-import AxeBuilder from '@axe-core/playwright';
-import { test, expect } from './fixtures';
+import { axe, test, expect } from './fixtures';
 test('saves, edits and loads dynamic searches with reload and cross-tab persistence', async ({
   page,
   context,
@@ -45,7 +44,7 @@ test('saves, edits and loads dynamic searches with reload and cross-tab persiste
   await expect(manager.getByRole('status')).toHaveText('Search saved.');
   expect(
     (
-      await new AxeBuilder({ page })
+      await axe(page)
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
         .analyze()
     ).violations,

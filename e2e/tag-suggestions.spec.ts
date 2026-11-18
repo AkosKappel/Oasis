@@ -1,5 +1,4 @@
-import { openLibraryTool } from './fixtures';
-import AxeBuilder from '@axe-core/playwright';
+import { axe, openLibraryTool } from './fixtures';
 import { test, expect } from './fixtures';
 test('reviews local tag suggestions without fetching pages or saving unchosen tags', async ({
   page,
@@ -88,7 +87,7 @@ test('reviews local tag suggestions without fetching pages or saving unchosen ta
   ).toBeChecked();
   expect(
     (
-      await new AxeBuilder({ page })
+      await axe(page)
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
         .analyze()
     ).violations,

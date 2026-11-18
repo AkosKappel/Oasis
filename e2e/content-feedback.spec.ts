@@ -1,5 +1,4 @@
-import { openSettingsPage } from './fixtures';
-import AxeBuilder from '@axe-core/playwright';
+import { axe, openSettingsPage } from './fixtures';
 import { test, expect } from './fixtures';
 test('rates local images and quotes, persists across tabs and skips disliked daily content', async ({
   page,
@@ -118,7 +117,7 @@ test('rates local images and quotes, persists across tabs and skips disliked dai
   ).toHaveAttribute('aria-pressed', 'true');
   expect(
     (
-      await new AxeBuilder({ page })
+      await axe(page)
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
         .analyze()
     ).violations,
@@ -249,7 +248,7 @@ test('rates local images and quotes, persists across tabs and skips disliked dai
     .fill('');
   expect(
     (
-      await new AxeBuilder({ page })
+      await axe(page)
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
         .analyze()
     ).violations,

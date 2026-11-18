@@ -1,5 +1,10 @@
-import AxeBuilder from '@axe-core/playwright';
-import { openLibraryTool, test, expect, settleTransitions } from './fixtures';
+import {
+  axe,
+  openLibraryTool,
+  test,
+  expect,
+  settleTransitions,
+} from './fixtures';
 
 test('switches Links to tiles, browses folders, reorders and keeps the choice', async ({
   page,
@@ -111,10 +116,9 @@ test('switches Links to tiles, browses folders, reorders and keeps the choice', 
   await panel.getByRole('searchbox', { name: 'Search links' }).fill('');
 
   await settleTransitions(page);
-  expect(
-    (await new AxeBuilder({ page }).include('#home-links').analyze())
-      .violations,
-  ).toEqual([]);
+  expect((await axe(page).include('#home-links').analyze()).violations).toEqual(
+    [],
+  );
   await page.reload();
   // Left open before the reload, so the panel comes back open.
   await expect(panel).toBeVisible();

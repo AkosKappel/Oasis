@@ -31,3 +31,12 @@ Run `pnpm check` after your last edit, right before each commit. This machine is
 - Keep the manifest free of permissions until a feature needs one, and record why in `docs/DECISIONS.md`.
 - Pure logic (filters, validation, repositories) gets Vitest tests next to the file (`*.test.ts`); user flows get a Playwright test in `e2e/`.
 - UI text is user-facing English: short, plain sentences that tell the user what to do.
+
+## Flake-proof tests
+
+CI runners are slower and differently timed than this machine, and most past CI failures were tests that raced the app. Before committing:
+
+- Scan accessibility with `axe(page)` from `e2e/fixtures.ts`, never `new AxeBuilder` directly: it waits for running CSS transitions first.
+- Wait for observable, persisted results (a closed dialog, a status message, `expect.poll` on stored data) instead of assuming an action finished. Never use fixed sleeps.
+- Do not depend on the order of records saved in the same millisecond, or on events that fire asynchronously (such as popover `toggle`) having run before a reload.
+- Run new or changed Playwright specs with `--repeat-each=3` and new Vitest files at least three times.

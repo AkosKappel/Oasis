@@ -1,5 +1,4 @@
-import AxeBuilder from '@axe-core/playwright';
-import { test, expect, openLibraryTool } from './fixtures';
+import { axe, test, expect, openLibraryTool } from './fixtures';
 test('keeps results near the top and puts secondary tools and filters out of the way', async ({
   page,
 }, testInfo) => {
@@ -33,7 +32,7 @@ test('keeps results near the top and puts secondary tools and filters out of the
   ).toBeFocused();
   expect(
     (
-      await new AxeBuilder({ page })
+      await axe(page)
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
         .analyze()
     ).violations,

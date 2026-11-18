@@ -1,5 +1,10 @@
-import AxeBuilder from '@axe-core/playwright';
-import { openLibraryTool, test, expect, settleTransitions } from './fixtures';
+import {
+  axe,
+  openLibraryTool,
+  test,
+  expect,
+  settleTransitions,
+} from './fixtures';
 test('checks only selected sites on demand and distinguishes HTTP outcomes without following redirects', async ({
   page,
   context,
@@ -181,9 +186,7 @@ test('checks only selected sites on demand and distinguishes HTTP outcomes witho
   ).toBe(true);
   expect(redirects).toBe(0);
   await settleTransitions(page);
-  expect(
-    (await new AxeBuilder({ page }).include('dialog').analyze()).violations,
-  ).toEqual([]);
+  expect((await axe(page).include('dialog').analyze()).violations).toEqual([]);
   const previews = process.env.OASIS_PREVIEW_DIR ?? '/tmp/oasis-previews';
   await dialog.screenshot({ path: previews + '/link-check-results.png' });
   await page.setViewportSize({ width: 320, height: 740 });

@@ -1,7 +1,6 @@
-import AxeBuilder from '@axe-core/playwright';
 import type { PageDetails } from '../src/features/capture/read-page-details';
 import { readFile } from 'node:fs/promises';
-import { test, expect } from './fixtures';
+import { axe, test, expect } from './fixtures';
 
 test('explicitly reads serialized page details and saves only offline cached images', async ({
   context,
@@ -131,7 +130,7 @@ test('explicitly reads serialized page details and saves only offline cached ima
   ).toHaveCount(0);
   expect(
     (
-      await new AxeBuilder({ page: popup })
+      await axe(popup)
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
         .analyze()
     ).violations,

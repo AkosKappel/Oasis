@@ -1,6 +1,5 @@
-import { openSettingsPage } from './fixtures';
+import { axe, openSettingsPage } from './fixtures';
 import { readFile } from 'node:fs/promises';
-import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from './fixtures';
 test('keeps scratchpads optional, preserves drafts across tab conflicts and downloads plain text', async ({
   page,
@@ -98,7 +97,7 @@ test('keeps scratchpads optional, preserves drafts across tab conflicts and down
   );
   expect(
     (
-      await new AxeBuilder({ page })
+      await axe(page)
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
         .analyze()
     ).violations,

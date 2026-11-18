@@ -1,6 +1,6 @@
-import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from '@playwright/test';
 import {
+  axe,
   openSettingsPage,
   openLibraryTool,
   openLibraryFilters,
@@ -89,7 +89,7 @@ test('onboarding, responsive Library CRUD, dialogs and local persistence work ac
   ).toBe(true);
   expect(
     (
-      await new AxeBuilder({ page })
+      await axe(page)
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
         .analyze()
     ).violations,

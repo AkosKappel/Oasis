@@ -1,5 +1,5 @@
-import AxeBuilder from '@axe-core/playwright';
 import {
+  axe,
   chooseIcon,
   openSettingsPage,
   openLibraryTool,
@@ -179,10 +179,9 @@ test('browses a compact nested Links tree with optional sections, tags and order
     path: previews + '/links-explorer-sidebar.png',
     animations: 'disabled',
   });
-  expect(
-    (await new AxeBuilder({ page }).include('#home-links').analyze())
-      .violations,
-  ).toEqual([]);
+  expect((await axe(page).include('#home-links').analyze()).violations).toEqual(
+    [],
+  );
   await page.setViewportSize({ width: 320, height: 740 });
   await page.screenshot({ path: previews + '/links-explorer-mobile.png' });
   expect(
